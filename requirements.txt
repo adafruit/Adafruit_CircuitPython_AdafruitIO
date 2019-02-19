@@ -1,0 +1,2 @@
+Adafruit-Blinka
+Adafruit_CircuitPython_ESP32SPI
