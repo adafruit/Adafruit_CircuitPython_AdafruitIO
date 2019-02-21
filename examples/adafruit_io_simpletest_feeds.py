@@ -6,7 +6,6 @@ import busio
 from digitalio import DigitalInOut
 
 # ESP32 SPI
-import microcontroller
 from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
 
 # Import Adafruit IO REST Client
@@ -29,6 +28,7 @@ wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, settings, board.NEO
 
 """
 # PyPortal ESP32 Setup
+import microcontroller
 esp32_cs = DigitalInOut(microcontroller.pin.PB14)
 esp32_ready = DigitalInOut(microcontroller.pin.PB16)
 esp32_reset = DigitalInOut(microcontroller.pin.PB17)

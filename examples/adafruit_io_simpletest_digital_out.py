@@ -4,7 +4,6 @@ from an Adafruit IO Dashboard.
 """
 import time
 import board
-import microcontroller
 import busio
 from digitalio import DigitalInOut, Direction
 
@@ -31,6 +30,7 @@ wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, settings, board.NEO
 
 """
 # PyPortal ESP32 Setup
+import microcontroller
 esp32_cs = DigitalInOut(microcontroller.pin.PB14)
 esp32_ready = DigitalInOut(microcontroller.pin.PB16)
 esp32_reset = DigitalInOut(microcontroller.pin.PB17)
