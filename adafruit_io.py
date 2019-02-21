@@ -79,8 +79,10 @@ class RESTClient():
 
     @staticmethod
     def _create_data(data, metadata):
-        return {'value':data, 'lat':metadata['lat'], 'lon':metadata['lon'],
-                'ele':metadata['ele'], 'created_at':metadata['created_at']}
+        if metadata is not None:
+            return {'value':data, 'lat':metadata['lat'], 'lon':metadata['lon'],
+                    'ele':metadata['ele'], 'created_at':metadata['created_at']}
+        return {'value':data}
 
     @staticmethod
     def _handle_error(response):
@@ -177,8 +179,7 @@ class RESTClient():
         :param str group_description: Brief summary about the group
         """
         path = self._compose_path("groups")
-        payload = {'name':group_key,
-                   'description':group_description}
+        payload = {'name':group_key, 'description':group_description}
         return self._post(path, payload)
 
     def delete_group(self, group_key):
