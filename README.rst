@@ -32,25 +32,23 @@ Usage Example
 
 Create an Adafruit IO Client object
 .. code-block:: python
-        io = RESTClient(ADAFRUIT_IO_USER, ADAFRUIT_IO_KEY, wifi)
+io = RESTClient(ADAFRUIT_IO_USER, ADAFRUIT_IO_KEY, wifi)
 
-Sending `data` to an Adafruit IO feed
+Sending data to an Adafruit IO feed
 .. code-block:: python
-        io.send_data(feed, data)
+io.send_data(feed, data)
 
-Receiving `data` from an Adafruit IO feed
+Receiving data from an Adafruit IO feed
 .. code-block:: python
-        data = io.receive_data(feed)
+data = io.receive_data(feed)
 
-Creating a new feed named `circuitpython` with a description
+Creating a new feed named circuitpython with a description
 .. code-block:: python
-        feed = io.create_new_feed('circuitpython', 'an Adafruit IO CircuitPython feed')
+feed = io.create_new_feed('circuitpython', 'an Adafruit IO CircuitPython feed')
 
 Listing the record of a specified feed:
 .. code-block:: python
-    feed = io.get_feed('circuitpython')
-
-More usage examples are included in the `examples folder of this repository<<https://github.com/adafruit/Adafruit_CircuitPython_Adafruit_IO/blob/examples>`_
+feed = io.get_feed('circuitpython')
 
 Contributing
 ============
