@@ -15,7 +15,7 @@ from Adafruit_IO import RESTClient, AdafruitIO_RequestError
 
 # Get wifi details and more from a wifi_settings.py.py file
 try:
-    from wifi_settings.py import settings
+    from wifi_settings import settings
 except ImportError:
     print("WiFi settings are kept in wifi_settings.py.py, please add them there!")
     raise

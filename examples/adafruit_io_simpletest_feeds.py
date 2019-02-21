@@ -39,7 +39,6 @@ io = RESTClient(ADAFRUIT_IO_USER, ADAFRUIT_IO_KEY, wifi)
 # Create a new 'circuitpython' feed with a description
 print('Creating new Adafruit IO feed...')
 feed = io.create_new_feed('circuitpython', 'a Adafruit IO CircuitPython feed')
-print(feed)
 
 # List a specified feed
 print('Retrieving new Adafruit IO feed...')
