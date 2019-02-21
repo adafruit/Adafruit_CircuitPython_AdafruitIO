@@ -58,7 +58,7 @@ class AdafruitIO_RequestError(Exception):
         error = response_content['error']
         super(AdafruitIO_RequestError, self).__init__("Adafruit IO Error {0}: {1}".format(response.status_code, error))
 
-class HTTPClient(object):
+class RESTClient(object):
     def __init__(self, username, key, wifi_manager, api_version='v2'):
         """
         Adafruit IO API REST Client
