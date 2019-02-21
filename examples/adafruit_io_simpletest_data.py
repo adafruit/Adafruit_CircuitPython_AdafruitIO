@@ -28,7 +28,7 @@ spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
 esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
 wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, settings, board.NEOPIXEL)
 
-# Set your Adafruit IO Username and Key in settings.py
+# Set your Adafruit IO Username and Key in wifi_settings.py
 # (visit io.adafruit.com if you need to create an account,
 # or if you need your Adafruit IO key.)
 ADAFRUIT_IO_USER = settings['adafruit_io_user']
