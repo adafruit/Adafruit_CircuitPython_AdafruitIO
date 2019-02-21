@@ -51,15 +51,16 @@ LED.direction = Direction.OUTPUT
 
 while True:
     # Get data from 'digital' feed
+    print('getting data from IO...')
     feed_data = io.receive_data(digital_feed['key'])
 
     # Check if data is ON or OFF
-    if int(feed_data['value'] == 1):
+    if int(feed_data['value']) == 1:
         print('received <- ON\n')
-    elif int(feed_data['value'] == 0):
+    elif int(feed_data['value']) == 0:
         print('received <= OFF\n')
 
     # Set the LED to the feed value
     LED.value = int(feed_data['value'])
 
-    time.sleep(0.5)
+    time.sleep(5)
