@@ -11,7 +11,7 @@ import microcontroller
 from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
 
 # Import Adafruit IO REST Client
-from Adafruit_IO import RESTClient
+from Adafruit_IO import RESTClient, AdafruitIO_RequestError, AdafruitIO_ThrottleError
 
 # Get wifi details and more from a settings.py file
 try:

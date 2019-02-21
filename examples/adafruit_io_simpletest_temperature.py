@@ -1,18 +1,25 @@
 """
-Example of attaching location
-metadata to data sent to Adafruit IO.
+Example of sending temperature
+values to an Adafruit IO feed.
+
+Dependencies:
+    * CircuitPython_ADT7410
+        https://github.com/adafruit/Adafruit_CircuitPython_ADT7410
 """
 import board
+import microcontroller
 import busio
-from random import randint
+import time
 from digitalio import DigitalInOut, Direction
 
 # ESP32 SPI
-import microcontroller
 from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
 
 # Import Adafruit IO REST Client
 from Adafruit_IO import RESTClient, AdafruitIO_RequestError, AdafruitIO_ThrottleError
+
+# Import ADT7410 Library
+import adafruit_adt7410
 
 # Get wifi details and more from a settings.py file
 try:
@@ -40,21 +47,21 @@ ADAFRUIT_IO_KEY = settings['adafruit_io_key']
 io = RESTClient(ADAFRUIT_IO_USER, ADAFRUIT_IO_KEY, wifi)
 
 try:
-    # Get the 'location' feed from Adafruit IO
-    location_feed = io.get_feed('location')
+    # Get the 'temperature' feed from Adafruit IO
+    temperature_feed = io.get_feed('temperature')
 except AdafruitIO_RequestError:
-    # If no 'location' feed exists, create one
-    location_feed = io.create_new_feed('location')
+    # If no 'temperature' feed exists, create one
+    temperature_feed = io.create_new_feed('temperature')
 
-# Set data
-data_value = 42
+# Set up ADT7410 sensor
+i2c_bus = busio.I2C(board.SCL, board.SDA)
+adt = adafruit_adt7410.ADT7410(i2c_bus, address=0x48)
+adt.high_resolution = True
 
-# Set up the Top-Secret Adafruit HQ Location Coordinate metadata
-lat = 40.726190
-lon = -74.005334
-ele = 6
-
-# Send data and location metadata to the 'location' feed
-print('Sending data and location metadata to IO...')
-io.send_data(location_feed['key'], data_value, lat, lon, ele)
-print('Data sent!')
+while True:
+    temperature = adt.temperature
+    print('Current Temperature is {0}C'.format(adt.temperature))
+    print('Sending to Adafruit IO...')
+    io.send_data(temperature_feed['key'], temperature)
+    print('Data sent!')
+    time.sleep(0.5)
