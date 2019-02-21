@@ -60,12 +60,15 @@ class AdafruitIO_RequestError(Exception):
                                                       .format(response.status_code, error))
 
 class RESTClient():
+    """
+    REST Client for interacting with the Adafruit IO API.
+    """
     def __init__(self, username, key, wifi_manager, api_version='v2'):
         """
-        Adafruit IO API REST Client
+        Creates an instance of the Adafruit IO REST Client
         :param str username: Adafruit IO Username
-        :param str key: Adafruit IO Key, from `settings.py`
-        :param wifi_manager: ESP32WiFiManager Object
+        :param str key: Adafruit IO Key
+        :param wifi_manager: WiFiManager Object
         :param str api_version: Adafruit IO REST API Version
         """
         self.api_version = api_version
@@ -83,9 +86,9 @@ class RESTClient():
     def _compose_path(self, path):
         return "{0}/{1}/{2}/{3}".format(self.url, self.api_version, self.username, path)
 
-    def _create_data(self, data, latitude, longitude, elevation, timestamp):
-        return {'value':data, 'lat':latitude, 'lon':longitude,
-                'ele':elevation, 'created_at':timestamp}
+    def _create_data(self, data, metadata):
+        return {'value':data, 'lat':metadata[0], 'lon':metadata[1],
+                'ele':metadata[2], 'created_at':metadata[3]}
 
     def _handle_error(self, response):
         if response.status_code == 429:
@@ -109,7 +112,6 @@ class RESTClient():
             headers=self.http_headers[0])
         self._handle_error(response)
         return response.json()
-        response.close()
 
     def _get(self, path):
         """
@@ -121,7 +123,6 @@ class RESTClient():
             headers=self.http_headers[1])
         self._handle_error(response)
         return response.json()
-        response.close()
 
     def _delete(self, path):
         """
@@ -133,7 +134,6 @@ class RESTClient():
             headers=self.http_headers[0])
         self._handle_error(response)
         return response.json()
-        response.close()
 
     # Data
     def send_data(self, feed_key, data, lat=None, lon=None, ele=None, created_at=None):
@@ -147,7 +147,8 @@ class RESTClient():
         :param string created_at: Optional date/time string
         """
         path = self._compose_path("feeds/{0}/data".format(feed_key))
-        packet = self._create_data(data, lat, lon, ele, created_at)
+        metadata = [lat, lon, ele, created_at]
+        packet = self._create_data(data, metadata)
         self._post(path, packet)
 
     def receive_data(self, feed_key):
