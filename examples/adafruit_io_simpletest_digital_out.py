@@ -21,6 +21,15 @@ except ImportError:
     print("WiFi settings are kept in wifi_settings.py.py, please add them there!")
     raise
 
+# ESP32 Setup
+esp32_cs = DigitalInOut(board.D9)
+esp32_ready = DigitalInOut(board.D10)
+esp32_reset = DigitalInOut(board.D5)
+spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
+esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
+wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, settings, board.NEOPIXEL)
+
+"""
 # PyPortal ESP32 Setup
 esp32_cs = DigitalInOut(microcontroller.pin.PB14)
 esp32_ready = DigitalInOut(microcontroller.pin.PB16)
@@ -28,6 +37,7 @@ esp32_reset = DigitalInOut(microcontroller.pin.PB17)
 spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
 esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
 wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, settings, board.NEOPIXEL)
+"""
 
 # Set your Adafruit IO Username and Key in wifi_settings.py
 # (visit io.adafruit.com if you need to create an account,
