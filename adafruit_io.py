@@ -102,15 +102,15 @@ class RESTClient():
         return "{0}/{1}/{2}/{3}".format(self.url, self.api_version, self.username, path)
 
     # HTTP Requests
-    def _post(self, path, packet):
+    def _post(self, path, payload):
         """
         Send data to Adafruit IO
         :param str path: Formatted Adafruit IO URL
-        :param json packet: JSON data to send to Adafruit IO
+        :param json payload: JSON data to send to Adafruit IO
         """
         response = self.wifi.post(
             path,
-            json=packet,
+            json=payload,
             headers=self.http_headers[0])
         self._handle_error(response)
         return response.json()
@@ -146,8 +146,8 @@ class RESTClient():
         :param dict metadata: Metadata associated with the data being sent
         """
         path = self._compose_path("feeds/{0}/data".format(feed_key))
-        packet = self._create_data(data, metadata)
-        self._post(path, packet)
+        payload = self._create_data(data, metadata)
+        self._post(path, payload)
 
     def receive_data(self, feed_key):
         """
@@ -174,8 +174,8 @@ class RESTClient():
         :param str feed_key: Feed to add to the group
         """
         path = self._compose_path("groups/{0}/add".format(group_key))
-        packet = {'feed_key':feed_key}
-        return self._post(path, packet)
+        payload = {'feed_key':feed_key}
+        return self._post(path, payload)
 
     def create_new_group(self, group_key, group_description):
         """
@@ -184,8 +184,8 @@ class RESTClient():
         :param str group_description: Brief summary about the group
         """
         path = self._compose_path("groups")
-        packet = {'name':group_key, 'description':group_description}
-        return self._post(path, packet)
+        payload = {'name':group_key, 'description':group_description}
+        return self._post(path, payload)
 
     def delete_group(self, group_key):
         """
@@ -224,10 +224,10 @@ class RESTClient():
         :param str feed_license: Optional feed License
         """
         path = self._compose_path("feeds")
-        packet = packet = {'name':feed_key,
-                           'description':feed_desc,
-                           'license':feed_license}
-        return self._post(path, packet)
+        payload = {'name':feed_key,
+                   'description':feed_desc,
+                   'license':feed_license}
+        return self._post(path, payload)
 
     def delete_feed(self, feed_key):
         """
