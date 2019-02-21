@@ -13,11 +13,11 @@ from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
 # Import Adafruit IO REST Client
 from Adafruit_IO import RESTClient, AdafruitIO_RequestError
 
-# Get wifi details and more from a esp32spi_settings.py file
+# Get wifi details and more from a wifi_settings.py.py file
 try:
-    from esp32spi_settings import settings
+    from wifi_settings.py import settings
 except ImportError:
-    print("WiFi settings are kept in esp32spi_settings.py, please add them there!")
+    print("WiFi settings are kept in wifi_settings.py.py, please add them there!")
     raise
 
 # PyPortal ESP32 Setup

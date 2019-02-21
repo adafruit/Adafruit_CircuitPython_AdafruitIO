@@ -13,11 +13,11 @@ from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
 # Import Adafruit IO REST Client
 from Adafruit_IO import RESTClient, AdafruitIO_RequestError
 
-# Get wifi details and more from a esp32spi_settings.py file
+# Get wifi details and more from a wifi_settings.py.py file
 try:
-    from esp32spi_settings import settings
+    from wifi_settings.py import settings
 except ImportError:
-    print("WiFi settings are kept in esp32spi_settings.py, please add them there!")
+    print("WiFi settings are kept in wifi_settings.py.py, please add them there!")
     raise
 
 # PyPortal ESP32 Setup
@@ -32,8 +32,8 @@ wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, settings, board.NEO
 # Set your Adafruit IO Username and Key in settings.py
 # (visit io.adafruit.com if you need to create an account,
 # or if you need your Adafruit IO key.)
-ADAFRUIT_IO_USER = esp32spi_settings['adafruit_io_user']
-ADAFRUIT_IO_KEY = esp32spi_settings['adafruit_io_key']
+ADAFRUIT_IO_USER = settings['adafruit_io_user']
+ADAFRUIT_IO_KEY = settings['adafruit_io_key']
 
 # Create an instance of the Adafruit IO REST client
 io = RESTClient(ADAFRUIT_IO_USER, ADAFRUIT_IO_KEY, wifi)

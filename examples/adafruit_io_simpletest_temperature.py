@@ -21,11 +21,11 @@ from Adafruit_IO import RESTClient, AdafruitIO_RequestError
 # Import ADT7410 Library
 import adafruit_adt7410
 
-# Get wifi details and more from a esp32spi_settings.py file
+# Get wifi details and more from a wifi_settings.py.py file
 try:
-    from esp32spi_settings import settings
+    from wifi_settings.py import settings
 except ImportError:
-    print("WiFi settings are kept in esp32spi_settings.py, please add them there!")
+    print("WiFi settings are kept in wifi_settings.py.py, please add them there!")
     raise
 
 # PyPortal ESP32 Setup
