@@ -60,7 +60,10 @@ adt.high_resolution = True
 
 while True:
     temperature = adt.temperature
-    print('Current Temperature is {0}C'.format(adt.temperature))
+    # set temperature value to two precision points
+    temperature = '%0.2f'%(temperature)
+
+    print('Current Temperature: {0}*C'.format(temperature))
     print('Sending to Adafruit IO...')
     io.send_data(temperature_feed['key'], temperature)
     print('Data sent!')
