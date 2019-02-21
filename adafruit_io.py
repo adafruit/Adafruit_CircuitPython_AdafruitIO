@@ -25,7 +25,6 @@
 
 A CircuitPython/Python library for communicating with Adafruit IO
 
-
 * Author(s): Brent Rubell for Adafruit Industries
 
 Implementation Notes
@@ -40,19 +39,17 @@ Implementation Notes
     https://github.com/adafruit/Adafruit_CircuitPython_ESP32SPI
 """
 
-# imports
-
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_Adafruit_IO.git"
 
 class AdafruitIO_ThrottleError(Exception):
-    """Adafruit IO request error class for Throttle Errors"""
+    """Adafruit IO request error class for rate-limiting"""
     def __init__(self):
         super(AdafruitIO_ThrottleError, self).__init__("Number of Adafruit IO Requests exceeded! \
                                                             Please try again in 30 seconds..")
 
 class AdafruitIO_RequestError(Exception):
-    """Base Adafruit IO request error class"""
+    """Adafruit IO request error class"""
     def __init__(self, response):
         response_content = response.json()
         error = response_content['error']
@@ -63,18 +60,15 @@ class RESTClient():
     """
     REST Client for interacting with the Adafruit IO API.
     """
-    def __init__(self, username, key, wifi_manager, api_version='v2'):
+    def __init__(self, adafruit_io_username, adafruit_io_key, wifi_manager):
         """
-        Creates an instance of the Adafruit IO REST Client
-        :param str username: Adafruit IO Username
-        :param str key: Adafruit IO Key
-        :param wifi_manager: WiFiManager Object
-        :param str api_version: Adafruit IO REST API Version
+        Creates an instance of the Adafruit IO REST Client.
+        :param str adafruit_io_username: Adafruit IO Username
+        :param str adafruit_io_key: Adafruit IO Key
+        :param wifi_manager: WiFiManager object from adafruit_esp32spi_wifimanager
         """
-        self.api_version = api_version
-        self.url = 'https://io.adafruit.com/api'
-        self.username = username
-        self.key = key
+        self.username = adafruit_io_username
+        self.key = adafruit_io_key
         if wifi_manager:
             self.wifi = wifi_manager
         else:
@@ -96,10 +90,9 @@ class RESTClient():
             raise AdafruitIO_RequestError(response)
         elif response.status_code >= 400:
             raise AdafruitIO_RequestError(response)
-        # no error? do nothing
 
     def _compose_path(self, path):
-        return "{0}/{1}/{2}/{3}".format(self.url, self.api_version, self.username, path)
+        return "{0}/{1}/{2}/{3}".format('https://io.adafruit.com/api', 'v2', self.username, path)
 
     # HTTP Requests
     def _post(self, path, payload):
@@ -184,7 +177,8 @@ class RESTClient():
         :param str group_description: Brief summary about the group
         """
         path = self._compose_path("groups")
-        payload = {'name':group_key, 'description':group_description}
+        payload = {'name':group_key,
+                   'description':group_description}
         return self._post(path, payload)
 
     def delete_group(self, group_key):

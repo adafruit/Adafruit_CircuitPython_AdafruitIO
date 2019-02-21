@@ -27,49 +27,30 @@ Please ensure all dependencies are available on the CircuitPython filesystem.
 This is easily achieved by downloading
 `the Adafruit library and driver bundle <https://github.com/adafruit/Adafruit_CircuitPython_Bundle>`_.
 
-Installing from PyPI
---------------------
-.. note:: This library is not available on PyPI yet. Install documentation is included
-   as a standard element. Stay tuned for PyPI availability!
-.. todo:: Remove the above note if PyPI version is/will be available at time of release.
-   If the library is not planned for PyPI, remove the entire 'Installing from PyPI' section.
-On supported GNU/Linux systems like the Raspberry Pi, you can install the driver locally `from
-PyPI <https://pypi.org/project/adafruit-circuitpython-adafruit_io/>`_. To install for current user:
-
-.. code-block:: shell
-
-    pip3 install adafruit-circuitpython-adafruit_io
-
-To install system-wide (this may be required in some cases):
-
-.. code-block:: shell
-
-    sudo pip3 install adafruit-circuitpython-adafruit_io
-
-To install in a virtual environment in your current project:
-
-.. code-block:: shell
-
-    mkdir project-name && cd project-name
-    python3 -m venv .env
-    source .env/bin/activate
-    pip3 install adafruit-circuitpython-adafruit_io
-
 Usage Example
 =============
 
 Create an Adafruit IO Client object
 .. code-block:: python
-        aio = adafruit_io.Client(ADAFRUIT_IO_USER, ADAFRUIT_IO_KEY, wifi)
+        io = RESTClient(ADAFRUIT_IO_USER, ADAFRUIT_IO_KEY, wifi)
 
 Sending `data` to an Adafruit IO feed
 .. code-block:: python
-        aio.send_data(my_adafruit_io_feed, data)
+        io.send_data(feed, data)
 
 Receiving `data` from an Adafruit IO feed
 .. code-block:: python
-        data = aio.receive_data(my_adafruit_io_feed)
+        data = io.receive_data(feed)
 
+Creating a new feed named `circuitpython` with a description
+.. code-block:: python
+        feed = io.create_new_feed('circuitpython', 'an Adafruit IO CircuitPython feed')
+
+Listing the record of a specified feed:
+.. code-block:: python
+    feed = io.get_feed('circuitpython')
+
+More usage examples are included in the `examples folder of this repository<<https://github.com/adafruit/Adafruit_CircuitPython_Adafruit_IO/blob/examples>`_
 
 Contributing
 ============

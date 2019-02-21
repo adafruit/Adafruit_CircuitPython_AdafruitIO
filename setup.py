@@ -17,7 +17,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='adafruit-circuitpython-adafruit_io',
+    name='adafruit-circuitpython-adafruitio',
 
     use_scm_version=True,
     setup_requires=['setuptools_scm'],
@@ -27,7 +27,7 @@ setup(
     long_description_content_type='text/x-rst',
 
     # The project's main homepage.
-    url='https://github.com/adafruit/Adafruit_CircuitPython_Adafruit_IO',
+    url='https://github.com/adafruit/Adafruit_CircuitPython_AdafruitIO',
 
     # Author details
     author='Adafruit Industries',
@@ -59,7 +59,5 @@ setup(
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
-    # TODO: IF LIBRARY FILES ARE A PACKAGE FOLDER,
-    #       CHANGE `py_modules=['...']` TO `packages=['...']`
     py_modules=['adafruit_adafruit_io'],
 )
