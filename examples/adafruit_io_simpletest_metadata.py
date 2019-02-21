@@ -1,6 +1,6 @@
 """
-Example of attaching location
-metadata to data sent to Adafruit IO.
+Example of attaching metadata
+to data sent to Adafruit IO.
 """
 import board
 import busio
@@ -48,12 +48,13 @@ except AdafruitIO_RequestError:
 # Set data
 data_value = 42
 
-# Set up the Top-Secret Adafruit HQ Location Coordinate metadata
-lat = 40.726190
-lon = -74.005334
-ele = 6
+# Set up metadata associated with data_value
+metadata = {'lat': 40.726190,
+            'lon': -74.005334,
+            'ele': -6,
+            'created_at': None}
 
 # Send data and location metadata to the 'location' feed
 print('Sending data and location metadata to IO...')
-io.send_data(location_feed['key'], data_value, lat, lon, ele)
+io.send_data(location_feed['key'], data_value, metadata)
 print('Data sent!')

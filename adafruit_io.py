@@ -83,14 +83,13 @@ class RESTClient():
                               bytes("Content-Type", "utf-8"):bytes('application/json', "utf-8")},
                              {bytes("X-AIO-KEY", "utf-8"):bytes(self.key, "utf-8")}]
 
-    def _compose_path(self, path):
-        return "{0}/{1}/{2}/{3}".format(self.url, self.api_version, self.username, path)
+    @staticmethod
+    def _create_data(data, metadata):
+        return {'value':data, 'lat':metadata['lat'], 'lon':metadata['lon'],
+                'ele':metadata['ele'], 'created_at':metadata['created_at']}
 
-    def _create_data(self, data, metadata):
-        return {'value':data, 'lat':metadata[0], 'lon':metadata[1],
-                'ele':metadata[2], 'created_at':metadata[3]}
-
-    def _handle_error(self, response):
+    @staticmethod
+    def _handle_error(response):
         if response.status_code == 429:
             raise AdafruitIO_ThrottleError
         elif response.status_code == 400:
@@ -98,6 +97,9 @@ class RESTClient():
         elif response.status_code >= 400:
             raise AdafruitIO_RequestError(response)
         # no error? do nothing
+
+    def _compose_path(self, path):
+        return "{0}/{1}/{2}/{3}".format(self.url, self.api_version, self.username, path)
 
     # HTTP Requests
     def _post(self, path, packet):
@@ -136,18 +138,14 @@ class RESTClient():
         return response.json()
 
     # Data
-    def send_data(self, feed_key, data, lat=None, lon=None, ele=None, created_at=None):
+    def send_data(self, feed_key, data, metadata=None):
         """
         Sends value data to an Adafruit IO feed.
         :param str feed_key: Specified Adafruit IO feed
-        :param data: Data to send to an Adafruit IO feed
-        :param int lat: Optional latitude
-        :param int lon: Optional longitude
-        :param int ele: Optional elevation
-        :param string created_at: Optional date/time string
+        :param str data: Data to send to an Adafruit IO feed
+        :param dict metadata: Metadata associated with the data being sent
         """
         path = self._compose_path("feeds/{0}/data".format(feed_key))
-        metadata = [lat, lon, ele, created_at]
         packet = self._create_data(data, metadata)
         self._post(path, packet)
 
@@ -165,7 +163,7 @@ class RESTClient():
         :param string feed: Feed Key
         :param string data_id: Data point to delete
         """
-        path = self._compose_path("feeds/{0}/data/{0}".format(feed_key, data_id))
+        path = self._compose_path("feeds/{0}/data/{1}".format(feed_key, data_id))
         return self._delete(path)
 
     # Groups
