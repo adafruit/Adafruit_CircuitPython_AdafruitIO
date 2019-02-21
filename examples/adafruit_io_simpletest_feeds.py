@@ -1,9 +1,9 @@
 """
-Sending data to Adafruit IO and receiving it.
+Example of interacting with Adafruit IO feeds
 """
+import time
 import board
 import busio
-from random import randint
 from digitalio import DigitalInOut, Direction
 
 # ESP32 SPI
@@ -38,20 +38,17 @@ ADAFRUIT_IO_KEY = settings['adafruit_io_key']
 # Create an instance of the Adafruit IO REST client
 io = RESTClient(ADAFRUIT_IO_USER, ADAFRUIT_IO_KEY, wifi)
 
-try:
-    # Get the 'temperature' feed from Adafruit IO
-    temperature_feed = io.get_feed('temperature')
-except AdafruitIO_RequestError:
-    # If no 'temperature' feed exists, create one
-    temperature_feed = io.create_new_feed('temperature')
+# Create a new 'circuitpython' feed with a description
+print('Creating new Adafruit IO feed...')
+feed = io.create_new_feed('circuitpython', 'a Adafruit IO CircuitPython feed')
+print(feed)
 
-# Send random integer values to the feed
-random_value = randint(0, 50)
-print('Sending {0} to temperature feed...'.format(random_value))
-io.send_data(temperature_feed['key'], random_value)
-print('Data sent!')
+# List a specified feed
+print('Retrieving new Adafruit IO feed...')
+specified_feed = io.get_feed('circuitpython')
+print(specified_feed)
 
-# Retrieve data value from the feed
-print('Retrieving data from temperature feed...')
-received_data = io.receive_data(temperature_feed['key'])
-print('Data from temperature feed: ', received_data['value'])
+# Delete a specified feed by feed key
+print('Deleting feed...')
+io.delete_feed(specified_feed['key'])
+print('Feed deleted!')
