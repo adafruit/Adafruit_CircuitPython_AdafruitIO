@@ -31,7 +31,6 @@ except ImportError:
 # PyPortal ESP32 Setup
 esp32_cs = DigitalInOut(microcontroller.pin.PB14)
 esp32_ready = DigitalInOut(microcontroller.pin.PB16)
-esp32_gpio0 = DigitalInOut(microcontroller.pin.PB15)
 esp32_reset = DigitalInOut(microcontroller.pin.PB17)
 spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
 esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
