@@ -6,17 +6,17 @@ Dependencies:
     * CircuitPython_ADT7410
         https://github.com/adafruit/Adafruit_CircuitPython_ADT7410
 """
+import time
 import board
 import microcontroller
 import busio
-import time
-from digitalio import DigitalInOut, Direction
+from digitalio import DigitalInOut
 
 # ESP32 SPI
 from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
 
 # Import Adafruit IO REST Client
-from Adafruit_IO import RESTClient, AdafruitIO_RequestError, AdafruitIO_ThrottleError
+from Adafruit_IO import RESTClient, AdafruitIO_RequestError
 
 # Import ADT7410 Library
 import adafruit_adt7410

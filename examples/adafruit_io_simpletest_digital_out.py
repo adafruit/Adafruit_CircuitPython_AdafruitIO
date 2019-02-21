@@ -2,17 +2,17 @@
 Example of turning on and off a LED
 from an Adafruit IO Dashboard.
 """
+import time
 import board
 import microcontroller
 import busio
-import time
 from digitalio import DigitalInOut, Direction
 
 # ESP32 SPI
 from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
 
 # Import Adafruit IO REST Client
-from Adafruit_IO import RESTClient, AdafruitIO_RequestError, AdafruitIO_ThrottleError
+from Adafruit_IO import RESTClient, AdafruitIO_RequestError
 
 # Get wifi details and more from a settings.py file
 try:

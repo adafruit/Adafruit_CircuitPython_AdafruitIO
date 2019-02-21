@@ -1,17 +1,16 @@
 """
 Example of interacting with Adafruit IO feeds
 """
-import time
 import board
 import busio
-from digitalio import DigitalInOut, Direction
+from digitalio import DigitalInOut
 
 # ESP32 SPI
 import microcontroller
 from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
 
 # Import Adafruit IO REST Client
-from Adafruit_IO import RESTClient, AdafruitIO_RequestError, AdafruitIO_ThrottleError
+from Adafruit_IO import RESTClient
 
 # Get wifi details and more from a settings.py file
 try:
