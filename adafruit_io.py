@@ -216,12 +216,12 @@ class RESTClient(object):
             path = self._compose_path("feeds/{0}".format(feed_key))
         return self._get(path)
 
-    def create_new_feed(self, feed_key, feed_desc, feed_license):
+    def create_new_feed(self, feed_key, feed_desc=None, feed_license=None):
         """
         Creates a new feed.
         :param str feed_key: Feed key
-        :param str feed_desc: Description of feed
-        :param str feed_license: Feed License
+        :param str feed_desc: Optional description of feed
+        :param str feed_license: Optional feed License
         """
         path = self._compose_path("feeds")
         packet = packet = {'name':feed_key,
