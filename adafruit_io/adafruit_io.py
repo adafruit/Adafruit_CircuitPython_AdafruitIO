@@ -39,6 +39,7 @@ Implementation Notes
     https://github.com/adafruit/Adafruit_CircuitPython_ESP32SPI
 """
 from adafruit_io.adafruit_io_errors import AdafruitIO_RequestError, AdafruitIO_ThrottleError
+from adafruit_esp32spi import adafruit_esp32spi_wifimanager
 
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_Adafruit_IO.git"
@@ -56,7 +57,7 @@ class RESTClient():
         """
         self.username = adafruit_io_username
         self.key = adafruit_io_key
-        if isinstance(wifi, adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager):
+        if isinstance(wifi_manager, adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager):
             self.wifi = wifi_manager
         else:
             raise TypeError("This library requires a WiFiManager object.")
