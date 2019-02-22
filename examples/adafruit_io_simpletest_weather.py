@@ -51,7 +51,10 @@ ADAFRUIT_IO_KEY = settings['adafruit_io_key']
 io = RESTClient(ADAFRUIT_IO_USER, ADAFRUIT_IO_KEY, wifi)
 
 # Weather Location ID
-location_id = 2127
+# (to obtain this value, visit
+# https://io.adafruit.com/services/weather
+# and copy over the location ID)
+location_id = 1234
 
 print('Getting weather record from IO...')
 # Get the specified weather record with current weather
