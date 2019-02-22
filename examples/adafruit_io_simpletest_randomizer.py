@@ -55,9 +55,14 @@ io = RESTClient(ADAFRUIT_IO_USER, ADAFRUIT_IO_KEY, wifi)
 random_data_id = 1234
 
 while True:
-    print('Fetching random data from Adafruit IO...')
-    random_data = io.receive_random_data(random_data_id)
-    print('Random Data: ', random_data['value'])
-    print('Data Seed: ', random_data['seed'])
-    print('Waiting 1 minute to fetch new randomized data...')
-    time.sleep(60)
+    try:
+        print('Fetching random data from Adafruit IO...')
+        random_data = io.receive_random_data(random_data_id)
+        print('Random Data: ', random_data['value'])
+        print('Data Seed: ', random_data['seed'])
+        print('Waiting 1 minute to fetch new randomized data...')
+    except (ValueError, RuntimeError) as e:
+        print("Failed to get data, retrying\n", e)
+        wifi.reset()
+        continue
+    time.sleep(0.5)

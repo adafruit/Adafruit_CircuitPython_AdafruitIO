@@ -68,12 +68,17 @@ adt = adafruit_adt7410.ADT7410(i2c_bus, address=0x48)
 adt.high_resolution = True
 
 while True:
-    temperature = adt.temperature
-    # set temperature value to two precision points
-    temperature = '%0.2f'%(temperature)
+    try:
+        temperature = adt.temperature
+        # set temperature value to two precision points
+        temperature = '%0.2f'%(temperature)
 
-    print('Current Temperature: {0}*C'.format(temperature))
-    print('Sending to Adafruit IO...')
-    io.send_data(temperature_feed['key'], temperature)
-    print('Data sent!')
+        print('Current Temperature: {0}*C'.format(temperature))
+        print('Sending to Adafruit IO...')
+        io.send_data(temperature_feed['key'], temperature)
+        print('Data sent!')
+    except (ValueError, RuntimeError) as e:
+        print("Failed to get data, retrying\n", e)
+        wifi.reset()
+        continue
     time.sleep(0.5)
