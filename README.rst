@@ -9,8 +9,8 @@ Introduction
     :target: https://discord.gg/nBQh6qu
     :alt: Discord
 
-.. image:: https://travis-ci.com/adafruit/Adafruit_CircuitPython_Adafruit_IO.svg?branch=master
-    :target: https://travis-ci.com/adafruit/Adafruit_CircuitPython_Adafruit_IO
+.. image:: https://travis-ci.com/adafruit/Adafruit_CircuitPython_AdafruitIO.svg?branch=master
+    :target: https://travis-ci.com/adafruit/Adafruit_CircuitPython_AdafruitIO
     :alt: Build Status
 
 CircuitPython wrapper library for communicating with `Adafruit IO <http://io.adafruit.com>`_.
@@ -30,25 +30,35 @@ This is easily achieved by downloading
 Usage Example
 =============
 
-Create an Adafruit IO Client object
+Create an Adafruit IO Client object  
+
 .. code-block:: python
-io = RESTClient(ADAFRUIT_IO_USER, ADAFRUIT_IO_KEY, wifi)
+
+   io = RESTClient(ADAFRUIT_IO_USER, ADAFRUIT_IO_KEY, wifi)
 
 Sending data to an Adafruit IO feed
+
 .. code-block:: python
-io.send_data(feed, data)
+
+   io.send_data(feed, data)
 
 Receiving data from an Adafruit IO feed
+
 .. code-block:: python
-data = io.receive_data(feed)
+  
+   data = io.receive_data(feed)
 
 Creating a new feed named circuitpython with a description
+
 .. code-block:: python
-feed = io.create_new_feed('circuitpython', 'an Adafruit IO CircuitPython feed')
+
+    feed = io.create_new_feed('circuitpython', 'an Adafruit IO CircuitPython feed')
 
 Listing the record of a specified feed:
+
 .. code-block:: python
-feed = io.get_feed('circuitpython')
+    
+    feed = io.get_feed('circuitpython')
 
 Contributing
 ============
