@@ -65,4 +65,4 @@ while True:
         print("Failed to get data, retrying\n", e)
         wifi.reset()
         continue
-    time.sleep(0.5)
+    time.sleep(60)
