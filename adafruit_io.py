@@ -231,3 +231,13 @@ class RESTClient():
         """
         path = self._compose_path("feeds/{0}".format(feed_key))
         return self._delete(path)
+
+    # Adafruit IO Connected Services
+    def receive_weather(self, weather_id):
+        """
+        Adafruit IO Weather Forecast Service
+        NOTE: This service is avaliable to Adafruit IO Plus subscribers only.
+        :param int weather_id: ID for retrieving a specified weather record.
+        """
+        path = self._compose_path("integrations/weather/{0}".format(weather_id))
+        return self._get(path)
