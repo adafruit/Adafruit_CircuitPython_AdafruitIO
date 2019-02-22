@@ -38,23 +38,10 @@ Implementation Notes
 * Adafruit's ESP32SPI library:
     https://github.com/adafruit/Adafruit_CircuitPython_ESP32SPI
 """
+from adafruit_io.adafruit_io_errors import AdafruitIO_RequestError, AdafruitIO_ThrottleError
 
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_Adafruit_IO.git"
-
-class AdafruitIO_ThrottleError(Exception):
-    """Adafruit IO request error class for rate-limiting"""
-    def __init__(self):
-        super(AdafruitIO_ThrottleError, self).__init__("Number of Adafruit IO Requests exceeded! \
-                                                            Please try again in 30 seconds..")
-
-class AdafruitIO_RequestError(Exception):
-    """Adafruit IO request error class"""
-    def __init__(self, response):
-        response_content = response.json()
-        error = response_content['error']
-        super(AdafruitIO_RequestError, self).__init__("Adafruit IO Error {0}: {1}"
-                                                      .format(response.status_code, error))
 
 class RESTClient():
     """
@@ -91,7 +78,7 @@ class RESTClient():
         elif response.status_code == 400:
             raise AdafruitIO_RequestError(response)
         elif response.status_code >= 400:
-            raise AdafruitIO_RequestError(response)
+            raise adafruit_io.adafruit_io_errors.AdafruitIO_RequestError(response)
 
     def _compose_path(self, path):
         return "{0}/{1}/{2}/{3}".format('https://io.adafruit.com/api', 'v2', self.username, path)
