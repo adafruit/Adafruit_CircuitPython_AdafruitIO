@@ -253,7 +253,7 @@ class RESTClient():
     def receive_time(self, time_type):
         """
         Returns the current time from the Adafruit IO Server
-        :param string time_type: Type of time to be returned: `millis`, `seconds`, `ISO-8601`
+        :param string time_type: Type of time to be returned: millis, seconds, or ISO-8601
         """
         path = 'https://io.adafruit.com/api/v2/time/{0}'.format(time_type)
         return self._get(path)
