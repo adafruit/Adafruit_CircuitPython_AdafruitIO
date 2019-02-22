@@ -49,6 +49,9 @@ ADAFRUIT_IO_KEY = settings['adafruit_io_key']
 io = RESTClient(ADAFRUIT_IO_USER, ADAFRUIT_IO_KEY, wifi)
 
 # Random Data ID
+# (to obtain this value, visit
+# https://io.adafruit.com/services/words
+# and copy over the location ID)
 random_data_id = 1234
 
 while True:
