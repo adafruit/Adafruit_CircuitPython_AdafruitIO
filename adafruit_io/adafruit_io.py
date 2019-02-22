@@ -105,15 +105,18 @@ class RESTClient():
         self._handle_error(response)
         return response.json()
 
-    def _get(self, path):
+    def _get(self, path, return_text=False):
         """
         GET data from Adafruit IO
         :param str path: Formatted Adafruit IO URL from _compose_path
+        :param bool return_text: Returns text instead of json
         """
         response = self.wifi.get(
             path,
             headers=self.http_headers[1])
         self._handle_error(response)
+        if return_text:
+            return response.text
         return response.json()
 
     def _delete(self, path):
@@ -251,4 +254,4 @@ class RESTClient():
         :param string time_type: Type of time to be returned: millis, seconds, or ISO-8601
         """
         path = 'https://io.adafruit.com/api/v2/time/{0}'.format(time_type)
-        return self._get(path)
+        return self._get(path, return_text=True)
