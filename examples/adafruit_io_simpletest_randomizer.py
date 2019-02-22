@@ -11,7 +11,7 @@ from digitalio import DigitalInOut
 from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
 
 # Import Adafruit IO REST Client
-from Adafruit_IO import RESTClient
+from adafruit_io.adafruit_io import RESTClient
 
 # Get wifi details and more from a wifi_settings.py.py file
 try:

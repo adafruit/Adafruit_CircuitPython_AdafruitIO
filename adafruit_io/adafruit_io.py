@@ -78,7 +78,7 @@ class RESTClient():
         elif response.status_code == 400:
             raise AdafruitIO_RequestError(response)
         elif response.status_code >= 400:
-            raise adafruit_io.adafruit_io_errors.AdafruitIO_RequestError(response)
+            raise AdafruitIO_RequestError(response)
 
     def _compose_path(self, path):
         return "{0}/{1}/{2}/{3}".format('https://io.adafruit.com/api', 'v2', self.username, path)
