@@ -23,7 +23,7 @@
 `adafruit_io`
 ================================================================================
 
-A CircuitPython/Python library for communicating with Adafruit IO
+A CircuitPython/Python library for communicating with Adafruit IO over WiFi
 
 * Author(s): Brent Rubell for Adafruit Industries
 
@@ -66,6 +66,8 @@ class RESTClient():
 
     @staticmethod
     def _create_data(data, metadata):
+        """Creates JSON data payload
+        """
         if metadata is not None:
             return {'value':data, 'lat':metadata['lat'], 'lon':metadata['lon'],
                     'ele':metadata['ele'], 'created_at':metadata['created_at']}
@@ -73,6 +75,9 @@ class RESTClient():
 
     @staticmethod
     def _handle_error(response):
+        """Checks HTTP status codes
+        and raises errors.
+        """
         if response.status_code == 429:
             raise AdafruitIO_ThrottleError
         elif response.status_code == 400:
@@ -81,13 +86,16 @@ class RESTClient():
             raise AdafruitIO_RequestError(response)
 
     def _compose_path(self, path):
+        """Composes a valid API request path.
+        :param str path: Adafruit IO API URL path.
+        """
         return "{0}/{1}/{2}/{3}".format('https://io.adafruit.com/api', 'v2', self.username, path)
 
     # HTTP Requests
     def _post(self, path, payload):
         """
-        Send data to Adafruit IO
-        :param str path: Formatted Adafruit IO URL
+        POST data to Adafruit IO
+        :param str path: Formatted Adafruit IO URL from _compose_path
         :param json payload: JSON data to send to Adafruit IO
         """
         response = self.wifi.post(
@@ -99,8 +107,8 @@ class RESTClient():
 
     def _get(self, path):
         """
-        Get data from Adafruit IO
-        :param str path: Formatted Adafruit IO URL
+        GET data from Adafruit IO
+        :param str path: Formatted Adafruit IO URL from _compose_path
         """
         response = self.wifi.get(
             path,
@@ -110,8 +118,8 @@ class RESTClient():
 
     def _delete(self, path):
         """
-        Delete data from Adafruit IO.
-        :param str path: Formatted Adafruit IO URL
+        DELETE data from Adafruit IO.
+        :param str path: Formatted Adafruit IO URL from _compose_path
         """
         response = self.wifi.delete(
             path,
@@ -122,10 +130,10 @@ class RESTClient():
     # Data
     def send_data(self, feed_key, data, metadata=None):
         """
-        Sends value data to an Adafruit IO feed.
-        :param str feed_key: Specified Adafruit IO feed
-        :param str data: Data to send to an Adafruit IO feed
-        :param dict metadata: Metadata associated with the data being sent
+        Sends value data to a specified Adafruit IO feed.
+        :param str feed_key: Adafruit IO feed key
+        :param str data: Data to send to the Adafruit IO feed
+        :param dict metadata: Optional metadata associated with the data
         """
         path = self._compose_path("feeds/{0}/data".format(feed_key))
         payload = self._create_data(data, metadata)
@@ -134,16 +142,16 @@ class RESTClient():
     def receive_data(self, feed_key):
         """
         Return the most recent value for the specified feed.
-        :param string feed_key: Name/Key/ID of Adafruit IO feed.
+        :param string feed_key: Adafruit IO feed key
         """
         path = self._compose_path("feeds/{0}/data/last".format(feed_key))
         return self._get(path)
 
     def delete_data(self, feed_key, data_id):
         """
-        Delete an existing Data point from a feed.
-        :param string feed: Feed Key
-        :param string data_id: Data point to delete
+        Deletes an existing Data point from a feed.
+        :param string feed: Adafruit IO feed key
+        :param string data_id: Data point to delete from the feed
         """
         path = self._compose_path("feeds/{0}/data/{1}".format(feed_key, data_id))
         return self._delete(path)
@@ -188,9 +196,9 @@ class RESTClient():
     # Feeds
     def get_feed(self, feed_key, detailed=False):
         """
-        Returns feed based on the feed key
-        :param str feed_key: Feed Key
-        :param bool detailed: Returns a more detailed feed record
+        Returns an Adafruit IO feed based on the feed key
+        :param str feed_key: Adafruit IO Feed Key
+        :param bool detailed: Returns a more verbose feed record
         """
         if detailed:
             path = self._compose_path("feeds/{0}/details".format(feed_key))
@@ -200,10 +208,10 @@ class RESTClient():
 
     def create_new_feed(self, feed_key, feed_desc=None, feed_license=None):
         """
-        Creates a new feed.
-        :param str feed_key: Feed key
+        Creates a new Adafruit IO feed.
+        :param str feed_key: Adafruit IO Feed Key
         :param str feed_desc: Optional description of feed
-        :param str feed_license: Optional feed License
+        :param str feed_license: Optional feed license
         """
         path = self._compose_path("feeds")
         payload = {'name':feed_key,
