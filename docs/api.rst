@@ -5,5 +5,5 @@ API
 .. If your library file(s) are nested in a directory (e.g. /adafruit_foo/foo.py)
 .. use this format as the module name: "adafruit_foo.foo"
 
-.. automodule:: adafruit_io
+.. automodule:: adafruit_io.adafruit_io
    :members:

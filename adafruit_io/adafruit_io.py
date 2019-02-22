@@ -56,7 +56,7 @@ class RESTClient():
         """
         self.username = adafruit_io_username
         self.key = adafruit_io_key
-        if wifi_manager:
+        if isinstance(wifi, adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager):
             self.wifi = wifi_manager
         else:
             raise TypeError("This library requires a WiFiManager object.")
@@ -89,7 +89,7 @@ class RESTClient():
         """Composes a valid API request path.
         :param str path: Adafruit IO API URL path.
         """
-        return "{0}/{1}/{2}/{3}".format('https://io.adafruit.com/api', 'v2', self.username, path)
+        return "https://io.adafruit.com/api/v2/{0}/{1}".format(self.username, path)
 
     # HTTP Requests
     def _post(self, path, payload):
