@@ -12,11 +12,11 @@ from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
 # Import Adafruit IO REST Client
 from adafruit_io.adafruit_io import RESTClient, AdafruitIO_RequestError
 
-# Get wifi details and more from a esp32spi_secrets.py.py file
+# Get wifi details and more from a secrets.py file
 try:
-    from esp32spi_secrets import secrets
+    from secrets import secrets
 except ImportError:
-    print("WiFi secrets are kept in esp32spi_secrets.py, please add them there!")
+    print("WiFi secrets are kept in secrets.py, please add them there!")
     raise
 
 # ESP32 Setup
@@ -38,7 +38,7 @@ esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
 wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, board.NEOPIXEL)
 """
 
-# Set your Adafruit IO Username and Key in esp32spi_secrets.py
+# Set your Adafruit IO Username and Key in secrets.py
 # (visit io.adafruit.com if you need to create an account,
 # or if you need your Adafruit IO key.)
 ADAFRUIT_IO_USER = secrets['adafruit_io_user']
