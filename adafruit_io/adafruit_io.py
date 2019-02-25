@@ -35,8 +35,9 @@ Implementation Notes
 * Adafruit CircuitPython firmware for the supported boards:
     https://github.com/adafruit/circuitpython/releases
 
-* Adafruits ESP32SPI library:
+* Adafruit ESP32SPI or ESP_ATcontrol library:
     https://github.com/adafruit/Adafruit_CircuitPython_ESP32SPI
+    https://github.com/adafruit/Adafruit_CircuitPython_ESP_ATcontrol
 """
 from adafruit_io.adafruit_io_errors import AdafruitIO_RequestError, AdafruitIO_ThrottleError
 
