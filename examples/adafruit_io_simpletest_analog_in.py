@@ -5,11 +5,9 @@ and sending the value to Adafruit IO
 import time
 import board
 import busio
-from analogio import AnalogIn
 from digitalio import DigitalInOut
-
-# ESP32 SPI
 from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
+from analogio import AnalogIn
 
 # Import Adafruit IO REST Client
 from adafruit_io.adafruit_io import RESTClient, AdafruitIO_RequestError
