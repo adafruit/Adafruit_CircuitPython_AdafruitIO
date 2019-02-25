@@ -35,10 +35,10 @@ Implementation Notes
 * Adafruit CircuitPython firmware for the supported boards:
     https://github.com/adafruit/circuitpython/releases
 
-* Adafruit's ESP32SPI library:
+* Adafruit ESP32SPI or ESP_ATcontrol library:
     https://github.com/adafruit/Adafruit_CircuitPython_ESP32SPI
+    https://github.com/adafruit/Adafruit_CircuitPython_ESP_ATcontrol
 """
-from adafruit_esp32spi import adafruit_esp32spi_wifimanager
 from adafruit_io.adafruit_io_errors import AdafruitIO_RequestError, AdafruitIO_ThrottleError
 
 __version__ = "0.0.0-auto.0"
@@ -53,11 +53,12 @@ class RESTClient():
         Creates an instance of the Adafruit IO REST Client.
         :param str adafruit_io_username: Adafruit IO Username
         :param str adafruit_io_key: Adafruit IO Key
-        :param wifi_manager: WiFiManager object from adafruit_esp32spi_wifimanager
+        :param wifi_manager: WiFiManager object from ESPSPI_WiFiManager or ESPAT_WiFiManager
         """
         self.username = adafruit_io_username
         self.key = adafruit_io_key
-        if isinstance(wifi_manager, adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager):
+        wifi_type = str(type(wifi_manager))
+        if ('ESPSPI_WiFiManager' in wifi_type or 'ESPAT_WiFiManager' in wifi_type):
             self.wifi = wifi_manager
         else:
             raise TypeError("This library requires a WiFiManager object.")
