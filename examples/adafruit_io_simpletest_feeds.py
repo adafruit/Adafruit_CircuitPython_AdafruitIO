@@ -18,20 +18,19 @@ except ImportError:
     print("WiFi secrets are kept in secrets.py, please add them there!")
     raise
 
-# ESP32 Setup
-esp32_cs = DigitalInOut(board.D9)
-esp32_ready = DigitalInOut(board.D10)
-esp32_reset = DigitalInOut(board.D5)
+# PyPortal ESP32 Setup
+esp32_cs = DigitalInOut(board.ESP_CS)
+esp32_ready = DigitalInOut(board.ESP_BUSY)
+esp32_reset = DigitalInOut(board.ESP_RESET)
 spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
 esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
 wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, board.NEOPIXEL)
 
 """
-# PyPortal ESP32 Setup
-import microcontroller
-esp32_cs = DigitalInOut(microcontroller.pin.PB14)
-esp32_ready = DigitalInOut(microcontroller.pin.PB16)
-esp32_reset = DigitalInOut(microcontroller.pin.PB17)
+# ESP32 Setup
+esp32_cs = DigitalInOut(board.D9)
+esp32_ready = DigitalInOut(board.D10)
+esp32_reset = DigitalInOut(board.D5)
 spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
 esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
 wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, board.NEOPIXEL)
