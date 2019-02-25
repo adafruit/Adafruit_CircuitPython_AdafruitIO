@@ -64,10 +64,10 @@ forecast = io.receive_weather(location_id)
 # Get today's forecast
 current_forecast = forecast['current']
 print('It is {0} and {1}*F.'.format(current_forecast['summary'], current_forecast['temperature']))
-print('with a humidity of {0}%'.format(current_forecast['humidity']))
+print('with a humidity of {0}%'.format(current_forecast['humidity'] * 100))
 
 # Get tomorrow's forecast
 tom_forecast = forecast['forecast_days_1']
 print('\nTomorrow has a low of {0}*F and a high of {1}*F.'.format(
     tom_forecast['temperatureLow'], tom_forecast['temperatureHigh']))
-print('with a humidity of {0}%'.format(tom_forecast['humidity']))
+print('with a humidity of {0}%'.format(tom_forecast['humidity'] * 100))
