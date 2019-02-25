@@ -52,12 +52,12 @@ class RESTClient():
         Creates an instance of the Adafruit IO REST Client.
         :param str adafruit_io_username: Adafruit IO Username
         :param str adafruit_io_key: Adafruit IO Key
-        :param wifi_manager: WiFiManager object from ESPSPI_WiFiManager or ESPAT_WifiManager
+        :param wifi_manager: WiFiManager object from ESPSPI_WiFiManager or ESPAT_WiFiManager
         """
         self.username = adafruit_io_username
         self.key = adafruit_io_key
         wifi_type = str(type(wifi_manager))
-        if ('ESPSPI_WiFiManager' in wifi_type or 'ESPAT_WifiManager' in wifi_type):
+        if ('ESPSPI_WiFiManager' in wifi_type or 'ESPAT_WiFiManager' in wifi_type):
             self.wifi = wifi_manager
         else:
             raise TypeError("This library requires a WiFiManager object.")
