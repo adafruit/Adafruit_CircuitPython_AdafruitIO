@@ -133,14 +133,20 @@ class RESTClient():
         return response.json()
 
     # Data
-    def send_data(self, feed_key, data, metadata=None):
+    def send_data(self, feed_key, data, metadata=None, precision=None):
         """
         Sends value data to a specified Adafruit IO feed.
         :param str feed_key: Adafruit IO feed key
         :param str data: Data to send to the Adafruit IO feed
         :param dict metadata: Optional metadata associated with the data
+        :param int precision: Optional amount of precision points to send with floating point data
         """
         path = self._compose_path("feeds/{0}/data".format(feed_key))
+        if precision:
+            try:
+                data = round(data, precision)
+            except NotImplementedError: # received a non-float value
+                raise NotImplementedError('Precision requires a floating point value')
         payload = self._create_data(data, metadata)
         self._post(path, payload)
 
