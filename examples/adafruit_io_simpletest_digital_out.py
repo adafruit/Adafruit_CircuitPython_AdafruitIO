@@ -6,10 +6,12 @@ import time
 import board
 import busio
 from digitalio import DigitalInOut, Direction
-import neopixel
 
 # ESP32 SPI
 from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
+
+# Import NeoPixel Library
+import neopixel
 
 # Import Adafruit IO REST Client
 from adafruit_io.adafruit_io import RESTClient, AdafruitIO_RequestError
