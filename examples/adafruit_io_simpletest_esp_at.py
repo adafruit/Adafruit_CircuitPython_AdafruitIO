@@ -19,9 +19,13 @@ from adafruit_espatcontrol import adafruit_espatcontrol, adafruit_espatcontrol_w
 #Use below for Most Boards
 import neopixel
 status_light = neopixel.NeoPixel(board.NEOPIXEL, 1, brightness=0.2) # Uncomment for Most Boards
+
 #Uncomment below for ItsyBitsy M4#
 #import adafruit_dotstar as dotstar
 #status_light = dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
+
+#Uncomment below for Particle Argon#
+#status_light = None
 
 # Get wifi details and more from a secrets.py file
 try:
