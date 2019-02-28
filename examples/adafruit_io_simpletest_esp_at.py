@@ -10,6 +10,9 @@ import board
 import busio
 from digitalio import DigitalInOut
 
+# Import Adafruit IO REST Client
+from adafruit_io.adafruit_io import RESTClient, AdafruitIO_RequestError
+
 # ESP32 AT
 from adafruit_espatcontrol import adafruit_espatcontrol, adafruit_espatcontrol_wifimanager
 
@@ -19,9 +22,6 @@ status_light = neopixel.NeoPixel(board.NEOPIXEL, 1, brightness=0.2) # Uncomment 
 #Uncomment below for ItsyBitsy M4#
 #import adafruit_dotstar as dotstar
 #status_light = dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
-
-# Import Adafruit IO REST Client
-from adafruit_io.adafruit_io import RESTClient, AdafruitIO_RequestError
 
 # Get wifi details and more from a secrets.py file
 try:
