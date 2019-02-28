@@ -21,7 +21,12 @@ Dependencies
 This driver depends on:
 
 * `Adafruit CircuitPython <https://github.com/adafruit/circuitpython>`_
-* `Adafruit CircuitPython ESP32SPI <https://github.com/adafruit/Adafruit_CircuitPython_ESP32SPI>`_
+
+You'll also need a library to communicate with an ESP32 as a coprocessor using a `WiFiManager` object. This library supports connecting an ESP32 using either SPI or UART.
+
+* SPI: `Adafruit CircuitPython ESP32SPI <https://github.com/adafruit/Adafruit_CircuitPython_ESP32SPI>`_
+
+* UART: `Adafruit CircuitPython ESP_ATcontrol <https://github.com/adafruit/Adafruit_CircuitPython_ESP_ATcontrol>`_
 
 Please ensure all dependencies are available on the CircuitPython filesystem.
 This is easily achieved by downloading
