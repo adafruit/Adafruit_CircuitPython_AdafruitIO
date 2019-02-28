@@ -1,4 +1,4 @@
-Introduction
+Adafruit_CircuitPython_AdafruitIO
 ============
 
 .. image:: https://readthedocs.org/projects/adafruit-circuitpython-adafruitio/badge/?version=latest
