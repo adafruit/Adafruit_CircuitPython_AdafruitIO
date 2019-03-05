@@ -1,5 +1,5 @@
 Adafruit_CircuitPython_AdafruitIO
-============
+=================================
 
 .. image:: https://readthedocs.org/projects/adafruit-circuitpython-adafruitio/badge/?version=latest
     :target: https://circuitpython.readthedocs.io/projects/adafruitio/en/latest/
@@ -17,7 +17,8 @@ CircuitPython wrapper library for communicating with `Adafruit IO <http://io.ada
 
 
 Dependencies
-=============
+============
+
 This driver depends on:
 
 * `Adafruit CircuitPython <https://github.com/adafruit/circuitpython>`_
@@ -100,7 +101,7 @@ Then run the build:
     circuitpython-build-bundles --filename_prefix adafruit-circuitpython-adafruit_io --library_location .
 
 Sphinx documentation
------------------------
+--------------------
 
 Sphinx is used to build the documentation based on rST files and comments in the code. First,
 install dependencies (feel free to reuse the virtual environment from above):
