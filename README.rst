@@ -40,7 +40,7 @@ Create an Adafruit IO Client object
 
 .. code-block:: python
 
-   io = RESTClient(ADAFRUIT_IO_USER, ADAFRUIT_IO_KEY, wifi)
+   io = RESTClient(aio_username, aio_key, wifi)
 
 Sending data to an Adafruit IO feed
 
