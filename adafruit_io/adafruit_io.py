@@ -44,6 +44,10 @@ from adafruit_io.adafruit_io_errors import AdafruitIO_RequestError, AdafruitIO_T
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_Adafruit_IO.git"
 
+CLIENT_HEADERS = {
+    'User-Agent': 'AIO-CircuitPython/{0}'.format(__version__)
+}
+
 class RESTClient():
     """
     REST Client for interacting with the Adafruit IO API.
@@ -62,9 +66,17 @@ class RESTClient():
             self.wifi = wifi_manager
         else:
             raise TypeError("This library requires a WiFiManager object.")
-        self.http_headers = [{bytes("X-AIO-KEY", "utf-8"):bytes(self.key, "utf-8"),
-                              bytes("Content-Type", "utf-8"):bytes('application/json', "utf-8")},
-                             {bytes("X-AIO-KEY", "utf-8"):bytes(self.key, "utf-8")}]
+        self._aio_headers = [{"X-AIO-KEY":self.key,
+                              "Content-Type":'application/json'},
+                             {"X-AIO-KEY":self.key,}]
+
+    @staticmethod
+    def _create_headers(io_headers):
+        """Creates http request headers.
+        """
+        headers = CLIENT_HEADERS.copy()
+        headers.update(io_headers)
+        return headers
 
     @staticmethod
     def _create_data(data, metadata):
@@ -103,7 +115,7 @@ class RESTClient():
         response = self.wifi.post(
             path,
             json=payload,
-            headers=self.http_headers[0])
+            headers=self._create_headers(self._aio_headers[0]))
         self._handle_error(response)
         return response.json()
 
@@ -115,7 +127,7 @@ class RESTClient():
         """
         response = self.wifi.get(
             path,
-            headers=self.http_headers[1])
+            headers=self._create_headers(self._aio_headers[1]))
         self._handle_error(response)
         if return_text:
             return response.text
@@ -128,7 +140,7 @@ class RESTClient():
         """
         response = self.wifi.delete(
             path,
-            headers=self.http_headers[0])
+            headers=self._create_headers(self._aio_headers[0]))
         self._handle_error(response)
         return response.json()
 
