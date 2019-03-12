@@ -39,6 +39,7 @@ Implementation Notes
     https://github.com/adafruit/Adafruit_CircuitPython_ESP32SPI
     https://github.com/adafruit/Adafruit_CircuitPython_ESP_ATcontrol
 """
+from time import struct_time
 from adafruit_io.adafruit_io_errors import AdafruitIO_RequestError, AdafruitIO_ThrottleError
 
 __version__ = "0.0.0-auto.0"
@@ -268,10 +269,19 @@ class RESTClient():
         path = self._compose_path("integrations/words/{0}".format(generator_id))
         return self._get(path)
 
-    def receive_time(self, time_type):
+    def receive_time(self):
         """
-        Returns the current time from the Adafruit IO Server
-        :param string time_type: Type of time to be returned: millis, seconds, or ISO-8601
+        Returns a struct_time from the Adafruit IO Server based on the device's IP address.
+        https://circuitpython.readthedocs.io/en/latest/shared-bindings/time/__init__.html#time.struct_time
         """
-        path = 'https://io.adafruit.com/api/v2/time/{0}'.format(time_type)
-        return self._get(path, return_text=True)
+        path = self._compose_path('/integrations/time/clock.json{0}'.format(strftime_format))
+        time_response = self._get(path, return_text=True)
+        times = time_response.split(' ')
+        the_date = times[0]
+        the_time = times[1]
+        year_day = int(times[2])
+        week_day = int(times[3])
+        year, month, mday = [int(x) for x in the_date.split('-')]
+        the_time = the_time.split('.')[0]
+        hours, minutes, seconds = [int(x) for x in the_time.split(':')]
+        return struct_time((year, month, mday, hours, minutes, seconds, week_day, year_day, None))
