@@ -274,9 +274,7 @@ class RESTClient():
         Returns a struct_time from the Adafruit IO Server based on the device's IP address.
         https://circuitpython.readthedocs.io/en/latest/shared-bindings/time/__init__.html#time.struct_time
         """
-        path = self._compose_path('integrations/time/clock.json')
+        path = self._compose_path('integrations/time/struct.json')
         time = self._get(path)
-        print(time)
-        print(time['wday'])
         return struct_time((time['year'], time['mon'], time['mday'], time['hour'],
                             time['min'], time['sec'], time['wday'], time['yday'], time['isdst']))
