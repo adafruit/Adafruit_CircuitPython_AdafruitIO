@@ -120,18 +120,15 @@ class RESTClient():
         self._handle_error(response)
         return response.json()
 
-    def _get(self, path, return_text=False):
+    def _get(self, path):
         """
         GET data from Adafruit IO
         :param str path: Formatted Adafruit IO URL from _compose_path
-        :param bool return_text: Returns text instead of json
         """
         response = self.wifi.get(
             path,
             headers=self._create_headers(self._aio_headers[1]))
         self._handle_error(response)
-        if return_text:
-            return response.text
         return response.json()
 
     def _delete(self, path):
