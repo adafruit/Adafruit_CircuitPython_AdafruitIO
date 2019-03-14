@@ -47,11 +47,11 @@ wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_lig
 # Set your Adafruit IO Username and Key in secrets.py
 # (visit io.adafruit.com if you need to create an account,
 # or if you need your Adafruit IO key.)
-ADAFRUIT_IO_USER = secrets['adafruit_io_user']
-ADAFRUIT_IO_KEY = secrets['adafruit_io_key']
+aio_username = secrets['aio_username']
+aio_key = secrets['aio_key']
 
 # Create an instance of the Adafruit IO REST client
-io = RESTClient(ADAFRUIT_IO_USER, ADAFRUIT_IO_KEY, wifi)
+io = RESTClient(aio_username, aio_key, wifi)
 
 # Create a new 'circuitpython' feed with a description
 print('Creating new Adafruit IO feed...')
