@@ -39,6 +39,7 @@ Implementation Notes
     https://github.com/adafruit/Adafruit_CircuitPython_ESP32SPI
     https://github.com/adafruit/Adafruit_CircuitPython_ESP_ATcontrol
 """
+from time import struct_time
 from adafruit_io.adafruit_io_errors import AdafruitIO_RequestError, AdafruitIO_ThrottleError
 
 __version__ = "0.0.0-auto.0"
@@ -119,18 +120,15 @@ class RESTClient():
         self._handle_error(response)
         return response.json()
 
-    def _get(self, path, return_text=False):
+    def _get(self, path):
         """
         GET data from Adafruit IO
         :param str path: Formatted Adafruit IO URL from _compose_path
-        :param bool return_text: Returns text instead of json
         """
         response = self.wifi.get(
             path,
             headers=self._create_headers(self._aio_headers[1]))
         self._handle_error(response)
-        if return_text:
-            return response.text
         return response.json()
 
     def _delete(self, path):
@@ -268,10 +266,12 @@ class RESTClient():
         path = self._compose_path("integrations/words/{0}".format(generator_id))
         return self._get(path)
 
-    def receive_time(self, time_type):
+    def receive_time(self):
         """
-        Returns the current time from the Adafruit IO Server
-        :param string time_type: Type of time to be returned: millis, seconds, or ISO-8601
+        Returns a struct_time from the Adafruit IO Server based on the device's IP address.
+        https://circuitpython.readthedocs.io/en/latest/shared-bindings/time/__init__.html#time.struct_time
         """
-        path = 'https://io.adafruit.com/api/v2/time/{0}'.format(time_type)
-        return self._get(path, return_text=True)
+        path = self._compose_path('integrations/time/struct.json')
+        time = self._get(path)
+        return struct_time((time['year'], time['mon'], time['mday'], time['hour'],
+                            time['min'], time['sec'], time['wday'], time['yday'], time['isdst']))
