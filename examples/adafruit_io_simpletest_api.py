@@ -90,11 +90,20 @@ def assertEqual(val_1, val_2):
     if val_1 != val_2:
         raise AssertionError('Values are not equal:', val_1, val_2)
 
-def delete_feed(io_feed):
+def delete_feed(io_feed_name):
     """Deletes a specified Adafruit IO Feed.
     """
     try:
-        io.delete_feed(io_feed)
+        io.delete_feed(io_feed_name)
+    except AdafruitIO_RequestError:
+        # feed doesnt exist
+        pass
+
+def delete_group(io_group_name):
+    """Deletes a specified Adafruit IO Group.
+    """
+    try:
+        io.delete_group(io_group_name)
     except AdafruitIO_RequestError:
         # feed doesnt exist
         pass
@@ -139,23 +148,13 @@ def send_location_data():
     assertAlmostEqual(float(rx_data['ele']), metadata['ele'])
     print('OK!')
 
-def test_receive_time():
-    """receive_time
-    """
-    print('Testing receive_time()...')
-    current_time = io.receive_time()
-    assertIsNone(current_time[0])
-    assertIsNone(current_time[1])
-    assertIsNone(current_time[2])
-    print('OK!')
-
 """
 Feed Functionality
 """
 def test_create_feed():
     """create_new_feed
     """
-    print('Test create_new_feed()')
+    print('Test create_new_feed')
     delete_feed('testfeed')
     test_feed = io.create_new_feed('testfeed')
     assertEqual(test_feed['name'], 'testfeed')
@@ -170,6 +169,9 @@ def test_delete_feed():
     assertRaises(AdafruitIO_RequestError, io.receive_data, 'testfeed')
 
 def test_delete_nonexistent_feed():
+    """delete_feed
+    """
+    print('Test delete_feed')
     delete_feed('testfeed')
     assertRaises(AdafruitIO_RequestError, io.delete_feed, 'testfeed')
 
@@ -177,9 +179,33 @@ def test_delete_nonexistent_feed():
 Group Functionality
 """
 
+def create_group():
+    print('Testing create_new_group()')
+    io.delete_group('testgroup')
+    response = io.create_new_group('testgroup', 'testing')
+    assertEqual(response['name'], 'testgroup')
+    assertEqual(response['description'], 'testing')
+
+# delete group, like delete feed
+
+# add a feed to a group and check if it's in the group
+
+"""
+Connected Services Functionality
+"""
+def test_receive_time():
+    """receive_time
+    """
+    print('Testing receive_time()...')
+    current_time = io.receive_time()
+    assertIsNone(current_time[0])
+    assertIsNone(current_time[1])
+    assertIsNone(current_time[2])
+    print('OK!')
+
 # tests to run
 tests = [send_receive, send_location_data, test_receive_time, test_create_feed,
-            test_delete_feed]
+            test_delete_feed, create_group]
 
 # start the timer
 start_time = time.monotonic()
