@@ -228,37 +228,43 @@ def test_receive_time():
     assertIsNone(current_time[1])
     assertIsNone(current_time[2])
 
-def test_receive_weather(weather_id):
+def test_receive_weather():
     """receive_weather
-    :param int weather_id: ID for retrieving a specified weather record.
     """
     print('Testing receive_weather...')
-    forecast = io.receive_weather(weather_id)
+    forecast = io.receive_weather(weather_location_id)
     current_forecast = forecast['current']
     assertIsNone(current_forecast['summary'])
     assertIsNone(current_forecast['temperature'])
 
+def test_receive_random():
+    """receive_random
+    """
+    print('Testing receive_random...')
+    random_data = io.receive_random_data(random_data_id)
+    assertIsNone(random_data['value'])
+    assertIsNone(random_data['seed'])
 
 """
 Test Configuration
 """
 # Weather Location ID, from https://io.adafruit.com/services/weather
-weather_location = 2127
+weather_location_id = 2127
 # Random Generator ID, from https://io.adafruit.com/services/words
-random_generator = 1461
+random_data_id = 1461
 
 # Tests, organized by API endpoint type
 data_tests = [send_receive, send_location_data]
 feed_tests = [test_create_feed, test_delete_feed, test_delete_nonexistent_feed]
 group_tests = [test_create_group, test_delete_group, test_get_group, test_add_to_group]
-services_tests = [test_receive_time, test_receive_weather(weather_location)] 
+services_tests = [test_receive_time, test_receive_weather, test_receive_random] 
 
 # Tests run by script
-tests = services_tests
-print(tests)
+tests = data_tests + feed_tests + group_tests + services_tests
 
 while True:
     start_time = time.monotonic()
+    print('Running %d tests...'%len(tests))
     try:
         for i in range(len(tests)):
             tests[i]()
