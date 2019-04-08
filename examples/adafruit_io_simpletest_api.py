@@ -257,6 +257,7 @@ random_data_id = 1461
 data_tests = [send_receive, send_location_data]
 feed_tests = [test_create_feed, test_delete_feed, test_delete_nonexistent_feed, test_get_feed]
 group_tests = [test_create_group, test_delete_group, test_get_group, test_add_feed_to_group]
+# Note: the tests for random and weather requrie an active IO Plus subscription
 services_tests = [test_receive_time, test_receive_weather, test_receive_random]
 
 # Tests run by script
