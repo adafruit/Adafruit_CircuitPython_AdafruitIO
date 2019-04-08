@@ -42,10 +42,16 @@ wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_lig
 aio_username = secrets['aio_username']
 aio_key = secrets['aio_key']
 
+# Create Adafruit IO Client
+io = RESTClient(aio_username, aio_key, wifi)
+
+"""
+Generic Test Assertions
+"""
 
 def assertAlmostEqual(x, y, places=None, msg=''):
     """Raises an AssertionError if two float values are not equal.
-    from https://github.com/micropython/micropython-lib/blob/master/unittest/unittest.py#L39
+    (from https://github.com/micropython/micropython-lib/blob/master/unittest/unittest.py)
     """
     if x == y:
         return
@@ -55,8 +61,28 @@ def assertAlmostEqual(x, y, places=None, msg=''):
         return
     if not msg:
         msg = '%r != %r within %r places' % (x, y, places)
-
     assert False, msg
+
+def assertRaises(exc, func=None, *args, **kwargs):
+    """Raises based on context.
+    (from https://github.com/micropython/micropython-lib/blob/master/unittest/unittest.py)
+    """
+    if func is None:
+        return AssertRaisesContext(exc)
+
+    try:
+        func(*args, **kwargs)
+        assert False, "%r not raised" % exc
+    except Exception as e:
+        if isinstance(e, exc):
+            return
+        raise
+
+def assertIsNone(x):
+    """Raises an AssertionError if x is None.
+    """
+    if x is None:
+        raise AssertionError('%r is None'%x)
 
 def assertEqual(val_1, val_2):
     """Raises an AssertionError if the two specified values are not equal.
@@ -64,21 +90,24 @@ def assertEqual(val_1, val_2):
     if val_1 != val_2:
         raise AssertionError('Values are not equal:', val_1, val_2)
 
-def delete_feed(io_client, io_feed):
+def delete_feed(io_feed):
     """Deletes a specified Adafruit IO Feed.
     """
     try:
-        io_client.delete_feed(io_feed)
+        io.delete_feed(io_feed)
     except AdafruitIO_RequestError:
         # feed doesnt exist
         pass
 
+"""
+Data Functionality
+"""
 def send_receive():
     """Sending a random int. to a feed and receiving it back.
+    send_data, receive_data
     """
     print('Testing send_receive...')
-    io = RESTClient(aio_username, aio_key, wifi)
-    delete_feed(io, 'testfeed')
+    delete_feed('testfeed')
     test_feed = io.create_new_feed('testfeed')
     tx_data = randint(1, 100)
     # send the value
@@ -89,11 +118,11 @@ def send_receive():
     print("OK!")
 
 def send_location_data():
-    """Sending a random location to a feed
+    """Sending a random location to a feed.
+    send_data
     """
     print('Testing send_location_data...')
-    io = RESTClient(aio_username, aio_key, wifi)
-    delete_feed(io, 'testfeed')
+    delete_feed('testfeed')
     test_feed = io.create_new_feed('testfeed')
     # value
     value = randint(1, 100)
@@ -110,8 +139,47 @@ def send_location_data():
     assertAlmostEqual(float(rx_data['ele']), metadata['ele'])
     print('OK!')
 
+def test_receive_time():
+    """receive_time
+    """
+    print('Testing receive_time()...')
+    current_time = io.receive_time()
+    assertIsNone(current_time[0])
+    assertIsNone(current_time[1])
+    assertIsNone(current_time[2])
+    print('OK!')
+
+"""
+Feed Functionality
+"""
+def test_create_feed():
+    """create_new_feed
+    """
+    print('Test create_new_feed()')
+    delete_feed('testfeed')
+    test_feed = io.create_new_feed('testfeed')
+    assertEqual(test_feed['name'], 'testfeed')
+    print('OK!')
+
+def test_delete_feed():
+    """delete_feed
+    """
+    print('Test delete_feed()')
+    delete_feed('testfeed')
+    test_feed = io.create_new_feed('testfeed')
+    assertRaises(AdafruitIO_RequestError, io.receive_data, 'testfeed')
+
+def test_delete_nonexistent_feed():
+    delete_feed('testfeed')
+    assertRaises(AdafruitIO_RequestError, io.delete_feed, 'testfeed')
+
+"""
+Group Functionality
+"""
+
 # tests to run
-tests = [send_receive, send_location_data]
+tests = [send_receive, send_location_data, test_receive_time, test_create_feed,
+            test_delete_feed]
 
 # start the timer
 start_time = time.monotonic()
@@ -121,8 +189,9 @@ while True:
             tests[i]()
             time.sleep(1)
     except (ValueError, RuntimeError) as e:
-        print("Failed to get data, retrying\n", e)
+        print("Failed to get data, retrying...\n", e)
         wifi.reset()
         continue
     final_time = time.monotonic()
-    raise AssertionError("Ran {0} tests in {1} seconds".format(len(tests), final_time - start_time))
+    print("Ran {0} tests in {1} seconds".format(len(tests), final_time - start_time))
+    break
