@@ -48,6 +48,8 @@ io = RESTClient(aio_username, aio_key, wifi)
 """
 Generic Test Assertions and Client Operations
 """
+
+#pylint: disable=keyword-arg-before-vararg
 def assertAlmostEqual(x, y, places=None, msg=''):
     """Raises an AssertionError if two float values are not equal.
     (from https://github.com/micropython/micropython-lib/blob/master/unittest/unittest.py)
@@ -62,7 +64,7 @@ def assertAlmostEqual(x, y, places=None, msg=''):
         msg = '%r != %r within %r places' % (x, y, places)
     assert False, msg
 
-def assertRaises(exc, func=None, *args, **kwargs):
+def assertRaises(exc,func=None, *args, **kwargs):
     """Raises based on context.
     (from https://github.com/micropython/micropython-lib/blob/master/unittest/unittest.py)
     """
@@ -150,7 +152,7 @@ def test_create_feed():
     assertEqual(test_feed['name'], 'testfeed')
 
 def test_delete_feed():
-    """delete_feed
+    """delete_feed by feed key
     """
     print('Testing delete_feed...')
     delete_feed('testfeed')
@@ -158,20 +160,20 @@ def test_delete_feed():
     assertRaises(AdafruitIO_RequestError, io.receive_data, 'testfeed')
 
 def test_delete_nonexistent_feed():
-    """delete_feed
+    """delete nonexistent feed by feed key
     """
     print('Testing delete_nonexistent_feed...')
     delete_feed('testfeed')
     assertRaises(AdafruitIO_RequestError, io.delete_feed, 'testfeed')
 
 def test_get_feed():
-    """get_feed
+    """get_feed by feed key
     """
     print('Testing get_feed...')
     delete_feed('testfeed')
     test_feed = io.create_new_feed('testfeed')
     resp = io.get_feed(test_feed['key'])
-    print(resp)
+    assertEqual(resp['key'], 'testfeed')
 
 # Group Functionality
 def test_create_group():
@@ -244,7 +246,7 @@ def test_receive_random():
     assertIsNone(random_data['seed'])
 
 
-# Test Configuration
+# Testing Setup
 
 # Weather Location ID, from https://io.adafruit.com/services/weather
 weather_location_id = 2127
@@ -258,15 +260,15 @@ group_tests = [test_create_group, test_delete_group, test_get_group, test_add_fe
 services_tests = [test_receive_time, test_receive_weather, test_receive_random]
 
 # Tests run by script
-tests = feed_tests
-#tests = data_tests + feed_tests + group_tests + services_tests
+tests = data_tests + feed_tests + group_tests + services_tests
 
 while True:
     start_time = time.monotonic()
     print('Running %d tests...'%len(tests))
     try:
-        for i in range(len(tests)):
-            tests[i]()
+        for i in enumerate(tests):
+            i[1]()
+            # tests[i[1]]()
             print('OK!')
             time.sleep(1)
     except (ValueError, RuntimeError) as e:
