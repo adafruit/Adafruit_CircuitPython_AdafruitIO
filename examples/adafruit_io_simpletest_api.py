@@ -43,10 +43,25 @@ aio_username = secrets['aio_username']
 aio_key = secrets['aio_key']
 
 
+def assertAlmostEqual(x, y, places=None, msg=''):
+    """Raises an AssertionError if two float values are not equal.
+    from https://github.com/micropython/micropython-lib/blob/master/unittest/unittest.py#L39
+    """
+    if x == y:
+        return
+    if places is None:
+        places = 2
+    if round(abs(y-x), places) == 0:
+        return
+    if not msg:
+        msg = '%r != %r within %r places' % (x, y, places)
+
+    assert False, msg
+
 def assertEqual(val_1, val_2):
     """Raises an AssertionError if the two specified values are not equal.
     """
-    if val_1 is not val_2:
+    if val_1 != val_2:
         raise AssertionError('Values are not equal:', val_1, val_2)
 
 def delete_feed(io_client, io_feed):
@@ -59,7 +74,7 @@ def delete_feed(io_client, io_feed):
         pass
 
 def send_receive():
-    """Sending a random int. to a feed and receiving it
+    """Sending a random int. to a feed and receiving it back.
     """
     print('Testing send_receive...')
     io = RESTClient(aio_username, aio_key, wifi)
@@ -81,36 +96,33 @@ def send_location_data():
     delete_feed(io, 'testfeed')
     test_feed = io.create_new_feed('testfeed')
     # value
-    value = randint(0, 100)
+    value = randint(1, 100)
     # Set up metadata associated with value
     metadata = {'lat': uniform(1, 100),
                 'lon': uniform(1, 100),
-                'ele': randint(0, 1000),
+                'ele': 10,
                 'created_at': None}
     io.send_data(test_feed['key'], value, metadata)
     rx_data = io.receive_data(test_feed['key'])
     assertEqual(int(rx_data['value']), value)
-    assertEqual(float(rx_data['lat']), metadata['lat'])
-    assertEqual(float(rx_data['lon']), metadata['lon'])
-    assertEqual(int(rx_data['ele']), metadata['ele'])
-    assertEqual(rx_data['created_at'], metadata['created_at'])
+    assertAlmostEqual(float(rx_data['lat']), metadata['lat'])
+    assertAlmostEqual(float(rx_data['lon']), metadata['lon'])
+    assertAlmostEqual(float(rx_data['ele']), metadata['ele'])
     print('OK!')
 
 # tests to run
-tests = [send_receive(), send_location_data()]
+tests = [send_receive, send_location_data]
 
 # start the timer
 start_time = time.monotonic()
 while True:
     try:
-        for i in len(tests) - 1:
-            print(i)
-            tests[test]
+        for i in range(len(tests)):
+            tests[i]()
             time.sleep(1)
     except (ValueError, RuntimeError) as e:
         print("Failed to get data, retrying\n", e)
         wifi.reset()
         continue
     final_time = time.monotonic()
-    total_time = final_time-start_time
-    print("Ran {0} tests in {1}".format(len(tests), total_time))
+    raise AssertionError("Ran {0} tests in {1} seconds".format(len(tests), final_time - start_time))
