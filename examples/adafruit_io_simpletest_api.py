@@ -66,9 +66,6 @@ def assertRaises(exc, func=None, *args, **kwargs):
     """Raises based on context.
     (from https://github.com/micropython/micropython-lib/blob/master/unittest/unittest.py)
     """
-    if func is None:
-        return AssertRaisesContext(exc)
-
     try:
         func(*args, **kwargs)
         assert False, "%r not raised" % exc
@@ -107,9 +104,7 @@ def delete_group(io_group_name):
         # feed doesnt exist
         pass
 
-"""
-Data Functionality
-"""
+# Data Functionality
 def send_receive():
     """Sending a random int. to a feed and receiving it back.
     send_data, receive_data
@@ -145,9 +140,7 @@ def send_location_data():
     assertAlmostEqual(float(rx_data['lon']), metadata['lon'])
     assertAlmostEqual(float(rx_data['ele']), metadata['ele'])
 
-"""
-Feed Functionality
-"""
+# Feed Functionality
 def test_create_feed():
     """create_new_feed
     """
@@ -161,34 +154,41 @@ def test_delete_feed():
     """
     print('Testing delete_feed...')
     delete_feed('testfeed')
-    test_feed = io.create_new_feed('testfeed')
+    io.create_new_feed('testfeed')
     assertRaises(AdafruitIO_RequestError, io.receive_data, 'testfeed')
 
 def test_delete_nonexistent_feed():
     """delete_feed
     """
-    print('Testing delete_feed...')
+    print('Testing delete_nonexistent_feed...')
     delete_feed('testfeed')
     assertRaises(AdafruitIO_RequestError, io.delete_feed, 'testfeed')
 
-"""
-Group Functionality
-"""
+def test_get_feed():
+    """get_feed
+    """
+    print('Testing get_feed...')
+    delete_feed('testfeed')
+    test_feed = io.create_new_feed('testfeed')
+    resp = io.get_feed(test_feed['key'])
+    print(resp)
+
+# Group Functionality
 def test_create_group():
     """create_new_group
     """
     print('Testing create_new_group...')
     delete_group('testgrp')
-    response = io.create_new_group('testgrp', 'testing')
-    assertEqual(response['name'], 'testgrp')
-    assertEqual(response['description'], 'testing')
+    resp = io.create_new_group('testgrp', 'testing')
+    assertEqual(resp['name'], 'testgrp')
+    assertEqual(resp['description'], 'testing')
 
 def test_delete_group():
     """delete_group
     """
     print('Testing delete_group...')
     delete_group('testgrp')
-    test_group = io.create_new_group('testgrp', 'testing')
+    io.create_new_group('testgrp', 'testing')
     delete_group('testgrp')
     assertRaises(AdafruitIO_RequestError, io.get_group, 'testgrp')
 
@@ -202,13 +202,13 @@ def test_get_group():
     assertEqual(test_group['name'], 'testgrp')
     assertEqual(test_group['key'], 'testgrp')
 
-def test_add_to_group():
+def test_add_feed_to_group():
     """add_feed_to_group
     """
     print('Testing add_feed_to_group...')
     delete_group('testgrp')
     delete_feed('testfeed')
-    test_feed = io.create_new_feed('testfeed')
+    io.create_new_feed('testfeed')
     test_group = io.create_new_group('testgrp', 'testing')
     io.add_feed_to_group('testgrp', 'testfeed')
     resp = io.get_group(test_group['key'])
@@ -216,9 +216,7 @@ def test_add_to_group():
     feeds = feeds[0]
     assertEqual(feeds['key'], 'testgrp.testfeed')
 
-"""
-Connected Services Functionality
-"""
+# Connected Services Functionality
 def test_receive_time():
     """receive_time
     """
@@ -245,9 +243,9 @@ def test_receive_random():
     assertIsNone(random_data['value'])
     assertIsNone(random_data['seed'])
 
-"""
-Test Configuration
-"""
+
+# Test Configuration
+
 # Weather Location ID, from https://io.adafruit.com/services/weather
 weather_location_id = 2127
 # Random Generator ID, from https://io.adafruit.com/services/words
@@ -255,12 +253,13 @@ random_data_id = 1461
 
 # Tests, organized by API endpoint type
 data_tests = [send_receive, send_location_data]
-feed_tests = [test_create_feed, test_delete_feed, test_delete_nonexistent_feed]
-group_tests = [test_create_group, test_delete_group, test_get_group, test_add_to_group]
-services_tests = [test_receive_time, test_receive_weather, test_receive_random] 
+feed_tests = [test_create_feed, test_delete_feed, test_delete_nonexistent_feed, test_get_feed]
+group_tests = [test_create_group, test_delete_group, test_get_group, test_add_feed_to_group]
+services_tests = [test_receive_time, test_receive_weather, test_receive_random]
 
 # Tests run by script
-tests = data_tests + feed_tests + group_tests + services_tests
+tests = feed_tests
+#tests = data_tests + feed_tests + group_tests + services_tests
 
 while True:
     start_time = time.monotonic()
