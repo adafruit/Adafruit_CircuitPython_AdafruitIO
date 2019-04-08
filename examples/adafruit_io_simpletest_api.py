@@ -46,9 +46,8 @@ aio_key = secrets['aio_key']
 io = RESTClient(aio_username, aio_key, wifi)
 
 """
-Generic Test Assertions
+Generic Test Assertions and Client Operations
 """
-
 def assertAlmostEqual(x, y, places=None, msg=''):
     """Raises an AssertionError if two float values are not equal.
     (from https://github.com/micropython/micropython-lib/blob/master/unittest/unittest.py)
@@ -124,7 +123,6 @@ def send_receive():
     # and get it back...
     rx_data = io.receive_data(test_feed['key'])
     assertEqual(int(rx_data['value']), tx_data)
-    print("OK!")
 
 def send_location_data():
     """Sending a random location to a feed.
@@ -146,7 +144,6 @@ def send_location_data():
     assertAlmostEqual(float(rx_data['lat']), metadata['lat'])
     assertAlmostEqual(float(rx_data['lon']), metadata['lon'])
     assertAlmostEqual(float(rx_data['ele']), metadata['ele'])
-    print('OK!')
 
 """
 Feed Functionality
@@ -154,16 +151,15 @@ Feed Functionality
 def test_create_feed():
     """create_new_feed
     """
-    print('Test create_new_feed')
+    print('Testing create_new_feed...')
     delete_feed('testfeed')
     test_feed = io.create_new_feed('testfeed')
     assertEqual(test_feed['name'], 'testfeed')
-    print('OK!')
 
 def test_delete_feed():
     """delete_feed
     """
-    print('Test delete_feed()')
+    print('Testing delete_feed...')
     delete_feed('testfeed')
     test_feed = io.create_new_feed('testfeed')
     assertRaises(AdafruitIO_RequestError, io.receive_data, 'testfeed')
@@ -171,24 +167,54 @@ def test_delete_feed():
 def test_delete_nonexistent_feed():
     """delete_feed
     """
-    print('Test delete_feed')
+    print('Testing delete_feed...')
     delete_feed('testfeed')
     assertRaises(AdafruitIO_RequestError, io.delete_feed, 'testfeed')
 
 """
 Group Functionality
 """
-
-def create_group():
-    print('Testing create_new_group()')
-    io.delete_group('testgroup')
-    response = io.create_new_group('testgroup', 'testing')
-    assertEqual(response['name'], 'testgroup')
+def test_create_group():
+    """create_new_group
+    """
+    print('Testing create_new_group...')
+    delete_group('testgrp')
+    response = io.create_new_group('testgrp', 'testing')
+    assertEqual(response['name'], 'testgrp')
     assertEqual(response['description'], 'testing')
 
-# delete group, like delete feed
+def test_delete_group():
+    """delete_group
+    """
+    print('Testing delete_group...')
+    delete_group('testgrp')
+    test_group = io.create_new_group('testgrp', 'testing')
+    delete_group('testgrp')
+    assertRaises(AdafruitIO_RequestError, io.get_group, 'testgrp')
 
-# add a feed to a group and check if it's in the group
+def test_get_group():
+    """get_group by key
+    """
+    print('Testing get_group...')
+    delete_group('testgrp')
+    test_group = io.create_new_group('testgrp', 'testing')
+    test_group = io.get_group(test_group['key'])
+    assertEqual(test_group['name'], 'testgrp')
+    assertEqual(test_group['key'], 'testgrp')
+
+def test_add_to_group():
+    """add_feed_to_group
+    """
+    print('Testing add_feed_to_group...')
+    delete_group('testgrp')
+    delete_feed('testfeed')
+    test_feed = io.create_new_feed('testfeed')
+    test_group = io.create_new_group('testgrp', 'testing')
+    io.add_feed_to_group('testgrp', 'testfeed')
+    resp = io.get_group(test_group['key'])
+    feeds = resp['feeds']
+    feeds = feeds[0]
+    assertEqual(feeds['key'], 'testgrp.testfeed')
 
 """
 Connected Services Functionality
@@ -196,23 +222,47 @@ Connected Services Functionality
 def test_receive_time():
     """receive_time
     """
-    print('Testing receive_time()...')
+    print('Testing receive_time...')
     current_time = io.receive_time()
     assertIsNone(current_time[0])
     assertIsNone(current_time[1])
     assertIsNone(current_time[2])
-    print('OK!')
 
-# tests to run
-tests = [send_receive, send_location_data, test_receive_time, test_create_feed,
-            test_delete_feed, create_group]
+def test_receive_weather(weather_id):
+    """receive_weather
+    :param int weather_id: ID for retrieving a specified weather record.
+    """
+    print('Testing receive_weather...')
+    forecast = io.receive_weather(weather_id)
+    current_forecast = forecast['current']
+    assertIsNone(current_forecast['summary'])
+    assertIsNone(current_forecast['temperature'])
 
-# start the timer
-start_time = time.monotonic()
+
+"""
+Test Configuration
+"""
+# Weather Location ID, from https://io.adafruit.com/services/weather
+weather_location = 2127
+# Random Generator ID, from https://io.adafruit.com/services/words
+random_generator = 1461
+
+# Tests, organized by API endpoint type
+data_tests = [send_receive, send_location_data]
+feed_tests = [test_create_feed, test_delete_feed, test_delete_nonexistent_feed]
+group_tests = [test_create_group, test_delete_group, test_get_group, test_add_to_group]
+services_tests = [test_receive_time, test_receive_weather(weather_location)] 
+
+# Tests run by script
+tests = services_tests
+print(tests)
+
 while True:
+    start_time = time.monotonic()
     try:
         for i in range(len(tests)):
             tests[i]()
+            print('OK!')
             time.sleep(1)
     except (ValueError, RuntimeError) as e:
         print("Failed to get data, retrying...\n", e)
