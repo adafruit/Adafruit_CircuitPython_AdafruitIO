@@ -200,6 +200,18 @@ class MQTT():
         else:
             raise AdafruitIO_MQTTError('Must provide a feed_key or group_key.')
 
+    def subscribe_throttling(self):
+        """Subscribes to the username/throttle feed to
+        notify you if your Adafruit IO rate limit has been
+        exceeded.
+        """
+        self._client.subscribe('%s/throttle'%self._user)
+
+    def subscribe_randomizer(self, randomizer_id):
+        """Subscribes to a random data stream created by the Adafruit IO Words service.
+        :param int randomizer_id: Random word record you want data for.
+        """
+        self._client.subscribe('{0}/integration/words/{1}'.format(self._user, randomizer_id))
 
     def subscribe_weather(self, integration_id, forecast_type):
         """Subscribes to a weather forecast using the Adafruit IO PLUS weather
