@@ -38,7 +38,7 @@ Implementation Notes
 * Adafruit CircuitPython MiniMQTT:
     https://github.com/adafruit/Adafruit_CircuitPython_MiniMQTT
 """
-from time import struct_time
+import time
 from adafruit_minimqtt import MQTT as MQTTClient
 #from adafruit_io.adafruit_io_errors import AdafruitIO_RequestError, AdafruitIO_ThrottleError
 
@@ -194,7 +194,7 @@ class MQTT():
         else:
             raise AdafruitIO_MQTTError('Must provide a feed_key or group_key.')
 
-    def subscribe(self, feed_key=None, group_key=None, shared_user=None):
+    def unsubscribe(self, feed_key=None, group_key=None, shared_user=None):
         """Unsubscribes from an Adafruit IO feed or group.
         Can also subscribe to someone else's feed.
         :param str feed_key: Adafruit IO Feed key.
@@ -215,15 +215,40 @@ class MQTT():
             client.unsubscribe([('temperature'), ('humidity')])
         """
         if shared_user is not None and feed_key is not None:
-            self._client.subscribe('{0}/feeds/{1}'.format(shared_user, feed_key))
+            self._client.unsubscribe('{0}/feeds/{1}'.format(shared_user, feed_key))
         elif group_key is not None:
-            self._client.subscribe('{0}/groups/{1}'.format(self._user, feed_key))
+            self._client.unsubscribe('{0}/groups/{1}'.format(self._user, feed_key))
         elif feed_key is not None:
-            self._client.subscribe('{0}/feeds/{1}'.format(self._user, feed_key))
+            self._client.unsubscribe('{0}/feeds/{1}'.format(self._user, feed_key))
         else:
             raise AdafruitIO_MQTTError('Must provide a feed_key or group_key.')
 
     # Publishing
+    def publish_multiple(self, feeds_and_data, timeout=3, is_group=False):
+        """Publishes multiple data points to multiple feeds or groups.
+        :param str feeds_and_data: List of tuples containing topic strings and data values.
+        :param int timeout: Delay between publishing data points to Adafruit IO.
+
+        Example of publishing multiple data points to Adafruit IO:
+        ..code-block:: python
+        
+            client.publish_multiple([('DemoFeed', value), ('testfeed', value)])
+
+        """
+        if isinstance(feeds_and_data, list):
+            feed_data = []
+            for t, d in feeds_and_data:
+                feed_data.append((t, d))
+        else:
+            raise AdafruitIO_MQTTError('This method accepts a list of tuples.')
+        for t, d in feed_data:
+            if is_group:
+                self.publish(t, d, is_group=True)
+            else:
+                print('publishing: {0} to {1}'.format(d, t))
+                self.publish(t, d)
+            time.sleep(timeout)
+
     def publish(self, feed_key, data, shared_user=None, is_group=False):
         """Publishes to an An Adafruit IO Feed.
         :param str feed_key: Adafruit IO Feed key.
@@ -267,30 +292,6 @@ class MQTT():
             self._client.publish('{0}/feeds/{1}'.format(shared_user, feed_key), data)
         else:
             self._client.publish('{0}/feeds/{1}'.format(self._user, feed_key), data)
-
-
-        def publish_multiple(self, feeds_and_data, timeout=5, is_group=False):
-            """Publishes multiple data points to multiple feeds or groups.
-            :param str feeds_and_data: List of tuples containing topic strings and data values.
-            :param int timeout: Delay between publishing data points to Adafruit IO.
-
-            Example of publishing multiple data points to Adafruit IO:
-            ..code-block:: python
-            
-                client.publish_multiple([('DemoFeed', value), ('testfeed', value)])
-
-            """
-            if isinstance(feeds_and_data, list):
-                feed_data = []
-                for t, d in feeds_and_data:
-                    feed_data.append((t, q))
-            else:
-                raise AdafruitIO_MQTTError('This method accepts a list of tuples.')
-            for t, d in feed_data:
-                if is_group:
-                    self._client.publish('{0}/feeds/{1}'.format(self._user, feed_key), data)
-                else:
-                    self._client.publish('{0}/groups/{1}'.format(self._user, feed_key), data)
 
 class RESTClient():
     """
@@ -514,5 +515,5 @@ class RESTClient():
         """
         path = self._compose_path('integrations/time/struct.json')
         time = self._get(path)
-        return struct_time((time['year'], time['mon'], time['mday'], time['hour'],
+        return time.struct_time((time['year'], time['mon'], time['mday'], time['hour'],
                             time['min'], time['sec'], time['wday'], time['yday'], time['isdst']))
