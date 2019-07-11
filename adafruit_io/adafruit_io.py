@@ -40,7 +40,7 @@ Implementation Notes
 """
 from time import struct_time
 from adafruit_minimqtt import MQTT
-from adafruit_io.adafruit_io_errors import AdafruitIO_RequestError, AdafruitIO_ThrottleError
+#from adafruit_io.adafruit_io_errors import AdafruitIO_RequestError, AdafruitIO_ThrottleError
 
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_Adafruit_IO.git"
@@ -54,23 +54,18 @@ class MQTT():
     Client for interacting with the Adafruit IO MQTT API
     :param str aio_username: Adafruit.io account username.
     :param str aio_key: Adafruit.io active key.
-    :param ESP32SPI network_interface: Network interface hardware, ESP32SPI object.
+    :param network_manager: NetworkManager object, such as WiFiManager from ESPSPI_WiFiManager.
     :param bool secure: Enables SSL/TLS connection.
     """
-    def __init__(self, aio_username, aio_key, network_interface, socket, secure=True):
+    def __init__(self, aio_username, aio_key, network_manager, socket, secure=True):
         self._user = aio_username
         self._key = aio_key
         # Network interface hardware detection
-        if hasattr(network_interface, '_gpio0'):
-            self._esp = network_interface
-            self._client = MQTT(socket,
-                                'io.adafruit.com',
-                                username = self._user,
-                                password = self._key,
-                                esp = esp,
-                                is_ssl = secure)
+        wifi_type = str(type(wifi_manager))
+        if ('ESPSPI_WiFiManager' in wifi_type or 'ESPAT_WiFiManager' in wifi_type):
+            self.wifi = wifi_manager
         else:
-            raise TypeError('This library requires network interface hardware.')
+            raise TypeError("This library requires a NetworkManager object.")
         # User-defined MQTT callback methods need to be init'd to none
         self.on_connect = None
         self.on_disconnect = None
@@ -85,7 +80,27 @@ class MQTT():
             self._logger = True
             self._client.set_logger_level('DEBUG')
         self._connected = False
+
+    @property
+    def is_connected(self):
+        """Returns True if class is connected to Adafruit IO."""
+        return self._connected
     
+    def connect(self):
+        """Connects to Adafruit IO, must be called before any
+        other API methods are called.
+        """
+        if self._connected:
+            return
+        self._client.connect()
+    
+    def disconnect(self):
+        """Disconnects from Adafruit IO.
+        """
+        if self._connected:
+            self._client.disconnect()
+
+
     def _on_connect_mqtt(self, client, userdata, flags, rc):
         """Runs when the on_connect callback is run from user-code.
         """
