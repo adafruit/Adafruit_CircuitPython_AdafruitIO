@@ -39,7 +39,7 @@ Implementation Notes
     https://github.com/adafruit/Adafruit_CircuitPython_MiniMQTT
 """
 from time import struct_time
-from adafruit_minimqtt import MQTT
+from adafruit_minimqtt import MQTT as MQTTClient
 #from adafruit_io.adafruit_io_errors import AdafruitIO_RequestError, AdafruitIO_ThrottleError
 
 __version__ = "0.0.0-auto.0"
@@ -51,7 +51,8 @@ CLIENT_HEADERS = {
 
 class MQTT():
     """
-    Client for interacting with the Adafruit IO MQTT API
+    Client for interacting with the Adafruit IO MQTT API. The client establishes
+    a secure connection to Adafruit IO by default.
     :param str aio_username: Adafruit.io account username.
     :param str aio_key: Adafruit.io active key.
     :param network_manager: NetworkManager object, such as WiFiManager from ESPSPI_WiFiManager.
@@ -61,34 +62,44 @@ class MQTT():
         self._user = aio_username
         self._key = aio_key
         # Network interface hardware detection
-        wifi_type = str(type(wifi_manager))
-        if ('ESPSPI_WiFiManager' in wifi_type or 'ESPAT_WiFiManager' in wifi_type):
-            self.wifi = wifi_manager
+        manager_type = str(type(network_manager))
+        if ('ESPSPI_WiFiManager' in manager_type or 'ESPAT_WiFiManager' in manager_type):
+            self._network_manager = network_manager
         else:
             raise TypeError("This library requires a NetworkManager object.")
+        # Set up a MiniMQTT Client
+        self._client = MQTTClient(socket,
+                            'io.adafruit.com',
+                            port=8883,
+                            username=self._user,
+                            password=self._key,
+                            network_manager=self._network_manager)
         # User-defined MQTT callback methods need to be init'd to none
         self.on_connect = None
         self.on_disconnect = None
         self.on_message = None
         self.on_subscribe = None
+        self.on_unsubscribe = None
         # MQTT event callbacks
         self._client.on_connect = self._on_connect_mqtt
         self._client.on_disconnect = self._on_disconnect_mqtt
         self._client.on_message = self._on_message_mqtt
-        self._logger = None
-        if hasattr(self._client, '_logger'):
+        self._logger = False
+        if self._client._logger is not None:
             self._logger = True
             self._client.set_logger_level('DEBUG')
         self._connected = False
 
     @property
     def is_connected(self):
-        """Returns True if class is connected to Adafruit IO."""
+        """Returns True if is connected to the to Adafruit IO
+        MQTT Broker.
+        """
         return self._connected
     
     def connect(self):
-        """Connects to Adafruit IO, must be called before any
-        other API methods are called.
+        """Connects to the Adafruit IO MQTT Broker.
+        Must be called before any other API methods are called.
         """
         if self._connected:
             return
@@ -100,9 +111,8 @@ class MQTT():
         if self._connected:
             self._client.disconnect()
 
-
     def _on_connect_mqtt(self, client, userdata, flags, rc):
-        """Runs when the on_connect callback is run from user-code.
+        """Runs when the on_connect callback is run from code.
         """
         if self._logger:
             self._client._logger.debug('Client called on_connect.')
@@ -117,7 +127,7 @@ class MQTT():
 
     def _on_disconnect_mqtt(self, client, userdata, rc):
         """Runs when the on_disconnect callback is run from
-        user-code.
+        code.
         """
         if self._logger:
             self._client._logger.debug('Client called on_disconnect')
@@ -127,25 +137,160 @@ class MQTT():
             self.on_disconnect(self)
     
     def _on_message_mqtt(self, client, topic, message):
-        """Runs when the on_message callback is run from user-code.
+        """Runs when the on_message callback is run from code.
         Performs parsing based on username/feed/feed-key.
         """
         if self._logger:
             self._client._logger.debug('Client called on_message.')
-        print('MSG: ', message)
         if self.on_message is not None:
-            parsed_feed = message.topic.split('/')
-            feed = parsed_feed[2]
-            message = '' if message is None else message.decode('utf-8')
+            # parse the feed/group name
+            topic_name = topic.split('/')
+            topic_name = topic_name[2]
+            # parse the message
+            message = '' if message is None else message
         else:
-            raise ValueError('Define an on_message method before calling this callback.')
-        self.on_message(self, feed, message)
+            raise ValueError('You must define an on_message method before calling this callback.')
+        self.on_message(self, topic_name, message)
+    
+    def loop(self):
+        """Manually process messages from Adafruit IO.
+        Use this method to check incoming subscription messages.
+        """
+        self._client.loop()
+    
+    def loop_blocking(self):
+        """Starts a blocking loop and to processes messages
+        from Adafruit IO. Code below this call will not run.
+        """
+        self._client.loop_forever()
+    
+    # Subscription
+    def subscribe(self, feed_key=None, group_key=None, shared_user=None):
+        """Subscribes to an Adafruit IO feed or group.
+        Can also subscribe to someone else's feed.
+        :param str feed_key: Adafruit IO Feed key.
+        :param str group_key: Adafruit IO Group key.
+        :param str shared_user: Owner of the Adafruit IO feed, required for shared feeds.
+        
+        Example of subscribing to an Adafruit IO Feed named 'temperature':
+
+        .. code-block:: python
+
+            client.subscribe('temperature')
+
+        Example of subscribing to two Adafruit IO feeds: `temperature`
+        and `humidity`
+
+        .. code-block:: python
+
+            client.subscribe([('temperature'), ('humidity')])
+        """
+        if shared_user is not None and feed_key is not None:
+            self._client.subscribe('{0}/feeds/{1}'.format(shared_user, feed_key))
+        elif group_key is not None:
+            self._client.subscribe('{0}/groups/{1}'.format(self._user, feed_key))
+        elif feed_key is not None:
+            self._client.subscribe('{0}/feeds/{1}'.format(self._user, feed_key))
+        else:
+            raise AdafruitIO_MQTTError('Must provide a feed_key or group_key.')
+
+    def subscribe(self, feed_key=None, group_key=None, shared_user=None):
+        """Unsubscribes from an Adafruit IO feed or group.
+        Can also subscribe to someone else's feed.
+        :param str feed_key: Adafruit IO Feed key.
+        :param str group_key: Adafruit IO Group key.
+        :param str shared_user: Owner of the Adafruit IO feed, required for shared feeds.
+        
+        Example of unsubscribing from an Adafruit IO Feed named 'temperature':
+
+        .. code-block:: python
+
+            client.unsubscribe('temperature')
+
+        Example of unsubscribing to two Adafruit IO feeds: `temperature`
+        and `humidity`
+
+        .. code-block:: python
+
+            client.unsubscribe([('temperature'), ('humidity')])
+        """
+        if shared_user is not None and feed_key is not None:
+            self._client.subscribe('{0}/feeds/{1}'.format(shared_user, feed_key))
+        elif group_key is not None:
+            self._client.subscribe('{0}/groups/{1}'.format(self._user, feed_key))
+        elif feed_key is not None:
+            self._client.subscribe('{0}/feeds/{1}'.format(self._user, feed_key))
+        else:
+            raise AdafruitIO_MQTTError('Must provide a feed_key or group_key.')
+
+    # Publishing
+    def publish(self, feed_key, data, shared_user=None, is_group=False):
+        """Publishes to an An Adafruit IO Feed.
+        :param str feed_key: Adafruit IO Feed key.
+        :param str data: Data to publish to the feed or group.
+        :param int data: Data to publish to the feed or group.
+        :param float data: Data to publish to the feed or group.
+        :param str shared_user: Owner of the Adafruit IO feed, required for
+                                feed sharing.
+        :param bool is_group: Set True if publishing to an Adafruit IO Group.
+
+        Example of publishing an integer to Adafruit IO on feed 'temperature'.
+        ..code-block:: python
+
+            client.publish('temperature', 30)
+        
+        Example of publishing a floating point value to Adafruit IO on feed 'temperature'.
+        ..code-block:: python
+
+            client.publish('temperature', 3.14)
+        
+        Example of publishing a string to Adafruit IO on feed 'temperature'.
+        ..code-block:: python
+
+            client.publish('temperature, 'thirty degrees')
+        
+        Example of publishing an integer to Adafruit IO on group 'weatherstation'.
+        ..code-block:: python
+
+            client.publish('weatherstation', 12, is_group=True)
+
+        Example of publishing to a shared Adafruit IO feed.
+        ..code-block:: python
+
+            client.publish('temperature', shared_user='myfriend')
+
+        """
+        if is_group:
+            self._client.publish('{0}/groups/{1}'.format(self._user, feed_key), data)
+            return
+        elif shared_user is not None:
+            self._client.publish('{0}/feeds/{1}'.format(shared_user, feed_key), data)
+        else:
+            self._client.publish('{0}/feeds/{1}'.format(self._user, feed_key), data)
 
 
+        def publish_multiple(self, feeds_and_data, timeout=5, is_group=False):
+            """Publishes multiple data points to multiple feeds or groups.
+            :param str feeds_and_data: List of tuples containing topic strings and data values.
+            :param int timeout: Delay between publishing data points to Adafruit IO.
 
+            Example of publishing multiple data points to Adafruit IO:
+            ..code-block:: python
+            
+                client.publish_multiple([('DemoFeed', value), ('testfeed', value)])
 
-
-
+            """
+            if isinstance(feeds_and_data, list):
+                feed_data = []
+                for t, d in feeds_and_data:
+                    feed_data.append((t, q))
+            else:
+                raise AdafruitIO_MQTTError('This method accepts a list of tuples.')
+            for t, d in feed_data:
+                if is_group:
+                    self._client.publish('{0}/feeds/{1}'.format(self._user, feed_key), data)
+                else:
+                    self._client.publish('{0}/groups/{1}'.format(self._user, feed_key), data)
 
 class RESTClient():
     """
