@@ -35,11 +35,11 @@ Implementation Notes
 * Adafruit CircuitPython firmware for the supported boards:
     https://github.com/adafruit/circuitpython/releases
 
-* Adafruit ESP32SPI or ESP_ATcontrol library:
-    https://github.com/adafruit/Adafruit_CircuitPython_ESP32SPI
-    https://github.com/adafruit/Adafruit_CircuitPython_ESP_ATcontrol
+* Adafruit CircuitPython MiniMQTT:
+    https://github.com/adafruit/Adafruit_CircuitPython_MiniMQTT
 """
 from time import struct_time
+from adafruit_minimqtt import MQTT
 from adafruit_io.adafruit_io_errors import AdafruitIO_RequestError, AdafruitIO_ThrottleError
 
 __version__ = "0.0.0-auto.0"
@@ -49,17 +49,39 @@ CLIENT_HEADERS = {
     'User-Agent': 'AIO-CircuitPython/{0}'.format(__version__)
 }
 
+class MQTT():
+    """
+    Client for interacting with the Adafruit IO MQTT API
+    :param str aio_username: Adafruit.io account username.
+    :param str aio_key: Adafruit.io active key.
+    :param ESP32SPI network_interface: Network interface hardware, ESP32SPI object.
+    :param bool secure: Enables SSL/TLS connection.
+    """
+    def __init__(self, aio_username, aio_key, network_interface, socket, secure=True):
+        self._user = aio_username
+        self._key = aio_key
+        # Network interface hardware detection
+        if hasattr(network_interface, '_gpio0'):
+            self._esp = network_interface
+            self._client = MQTT(socket,
+                                'io.adafruit.com',
+                                username = self._user,
+                                password = self._key,
+                                esp = esp,
+                                is_ssl = secure)
+        else:
+            raise TypeError('This library requires network interface hardware.')
+        
+
 class RESTClient():
     """
-    REST Client for interacting with the Adafruit IO API.
-    """
-    def __init__(self, adafruit_io_username, adafruit_io_key, wifi_manager):
-        """
-        Creates an instance of the Adafruit IO REST Client.
+    Client for interacting with the Adafruit IO HTTP API.
         :param str adafruit_io_username: Adafruit IO Username
         :param str adafruit_io_key: Adafruit IO Key
         :param wifi_manager: WiFiManager object from ESPSPI_WiFiManager or ESPAT_WiFiManager
-        """
+
+    """
+    def __init__(self, adafruit_io_username, adafruit_io_key, wifi_manager):
         self.username = adafruit_io_username
         self.key = adafruit_io_key
         wifi_type = str(type(wifi_manager))
