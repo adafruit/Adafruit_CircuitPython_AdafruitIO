@@ -71,7 +71,66 @@ class MQTT():
                                 is_ssl = secure)
         else:
             raise TypeError('This library requires network interface hardware.')
-        
+        # User-defined MQTT callback methods need to be init'd to none
+        self.on_connect = None
+        self.on_disconnect = None
+        self.on_message = None
+        self.on_subscribe = None
+        # MQTT event callbacks
+        self._client.on_connect = self._on_connect_mqtt
+        self._client.on_disconnect = self._on_disconnect_mqtt
+        self._client.on_message = self._on_message_mqtt
+        self._logger = None
+        if hasattr(self._client, '_logger'):
+            self._logger = True
+            self._client.set_logger_level('DEBUG')
+        self._connected = False
+    
+    def _on_connect_mqtt(self, client, userdata, flags, rc):
+        """Runs when the on_connect callback is run from user-code.
+        """
+        if self._logger:
+            self._client._logger.debug('Client called on_connect.')
+        if rc == 0:
+            self._connected = True
+            print('Connected to Adafruit IO!')
+        else:
+            raise AdafruitIO_MQTTError(rc)
+        # Call the user-defined on_connect callback if defined
+        if self.on_connect is not None:
+            self.on_connect(self)
+
+    def _on_disconnect_mqtt(self, client, userdata, rc):
+        """Runs when the on_disconnect callback is run from
+        user-code.
+        """
+        if self._logger:
+            self._client._logger.debug('Client called on_disconnect')
+        self._connected = False
+        # Call the user-defined on_disconnect callblack if defined
+        if self.on_disconnect is not None:
+            self.on_disconnect(self)
+    
+    def _on_message_mqtt(self, client, topic, message):
+        """Runs when the on_message callback is run from user-code.
+        Performs parsing based on username/feed/feed-key.
+        """
+        if self._logger:
+            self._client._logger.debug('Client called on_message.')
+        print('MSG: ', message)
+        if self.on_message is not None:
+            parsed_feed = message.topic.split('/')
+            feed = parsed_feed[2]
+            message = '' if message is None else message.decode('utf-8')
+        else:
+            raise ValueError('Define an on_message method before calling this callback.')
+        self.on_message(self, feed, message)
+
+
+
+
+
+
 
 class RESTClient():
     """
