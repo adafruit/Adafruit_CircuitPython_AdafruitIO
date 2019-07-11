@@ -49,6 +49,12 @@ CLIENT_HEADERS = {
     'User-Agent': 'AIO-CircuitPython/{0}'.format(__version__)
 }
 
+forecast_types = ["current", "forecast_minutes_5",
+                  "forecast_minutes_30", "forecast_hours_1",
+                  "forecast_hours_2", "forecast_hours_6",
+                  "forecast_hours_24", "forecast_days_1",
+                  "forecast_days_2", "forecast_days_5",]
+
 class MQTT():
     """
     Client for interacting with the Adafruit IO MQTT API. The client establishes
@@ -164,7 +170,7 @@ class MQTT():
         """
         self._client.loop_forever()
     
-    # Subscription
+    # Subscriptions
     def subscribe(self, feed_key=None, group_key=None, shared_user=None):
         """Subscribes to an Adafruit IO feed or group.
         Can also subscribe to someone else's feed.
@@ -193,6 +199,15 @@ class MQTT():
             self._client.subscribe('{0}/feeds/{1}'.format(self._user, feed_key))
         else:
             raise AdafruitIO_MQTTError('Must provide a feed_key or group_key.')
+
+
+    def subscribe_weather(self, integration_id, forecast_type):
+        """Subscribes to a weather forecast using the Adafruit IO PLUS weather
+        service. This feature is only avaliable to Adafruit IO PLUS subscribers.
+        :param int integration_id: Weather record you want data for.
+        :param str forecast_type: Forecast data you'd like to recieve.
+        """
+        self._client.subscribe('{0}/integration/weather/{1}/{2}'.format(self._user, integration_id, forecast_type))
 
     def unsubscribe(self, feed_key=None, group_key=None, shared_user=None):
         """Unsubscribes from an Adafruit IO feed or group.
@@ -228,11 +243,12 @@ class MQTT():
         """Publishes multiple data points to multiple feeds or groups.
         :param str feeds_and_data: List of tuples containing topic strings and data values.
         :param int timeout: Delay between publishing data points to Adafruit IO.
+        :param bool is_group: Set to True if you're publishing to a group.
 
-        Example of publishing multiple data points to Adafruit IO:
+        Example of publishing multiple data points on different feeds to Adafruit IO:
         ..code-block:: python
         
-            client.publish_multiple([('DemoFeed', value), ('testfeed', value)])
+            client.publish_multiple([('humidity', 24.5), ('temperature', 54)])
 
         """
         if isinstance(feeds_and_data, list):
@@ -245,7 +261,6 @@ class MQTT():
             if is_group:
                 self.publish(t, d, is_group=True)
             else:
-                print('publishing: {0} to {1}'.format(d, t))
                 self.publish(t, d)
             time.sleep(timeout)
 
