@@ -39,3 +39,8 @@ class AdafruitIO_RequestError(Exception):
         error = response_content['error']
         super(AdafruitIO_RequestError, self).__init__("Adafruit IO Error {0}: {1}"
                                                       .format(response.status_code, error))
+
+class AdafruitIO_MQTTError(Exception):
+    """Adafruit IO MQTT error class"""
+    def __init__(self, response):
+        super(AdafruitIO_ThrottleError, self).__init__('Adafruit IO MQTT Error: {0}'.format(response))
