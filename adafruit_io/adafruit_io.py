@@ -107,7 +107,6 @@ class IO_MQTT():
             self._client._logger.debug('Client called on_connect.')
         if rc == 0:
             self._connected = True
-            print('Connected to Adafruit IO!')
         else:
             raise AdafruitIO_MQTTError(rc)
         # Call the user-defined on_connect callback if defined
@@ -138,8 +137,7 @@ class IO_MQTT():
             # Parse the MQTT topic string
             topic_name = topic.split('/')
             if topic_name[1] == "groups":
-                # Adafruit IO Group Feed Parsing
-                # May have rx'd more than one feed - parse them.
+                # Adafruit IO Group Feed(s)
                 feeds = []
                 messages = []
                 payload = eval(payload)
@@ -150,9 +148,13 @@ class IO_MQTT():
                     messages.append(payload)
                 topic_name = feeds
                 message = messages
+            elif topic_name[0] == "time":
+                # Adafruit IO Time Topic
+                topic_name = topic_name[1]
+                message = payload
             else:
+                # Standard Adafruit IO Feed
                 topic_name = topic_name[2]
-                # parse the payload
                 message = '' if payload is None else message
         else:
             raise ValueError('You must define an on_message method before calling this callback.')
@@ -191,7 +193,6 @@ class IO_MQTT():
 
             client.subscribe([('temperature'), ('humidity')])
         """
-        print('sub called!')
         if shared_user is not None and feed_key is not None:
             self._client.subscribe('{0}/feeds/{1}'.format(shared_user, feed_key))
         elif group_key is not None:
@@ -226,6 +227,19 @@ class IO_MQTT():
         :param str forecast_type: Forecast data you'd like to recieve.
         """
         self._client.subscribe('{0}/integration/weather/{1}/{2}'.format(self._user, integration_id, forecast_type))
+
+    def subscribe_to_time(self, time_type):
+        """Adafruit IO provides some built-in MQTT topics for getting the current server time.
+        :param str time_type: Current Adafruit IO server time. Can be `seconds`, `millis`, or `iso`.
+        Information about these topics can be found on the Adafruit IO MQTT API Docs.:
+        https://io.adafruit.com/api/docs/mqtt.html#time-topics
+        """
+        if time_type == 'seconds' or time_type == 'millis':
+            self._client.subscribe('time/'+time_type)
+        elif time_type == 'iso':
+            self._client.subscribe('time/ISO-8601')
+        else:
+            raise TypeError('Invalid time feed type specified')
 
     def unsubscribe(self, feed_key=None, group_key=None, shared_user=None):
         """Unsubscribes from an Adafruit IO feed or group.
