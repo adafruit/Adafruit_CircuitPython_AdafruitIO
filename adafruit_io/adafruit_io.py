@@ -39,7 +39,8 @@ Implementation Notes
     https://github.com/adafruit/Adafruit_CircuitPython_MiniMQTT
 """
 import time
-from adafruit_io.adafruit_io_errors import AdafruitIO_RequestError, AdafruitIO_ThrottleError, AdafruitIO_MQTTError
+from adafruit_io.adafruit_io_errors import AdafruitIO_RequestError, AdafruitIO_ThrottleError
+from adafruit_io.adafruit_io_errors import AdafruitIO_MQTTError
 
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_Adafruit_IO.git"
@@ -53,9 +54,9 @@ class IO_MQTT():
     Client for interacting with the Adafruit IO MQTT API. The client establishes
     a secure connection to Adafruit IO by default.
     :param MiniMQTT mqtt_client: MiniMQTT Client object.
-    :param bool secure: Enables a secure SSL/TLS connection with Adafruit IO.
     """
-    def __init__(self, mqtt_client, secure=True):
+    # pylint: disable=protected-access
+    def __init__(self, mqtt_client):
         # MiniMQTT Object
         mqtt_client_type = str(type(mqtt_client))
         if 'MQTT' in mqtt_client_type:
@@ -85,9 +86,8 @@ class IO_MQTT():
         """
         try:
             self._client.connect()
-        except error as err:
-            AdafruitIO_MQTTError(err)
-        return
+        except error as e:
+            AdafruitIO_MQTTError(e)
 
     def disconnect(self):
         """Disconnects from Adafruit IO.
@@ -100,20 +100,22 @@ class IO_MQTT():
         """Returns if connected to Adafruit IO MQTT Broker."""
         return self._client.is_connected
 
-    def _on_connect_mqtt(self, client, userdata, flags, rc):
+    # pylint: disable=not-callable
+    def _on_connect_mqtt(self, client, userdata, flags, return_code):
         """Runs when the on_connect callback is run from code.
         """
         if self._logger:
             self._client._logger.debug('Client called on_connect.')
-        if rc == 0:
+        if return_code == 0:
             self._connected = True
         else:
-            raise AdafruitIO_MQTTError(rc)
+            raise AdafruitIO_MQTTError(return_code)
         # Call the user-defined on_connect callback if defined
         if self.on_connect is not None:
             self.on_connect(self)
 
-    def _on_disconnect_mqtt(self, client, userdata, rc):
+    # pylint: disable=not-callable
+    def _on_disconnect_mqtt(self, client, userdata, return_code):
         """Runs when the on_disconnect callback is run from
         code.
         """
@@ -123,7 +125,8 @@ class IO_MQTT():
         # Call the user-defined on_disconnect callblack if defined
         if self.on_disconnect is not None:
             self.on_disconnect(self)
-    
+
+    # pylint: disable=not-callable
     def _on_message_mqtt(self, client, topic, payload):
         """Runs when the on_message callback is run from code.
         Parses incoming data from special Adafruit IO feeds.
@@ -140,6 +143,7 @@ class IO_MQTT():
                 # Adafruit IO Group Feed(s)
                 feeds = []
                 messages = []
+                # TODO: Remove eval here...
                 payload = eval(payload)
                 for feed in payload['feeds']:
                     feeds.append(feed)
@@ -159,13 +163,13 @@ class IO_MQTT():
         else:
             raise ValueError('You must define an on_message method before calling this callback.')
         self.on_message(self, topic_name, message)
-    
+
     def loop(self):
         """Manually process messages from Adafruit IO.
         Use this method to check incoming subscription messages.
         """
         self._client.loop()
-    
+
     def loop_blocking(self):
         """Starts a blocking loop and to processes messages
         from Adafruit IO. Code below this call will not run.
@@ -179,7 +183,7 @@ class IO_MQTT():
         :param str feed_key: Adafruit IO Feed key.
         :param str group_key: Adafruit IO Group key.
         :param str shared_user: Owner of the Adafruit IO feed, required for shared feeds.
-        
+
         Example of subscribing to an Adafruit IO Feed named 'temperature':
 
         .. code-block:: python
@@ -220,13 +224,14 @@ class IO_MQTT():
         """
         self._client.subscribe('{0}/integration/words/{1}'.format(self._user, randomizer_id))
 
-    def subscribe_to_weather(self, integration_id, forecast_type):
+    def subscribe_to_weather(self, weather_record, forecast):
         """Subscribes to a weather forecast using the Adafruit IO PLUS weather
         service. This feature is only avaliable to Adafruit IO PLUS subscribers.
-        :param int integration_id: Weather record you want data for.
-        :param str forecast_type: Forecast data you'd like to recieve.
+        :param int weather_record: Weather record you want data for.
+        :param str forecast: Forecast data you'd like to recieve.
         """
-        self._client.subscribe('{0}/integration/weather/{1}/{2}'.format(self._user, integration_id, forecast_type))
+        self._client.subscribe('{0}/integration/weather/{1}/{2}'.format(self._user,
+                                                                        weather_record, forecast))
 
     def subscribe_to_time(self, time_type):
         """Adafruit IO provides some built-in MQTT topics for getting the current server time.
@@ -234,7 +239,7 @@ class IO_MQTT():
         Information about these topics can be found on the Adafruit IO MQTT API Docs.:
         https://io.adafruit.com/api/docs/mqtt.html#time-topics
         """
-        if time_type == 'seconds' or time_type == 'millis':
+        if 'seconds' or 'millis' in time_type:
             self._client.subscribe('time/'+time_type)
         elif time_type == 'iso':
             self._client.subscribe('time/ISO-8601')
@@ -247,7 +252,7 @@ class IO_MQTT():
         :param str feed_key: Adafruit IO Feed key.
         :param str group_key: Adafruit IO Group key.
         :param str shared_user: Owner of the Adafruit IO feed, required for shared feeds.
-        
+
         Example of unsubscribing from an Adafruit IO Feed named 'temperature':
 
         .. code-block:: python
@@ -280,7 +285,7 @@ class IO_MQTT():
 
         Example of publishing multiple data points on different feeds to Adafruit IO:
         ..code-block:: python
-        
+
             client.publish_multiple([('humidity', 24.5), ('temperature', 54)])
 
         """
@@ -311,12 +316,12 @@ class IO_MQTT():
         ..code-block:: python
 
             client.publish('temperature', 30)
-        
+
         Example of publishing a floating point value to Adafruit IO on feed 'temperature'.
         ..code-block:: python
 
             client.publish('temperature', 3.14)
-        
+
         Example of publishing a string to Adafruit IO on feed 'temperature'.
         ..code-block:: python
 
@@ -336,7 +341,7 @@ class IO_MQTT():
         if is_group:
             self._client.publish('{0}/groups/{1}'.format(self._user, feed_key), data)
             return
-        elif shared_user is not None:
+        if shared_user is not None:
             self._client.publish('{0}/feeds/{1}'.format(shared_user, feed_key), data)
         else:
             self._client.publish('{0}/feeds/{1}'.format(self._user, feed_key), data)
@@ -571,5 +576,6 @@ class RESTClient():
         """
         path = self._compose_path('integrations/time/struct.json')
         time = self._get(path)
-        return time.struct_time((time['year'], time['mon'], time['mday'], time['hour'],
-                            time['min'], time['sec'], time['wday'], time['yday'], time['isdst']))
+        return time.struct_time((time['year'], time['mon'], time['mday'],
+                                 time['hour'], time['min'], time['sec'],
+                                 time['wday'], time['yday'], time['isdst']))
