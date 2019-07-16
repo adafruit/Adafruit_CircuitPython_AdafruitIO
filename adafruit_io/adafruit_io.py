@@ -39,7 +39,6 @@ Implementation Notes
     https://github.com/adafruit/Adafruit_CircuitPython_MiniMQTT
 """
 import time
-from adafruit_minimqtt import MQTT as MQTTClient
 #from adafruit_io.adafruit_io_errors import AdafruitIO_RequestError, AdafruitIO_ThrottleError
 
 __version__ = "0.0.0-auto.0"
@@ -49,37 +48,20 @@ CLIENT_HEADERS = {
     'User-Agent': 'AIO-CircuitPython/{0}'.format(__version__)
 }
 
-forecast_types = ["current", "forecast_minutes_5",
-                  "forecast_minutes_30", "forecast_hours_1",
-                  "forecast_hours_2", "forecast_hours_6",
-                  "forecast_hours_24", "forecast_days_1",
-                  "forecast_days_2", "forecast_days_5",]
-
-class MQTT():
+class MQTT_API():
     """
     Client for interacting with the Adafruit IO MQTT API. The client establishes
     a secure connection to Adafruit IO by default.
-    :param str aio_username: Adafruit.io account username.
-    :param str aio_key: Adafruit.io active key.
-    :param network_manager: NetworkManager object, such as WiFiManager from ESPSPI_WiFiManager.
-    :param bool secure: Enables SSL/TLS connection.
+    :param MiniMQTT mqtt_client: MiniMQTT Client object.
+    :param bool secure: Enables a secure SSL/TLS connection with Adafruit IO.
     """
-    def __init__(self, aio_username, aio_key, network_manager, socket, secure=True):
+    def __init__(self, mqtt_client, secure=True):
         self._user = aio_username
         self._key = aio_key
-        # Network interface hardware detection
-        manager_type = str(type(network_manager))
-        if ('ESPSPI_WiFiManager' in manager_type or 'ESPAT_WiFiManager' in manager_type):
-            self._network_manager = network_manager
-        else:
-            raise TypeError("This library requires a NetworkManager object.")
-        # Set up a MiniMQTT Client
-        self._client = MQTTClient(socket,
-                            'io.adafruit.com',
-                            port=8883,
-                            username=self._user,
-                            password=self._key,
-                            network_manager=self._network_manager)
+        # MiniMQTT Object
+        print(type(mqtt_client))
+        print('MQTT CLIENT: ', mqtt_client)
+        self._client = mqtt_client
         # User-defined MQTT callback methods need to be init'd to none
         self.on_connect = None
         self.on_disconnect = None
@@ -98,9 +80,7 @@ class MQTT():
 
     @property
     def is_connected(self):
-        """Returns True if is connected to the to Adafruit IO
-        MQTT Broker.
-        """
+        """Returns if connected to Adafruit IO MQTT Broker."""
         return self._connected
     
     def connect(self):
@@ -142,12 +122,12 @@ class MQTT():
         if self.on_disconnect is not None:
             self.on_disconnect(self)
     
-    def _on_message_mqtt(self, client, topic, message):
+    def _on_message_mqtt(self, client, topic, payload):
         """Runs when the on_message callback is run from code.
-        Performs parsing based on username/feed/feed-key.
+        Parses incoming data from special Adafruit IO feeds.
         :param MQTT client: A MQTT Client Instance.
         :param str topic: MQTT topic response from Adafruit IO.
-        :param str message: MQTT message data response from Adafruit IO.
+        :param str payload: MQTT payload data response from Adafruit IO.
         """
         if self._logger:
             self._client._logger.debug('Client called on_message.')
@@ -155,17 +135,22 @@ class MQTT():
             # Parse the MQTT topic string
             topic_name = topic.split('/')
             if topic_name[1] == "groups":
-                print(message)
-                message = eval(message)
-                for feed in message['feeds']:
-                    topic_name = feed # TODO: change this to topic_name
-                message = message['feeds'][topic]
-                print(topic, message)
-                topic_name = topic
+                # Adafruit IO Group Feed Parsing
+                # May have rx'd more than one feed - parse them.
+                feeds = []
+                messages = []
+                payload = eval(payload)
+                for feed in payload['feeds']:
+                    feeds.append(feed)
+                for msg in feeds:
+                    payload = payload['feeds'][msg]
+                    messages.append(payload)
+                topic_name = feeds
+                message = messages
             else:
                 topic_name = topic_name[2]
-                # parse the message
-                message = '' if message is None else message
+                # parse the payload
+                message = '' if payload is None else message
         else:
             raise ValueError('You must define an on_message method before calling this callback.')
         self.on_message(self, topic_name, message)
@@ -214,11 +199,16 @@ class MQTT():
             raise AdafruitIO_MQTTError('Must provide a feed_key or group_key.')
 
     def subscribe_to_throttling(self):
-        """Subscribes to the throttle feed to notify you
-        if your Adafruit IO rate limit has been exceeded.
+        """Subscribes to your personal Adafruit IO /throttle feed.
         https://io.adafruit.com/api/docs/mqtt.html#mqtt-api-rate-limiting
         """
         self._client.subscribe('%s/throttle'%self._user)
+
+    def subscribe_to_errors(self):
+        """Subscribes to your personal Adafruit IO /errors feed.
+        Notifies you of errors relating to publish/subscribe calls.
+        """
+        self._client.subscribe('%s/errors'%self._user)
 
     def subscribe_to_randomizer(self, randomizer_id):
         """Subscribes to a random data stream created by the Adafruit IO Words service.
