@@ -39,7 +39,7 @@ Implementation Notes
     https://github.com/adafruit/Adafruit_CircuitPython_MiniMQTT
 """
 import time
-#from adafruit_io.adafruit_io_errors import AdafruitIO_RequestError, AdafruitIO_ThrottleError
+from adafruit_io.adafruit_io_errors import AdafruitIO_RequestError, AdafruitIO_ThrottleError, AdafruitIO_MQTTError
 
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_Adafruit_IO.git"
@@ -48,7 +48,7 @@ CLIENT_HEADERS = {
     'User-Agent': 'AIO-CircuitPython/{0}'.format(__version__)
 }
 
-class MQTT_API():
+class IO_MQTT():
     """
     Client for interacting with the Adafruit IO MQTT API. The client establishes
     a secure connection to Adafruit IO by default.
@@ -56,13 +56,14 @@ class MQTT_API():
     :param bool secure: Enables a secure SSL/TLS connection with Adafruit IO.
     """
     def __init__(self, mqtt_client, secure=True):
-        self._user = aio_username
-        self._key = aio_key
         # MiniMQTT Object
-        print(type(mqtt_client))
-        print('MQTT CLIENT: ', mqtt_client)
-        self._client = mqtt_client
-        # User-defined MQTT callback methods need to be init'd to none
+        mqtt_client_type = str(type(mqtt_client))
+        if 'MQTT' in mqtt_client_type:
+            self._client = mqtt_client
+        else:
+            raise TypeError("This class requires a MiniMQTT client.")
+        self._user = self._client._user
+        # User-defined MQTT callback methods must be init'd to None
         self.on_connect = None
         self.on_disconnect = None
         self.on_message = None
@@ -78,24 +79,26 @@ class MQTT_API():
             self._client.set_logger_level('DEBUG')
         self._connected = False
 
-    @property
-    def is_connected(self):
-        """Returns if connected to Adafruit IO MQTT Broker."""
-        return self._connected
-    
     def connect(self):
         """Connects to the Adafruit IO MQTT Broker.
         Must be called before any other API methods are called.
         """
-        if self._connected:
-            return
-        self._client.connect()
-    
+        try:
+            self._client.connect()
+        except error as err:
+            AdafruitIO_MQTTError(err)
+        return
+
     def disconnect(self):
         """Disconnects from Adafruit IO.
         """
         if self._connected:
             self._client.disconnect()
+
+    @property
+    def is_connected(self):
+        """Returns if connected to Adafruit IO MQTT Broker."""
+        return self._client.is_connected
 
     def _on_connect_mqtt(self, client, userdata, flags, rc):
         """Runs when the on_connect callback is run from code.
@@ -188,10 +191,10 @@ class MQTT_API():
 
             client.subscribe([('temperature'), ('humidity')])
         """
+        print('sub called!')
         if shared_user is not None and feed_key is not None:
             self._client.subscribe('{0}/feeds/{1}'.format(shared_user, feed_key))
         elif group_key is not None:
-            print('subscribing to group...')
             self._client.subscribe('{0}/groups/{1}'.format(self._user, group_key))
         elif feed_key is not None:
             self._client.subscribe('{0}/feeds/{1}'.format(self._user, feed_key))
