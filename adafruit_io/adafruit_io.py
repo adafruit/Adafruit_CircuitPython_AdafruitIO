@@ -145,15 +145,27 @@ class MQTT():
     def _on_message_mqtt(self, client, topic, message):
         """Runs when the on_message callback is run from code.
         Performs parsing based on username/feed/feed-key.
+        :param MQTT client: A MQTT Client Instance.
+        :param str topic: MQTT topic response from Adafruit IO.
+        :param str message: MQTT message data response from Adafruit IO.
         """
         if self._logger:
             self._client._logger.debug('Client called on_message.')
         if self.on_message is not None:
-            # parse the feed/group name
+            # Parse the MQTT topic string
             topic_name = topic.split('/')
-            topic_name = topic_name[2]
-            # parse the message
-            message = '' if message is None else message
+            if topic_name[1] == "groups":
+                print(message)
+                message = eval(message)
+                for feed in message['feeds']:
+                    topic_name = feed # TODO: change this to topic_name
+                message = message['feeds'][topic]
+                print(topic, message)
+                topic_name = topic
+            else:
+                topic_name = topic_name[2]
+                # parse the message
+                message = '' if message is None else message
         else:
             raise ValueError('You must define an on_message method before calling this callback.')
         self.on_message(self, topic_name, message)
@@ -169,7 +181,7 @@ class MQTT():
         from Adafruit IO. Code below this call will not run.
         """
         self._client.loop_forever()
-    
+
     # Subscriptions
     def subscribe(self, feed_key=None, group_key=None, shared_user=None):
         """Subscribes to an Adafruit IO feed or group.
@@ -194,26 +206,27 @@ class MQTT():
         if shared_user is not None and feed_key is not None:
             self._client.subscribe('{0}/feeds/{1}'.format(shared_user, feed_key))
         elif group_key is not None:
-            self._client.subscribe('{0}/groups/{1}'.format(self._user, feed_key))
+            print('subscribing to group...')
+            self._client.subscribe('{0}/groups/{1}'.format(self._user, group_key))
         elif feed_key is not None:
             self._client.subscribe('{0}/feeds/{1}'.format(self._user, feed_key))
         else:
             raise AdafruitIO_MQTTError('Must provide a feed_key or group_key.')
 
-    def subscribe_throttling(self):
-        """Subscribes to the username/throttle feed to
-        notify you if your Adafruit IO rate limit has been
-        exceeded.
+    def subscribe_to_throttling(self):
+        """Subscribes to the throttle feed to notify you
+        if your Adafruit IO rate limit has been exceeded.
+        https://io.adafruit.com/api/docs/mqtt.html#mqtt-api-rate-limiting
         """
         self._client.subscribe('%s/throttle'%self._user)
 
-    def subscribe_randomizer(self, randomizer_id):
+    def subscribe_to_randomizer(self, randomizer_id):
         """Subscribes to a random data stream created by the Adafruit IO Words service.
         :param int randomizer_id: Random word record you want data for.
         """
         self._client.subscribe('{0}/integration/words/{1}'.format(self._user, randomizer_id))
 
-    def subscribe_weather(self, integration_id, forecast_type):
+    def subscribe_to_weather(self, integration_id, forecast_type):
         """Subscribes to a weather forecast using the Adafruit IO PLUS weather
         service. This feature is only avaliable to Adafruit IO PLUS subscribers.
         :param int integration_id: Weather record you want data for.
@@ -240,6 +253,7 @@ class MQTT():
         .. code-block:: python
 
             client.unsubscribe([('temperature'), ('humidity')])
+
         """
         if shared_user is not None and feed_key is not None:
             self._client.unsubscribe('{0}/feeds/{1}'.format(shared_user, feed_key))
@@ -319,6 +333,14 @@ class MQTT():
             self._client.publish('{0}/feeds/{1}'.format(shared_user, feed_key), data)
         else:
             self._client.publish('{0}/feeds/{1}'.format(self._user, feed_key), data)
+
+    def get(self, feed_key):
+        """Calling this method will make Adafruit IO publish the most recent
+        value on feed_key.
+        https://io.adafruit.com/api/docs/mqtt.html#retained-values
+        :param str feed_key: Adafruit IO Feed key.
+        """
+        self._client.publish('{0}/feeds{1}/get'.format(self._user, feed_key), '\0')
 
 class RESTClient():
     """
