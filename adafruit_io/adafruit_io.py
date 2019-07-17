@@ -35,7 +35,7 @@ Implementation Notes
 * Adafruit CircuitPython firmware for the supported boards:
     https://github.com/adafruit/circuitpython/releases
 """
-from time import struct_time
+import time
 from adafruit_io.adafruit_io_errors import (
     AdafruitIO_RequestError,
     AdafruitIO_ThrottleError,
@@ -95,8 +95,8 @@ class IO_MQTT:
         """
         try:
             self._client.connect()
-        except error as e:
-            AdafruitIO_MQTTError(e)
+        except:
+            raise AdafruitIO_MQTTError("Unable to connect to Adafruit IO.")
 
     def disconnect(self):
         """Disconnects from Adafruit IO.
@@ -109,7 +109,7 @@ class IO_MQTT:
         """Returns if connected to Adafruit IO MQTT Broker."""
         return self._client.is_connected
 
-    # pylint: disable=not-callable
+    # pylint: disable=not-callable, unused-argument
     def _on_connect_mqtt(self, client, userdata, flags, return_code):
         """Runs when the on_connect callback is run from code.
         """
@@ -123,7 +123,7 @@ class IO_MQTT:
         if self.on_connect is not None:
             self.on_connect(self)
 
-    # pylint: disable=not-callable
+    # pylint: disable=not-callable, unused-argument
     def _on_disconnect_mqtt(self, client, userdata, return_code):
         """Runs when the on_disconnect callback is run from
         code.
@@ -307,18 +307,19 @@ class IO_MQTT:
         """
         if isinstance(feeds_and_data, list):
             feed_data = []
-            for t, d in feeds_and_data:
-                feed_data.append((t, d))
+            for topic, data in feeds_and_data:
+                feed_data.append((topic, data))
         else:
             raise AdafruitIO_MQTTError("This method accepts a list of tuples.")
-        for t, d in feed_data:
+        for topic, data in feed_data:
             if is_group:
-                self.publish(t, d, is_group=True)
+                self.publish(topic, data, is_group=True)
             else:
-                self.publish(t, d)
+                self.publish(topic, data)
             time.sleep(timeout)
 
-    def publish(self, feed_key, data, metadata = None, shared_user=None, is_group=False):
+    # pylint: disable=too-many-arguments
+    def publish(self, feed_key, data, metadata=None, shared_user=None, is_group=False):
         """Publishes to an An Adafruit IO Feed.
         :param str feed_key: Adafruit IO Feed key.
         :param str data: Data to publish to the feed or group.
@@ -343,7 +344,7 @@ class IO_MQTT:
         ..code-block:: python
 
             client.publish('temperature, 'thirty degrees')
-        
+
         Example of publishing an integer to Adafruit IO on group 'weatherstation'.
         ..code-block:: python
 
@@ -353,7 +354,7 @@ class IO_MQTT:
         ..code-block:: python
 
             client.publish('temperature', shared_user='myfriend')
-        
+
         Example of publishing a value along with locational metadata to a feed.
         ..code-block:: python
 
@@ -371,10 +372,11 @@ class IO_MQTT:
             if isinstance(data, int or float):
                 data = str(data)
             csv_string = data + "," + metadata
-            self._client.publish("{0}/feeds/{1}/csv".format(self._user, feed_key), csv_string)
+            self._client.publish(
+                "{0}/feeds/{1}/csv".format(self._user, feed_key), csv_string
+            )
         else:
             self._client.publish("{0}/feeds/{1}".format(self._user, feed_key), data)
-
 
     def get(self, feed_key):
         """Calling this method will make Adafruit IO publish the most recent
@@ -611,17 +613,17 @@ class IO_HTTP:
         https://circuitpython.readthedocs.io/en/latest/shared-bindings/time/__init__.html#time.struct_time
         """
         path = self._compose_path("integrations/time/struct.json")
-        time = self._get(path)
-        return struct_time(
+        time_struct = self._get(path)
+        return time.struct_time(
             (
-                time["year"],
-                time["mon"],
-                time["mday"],
-                time["hour"],
-                time["min"],
-                time["sec"],
-                time["wday"],
-                time["yday"],
-                time["isdst"],
+                time_struct["year"],
+                time_struct["mon"],
+                time_struct["mday"],
+                time_struct["hour"],
+                time_struct["min"],
+                time_struct["sec"],
+                time_struct["wday"],
+                time_struct["yday"],
+                time_struct["isdst"],
             )
         )
