@@ -1,9 +1,8 @@
 """
-Example of getting weather
-from the Adafruit IO Weather Service
-NOTE: This example is for Adafruit IO
-Plus subscribers only.
+Example of using Adafruit IO's
+random data service.
 """
+import time
 import board
 import busio
 from digitalio import DigitalInOut
@@ -14,8 +13,8 @@ from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
 # Import NeoPixel Library
 import neopixel
 
-# Import Adafruit IO REST Client
-from adafruit_io.adafruit_io import RESTClient
+# Import Adafruit IO HTTP Client
+from adafruit_io.adafruit_io import IO_HTTP
 
 # Get wifi details and more from a secrets.py file
 try:
@@ -47,27 +46,24 @@ wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_lig
 aio_username = secrets['aio_username']
 aio_key = secrets['aio_key']
 
-# Create an instance of the Adafruit IO REST client
-io = RESTClient(aio_username, aio_key, wifi)
+# Create an instance of the Adafruit IO HTTP client
+io = IO_HTTP(aio_username, aio_key, wifi)
 
-# Weather Location ID
+# Random Data ID
 # (to obtain this value, visit
-# https://io.adafruit.com/services/weather
+# https://io.adafruit.com/services/words
 # and copy over the location ID)
-location_id = 1234
+random_data_id = 1234
 
-print('Getting weather record from IO...')
-# Get the specified weather record with current weather
-# and all available forecast information.
-forecast = io.receive_weather(location_id)
-
-# Get today's forecast
-current_forecast = forecast['current']
-print('It is {0} and {1}*F.'.format(current_forecast['summary'], current_forecast['temperature']))
-print('with a humidity of {0}%'.format(current_forecast['humidity'] * 100))
-
-# Get tomorrow's forecast
-tom_forecast = forecast['forecast_days_1']
-print('\nTomorrow has a low of {0}*F and a high of {1}*F.'.format(
-    tom_forecast['temperatureLow'], tom_forecast['temperatureHigh']))
-print('with a humidity of {0}%'.format(tom_forecast['humidity'] * 100))
+while True:
+    try:
+        print('Fetching random data from Adafruit IO...')
+        random_data = io.receive_random_data(random_data_id)
+        print('Random Data: ', random_data['value'])
+        print('Data Seed: ', random_data['seed'])
+        print('Waiting 1 minute to fetch new randomized data...')
+    except (ValueError, RuntimeError) as e:
+        print("Failed to get data, retrying\n", e)
+        wifi.reset()
+        continue
+    time.sleep(60)

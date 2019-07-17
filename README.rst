@@ -23,12 +23,6 @@ This driver depends on:
 
 * `Adafruit CircuitPython <https://github.com/adafruit/circuitpython>`_
 
-You'll also need a library to communicate with an ESP32 as a coprocessor using a WiFiManager object. This library supports connecting an ESP32 using either SPI or UART.
-
-* SPI: `Adafruit CircuitPython ESP32SPI <https://github.com/adafruit/Adafruit_CircuitPython_ESP32SPI>`_
-
-* UART: `Adafruit CircuitPython ESP_ATcontrol <https://github.com/adafruit/Adafruit_CircuitPython_ESP_ATcontrol>`_
-
 Please ensure all dependencies are available on the CircuitPython filesystem.
 This is easily achieved by downloading
 `the Adafruit library and driver bundle <https://github.com/adafruit/Adafruit_CircuitPython_Bundle>`_.
@@ -36,35 +30,9 @@ This is easily achieved by downloading
 Usage Example
 =============
 
-Create an Adafruit IO Client object  
+Usage examples for the Adafruit IO HTTP API are within the examples/http folder.
 
-.. code-block:: python
-
-   io = RESTClient(aio_username, aio_key, wifi)
-
-Sending data to an Adafruit IO feed
-
-.. code-block:: python
-
-   io.send_data(feed, data)
-
-Receiving data from an Adafruit IO feed
-
-.. code-block:: python
-  
-   data = io.receive_data(feed)
-
-Creating a new feed named circuitpython with a description
-
-.. code-block:: python
-
-    feed = io.create_new_feed('circuitpython', 'an Adafruit IO CircuitPython feed')
-
-Listing the record of a specified feed:
-
-.. code-block:: python
-    
-    feed = io.get_feed('circuitpython')
+Usage examples for the Adafruit IO MQTT API are within the examples/mqtt folder.
 
 Contributing
 ============

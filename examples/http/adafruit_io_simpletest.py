@@ -1,6 +1,7 @@
 """
-Example of performing group operations
+Sending data to Adafruit IO and receiving it.
 """
+from random import randint
 import board
 import busio
 from digitalio import DigitalInOut
@@ -11,8 +12,8 @@ from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
 # Import NeoPixel Library
 import neopixel
 
-# Import Adafruit IO REST Client
-from adafruit_io.adafruit_io import RESTClient
+# Import Adafruit IO HTTP Client
+from adafruit_io.adafruit_io import IO_HTTP, AdafruitIO_RequestError
 
 # Get wifi details and more from a secrets.py file
 try:
@@ -37,26 +38,30 @@ status_light = neopixel.NeoPixel(board.NEOPIXEL, 1, brightness=0.2) # Uncomment 
 """Uncomment below for ItsyBitsy M4"""
 #status_light = dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
 wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_light)
+
 # Set your Adafruit IO Username and Key in secrets.py
 # (visit io.adafruit.com if you need to create an account,
 # or if you need your Adafruit IO key.)
 aio_username = secrets['aio_username']
 aio_key = secrets['aio_key']
 
-# Create an instance of the Adafruit IO REST client
-io = RESTClient(aio_username, aio_key, wifi)
+# Create an instance of the Adafruit IO HTTP client
+io = IO_HTTP(aio_username, aio_key, wifi)
 
-# Create a new group
-print('Creating a new Adafruit IO Group...')
-sensor_group = io.create_new_group('envsensors', 'a group of environmental sensors')
+try:
+    # Get the 'temperature' feed from Adafruit IO
+    temperature_feed = io.get_feed('temperature')
+except AdafruitIO_RequestError:
+    # If no 'temperature' feed exists, create one
+    temperature_feed = io.create_new_feed('temperature')
 
-# Add the 'temperature' feed to the group
-print('Adding feed temperature to group...')
-io.add_feed_to_group(sensor_group['key'], 'temperature')
+# Send random integer values to the feed
+random_value = randint(0, 50)
+print('Sending {0} to temperature feed...'.format(random_value))
+io.send_data(temperature_feed['key'], random_value)
+print('Data sent!')
 
-# Get info from the group
-print(sensor_group)
-
-# Delete the group
-print('Deleting group...')
-io.delete_group('envsensors')
+# Retrieve data value from the feed
+print('Retrieving data from temperature feed...')
+received_data = io.receive_data(temperature_feed['key'])
+print('Data from temperature feed: ', received_data['value'])

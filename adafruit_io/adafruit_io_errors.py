@@ -26,16 +26,30 @@ CircuitPython Adafruit IO Error Classes
 * Author(s): Brent Rubell
 """
 
+
 class AdafruitIO_ThrottleError(Exception):
     """Adafruit IO request error class for rate-limiting"""
+
     def __init__(self):
-        super(AdafruitIO_ThrottleError, self).__init__("Number of Adafruit IO Requests exceeded! \
-                                                            Please try again in 30 seconds..")
+        super(AdafruitIO_ThrottleError, self).__init__(
+            "Number of Adafruit IO Requests exceeded! \
+                                                            Please try again in 30 seconds.."
+        )
+
 
 class AdafruitIO_RequestError(Exception):
     """Adafruit IO request error class"""
+
     def __init__(self, response):
         response_content = response.json()
-        error = response_content['error']
-        super(AdafruitIO_RequestError, self).__init__("Adafruit IO Error {0}: {1}"
-                                                      .format(response.status_code, error))
+        error = response_content["error"]
+        super(AdafruitIO_RequestError, self).__init__(
+            "Adafruit IO Error {0}: {1}".format(response.status_code, error)
+        )
+
+
+class AdafruitIO_MQTTError(Exception):
+    """Adafruit IO MQTT error class"""
+
+    def __init__(self, response):
+        super(AdafruitIO_MQTTError, self).__init__("MQTT Error: {0}".format(response))

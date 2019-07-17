@@ -1,9 +1,11 @@
 """
-Example of interacting with Adafruit IO feeds
+Example of turning on and off a LED
+from an Adafruit IO Dashboard.
 """
+import time
 import board
 import busio
-from digitalio import DigitalInOut
+from digitalio import DigitalInOut, Direction
 
 # ESP32 SPI
 from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
@@ -11,8 +13,8 @@ from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
 # Import NeoPixel Library
 import neopixel
 
-# Import Adafruit IO REST Client
-from adafruit_io.adafruit_io import RESTClient
+# Import Adafruit IO HTTP Client
+from adafruit_io.adafruit_io import IO_HTTP, AdafruitIO_RequestError
 
 # Get wifi details and more from a secrets.py file
 try:
@@ -44,19 +46,32 @@ wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_lig
 aio_username = secrets['aio_username']
 aio_key = secrets['aio_key']
 
-# Create an instance of the Adafruit IO REST client
-io = RESTClient(aio_username, aio_key, wifi)
+# Create an instance of the Adafruit IO HTTP client
+io = IO_HTTP(aio_username, aio_key, wifi)
 
-# Create a new 'circuitpython' feed with a description
-print('Creating new Adafruit IO feed...')
-feed = io.create_new_feed('circuitpython', 'a Adafruit IO CircuitPython feed')
+try:
+    # Get the 'digital' feed from Adafruit IO
+    digital_feed = io.get_feed('digital')
+except AdafruitIO_RequestError:
+    # If no 'digital' feed exists, create one
+    digital_feed = io.create_new_feed('digital')
 
-# List a specified feed
-print('Retrieving new Adafruit IO feed...')
-specified_feed = io.get_feed('circuitpython')
-print(specified_feed)
+# Set up LED
+LED = DigitalInOut(board.D13)
+LED.direction = Direction.OUTPUT
 
-# Delete a specified feed by feed key
-print('Deleting feed...')
-io.delete_feed(specified_feed['key'])
-print('Feed deleted!')
+while True:
+    # Get data from 'digital' feed
+    print('getting data from IO...')
+    feed_data = io.receive_data(digital_feed['key'])
+
+    # Check if data is ON or OFF
+    if int(feed_data['value']) == 1:
+        print('received <- ON\n')
+    elif int(feed_data['value']) == 0:
+        print('received <= OFF\n')
+
+    # Set the LED to the feed value
+    LED.value = int(feed_data['value'])
+
+    time.sleep(5)

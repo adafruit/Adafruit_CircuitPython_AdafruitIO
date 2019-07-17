@@ -1,22 +1,19 @@
 """
-Example of reading an analog light sensor
-and sending the value to Adafruit IO
+Example of attaching metadata
+to data sent to Adafruit IO.
 """
-import time
 import board
 import busio
 from digitalio import DigitalInOut
+
+# ESP32 SPI
 from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
-from analogio import AnalogIn
 
 # Import NeoPixel Library
 import neopixel
 
-# Import Adafruit IO REST Client
-from adafruit_io.adafruit_io import RESTClient, AdafruitIO_RequestError
-
-# Delay between polling and sending light sensor data, in seconds
-SENSOR_DELAY = 30
+# Import Adafruit IO HTTP Client
+from adafruit_io.adafruit_io import IO_HTTP, AdafruitIO_RequestError
 
 # Get wifi details and more from a secrets.py file
 try:
@@ -48,24 +45,26 @@ wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_lig
 aio_username = secrets['aio_username']
 aio_key = secrets['aio_key']
 
-# Create an instance of the Adafruit IO REST client
-io = RESTClient(aio_username, aio_key, wifi)
+# Create an instance of the Adafruit IO HTTP client
+io = IO_HTTP(aio_username, aio_key, wifi)
 
 try:
-    # Get the 'light' feed from Adafruit IO
-    light_feed = io.get_feed('light')
+    # Get the 'location' feed from Adafruit IO
+    location_feed = io.get_feed('location')
 except AdafruitIO_RequestError:
-    # If no 'light' feed exists, create one
-    light_feed = io.create_new_feed('light')
+    # If no 'location' feed exists, create one
+    location_feed = io.create_new_feed('location')
 
-# Set up an analog light sensor on the PyPortal
-adc = AnalogIn(board.LIGHT)
+# Set data
+data_value = 42
 
-while True:
-    light_value = adc.value
-    print('Light Level: ', light_value)
-    print('Sending to Adafruit IO...')
-    io.send_data(light_feed['key'], light_value)
-    print('Sent!')
-    # delay sending to Adafruit IO
-    time.sleep(SENSOR_DELAY)
+# Set up metadata associated with data_value
+metadata = {'lat': 40.726190,
+            'lon': -74.005334,
+            'ele': -6,
+            'created_at': None}
+
+# Send data and location metadata to the 'location' feed
+print('Sending data and location metadata to IO...')
+io.send_data(location_feed['key'], data_value, metadata)
+print('Data sent!')

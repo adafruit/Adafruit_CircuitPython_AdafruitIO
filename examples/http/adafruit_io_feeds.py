@@ -1,12 +1,6 @@
 """
-Example of sending temperature
-values to an Adafruit IO feed.
-
-Dependencies:
-    * CircuitPython_ADT7410
-        https://github.com/adafruit/Adafruit_CircuitPython_ADT7410
+Example of interacting with Adafruit IO feeds
 """
-import time
 import board
 import busio
 from digitalio import DigitalInOut
@@ -17,11 +11,8 @@ from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
 # Import NeoPixel Library
 import neopixel
 
-# Import Adafruit IO REST Client
-from adafruit_io.adafruit_io import RESTClient, AdafruitIO_RequestError
-
-# Import ADT7410 Library
-import adafruit_adt7410
+# Import Adafruit IO HTTP Client
+from adafruit_io.adafruit_io import IO_HTTP
 
 # Get wifi details and more from a secrets.py file
 try:
@@ -53,33 +44,19 @@ wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_lig
 aio_username = secrets['aio_username']
 aio_key = secrets['aio_key']
 
-# Create an instance of the Adafruit IO REST client
-io = RESTClient(aio_username, aio_key, wifi)
+# Create an instance of the Adafruit IO HTTP client
+io = IO_HTTP(aio_username, aio_key, wifi)
 
-try:
-    # Get the 'temperature' feed from Adafruit IO
-    temperature_feed = io.get_feed('temperature')
-except AdafruitIO_RequestError:
-    # If no 'temperature' feed exists, create one
-    temperature_feed = io.create_new_feed('temperature')
+# Create a new 'circuitpython' feed with a description
+print('Creating new Adafruit IO feed...')
+feed = io.create_new_feed('circuitpython', 'a Adafruit IO CircuitPython feed')
 
-# Set up ADT7410 sensor
-i2c_bus = busio.I2C(board.SCL, board.SDA)
-adt = adafruit_adt7410.ADT7410(i2c_bus, address=0x48)
-adt.high_resolution = True
+# List a specified feed
+print('Retrieving new Adafruit IO feed...')
+specified_feed = io.get_feed('circuitpython')
+print(specified_feed)
 
-while True:
-    try:
-        temperature = adt.temperature
-        # set temperature value to two precision points
-        temperature = '%0.2f'%(temperature)
-
-        print('Current Temperature: {0}*C'.format(temperature))
-        print('Sending to Adafruit IO...')
-        io.send_data(temperature_feed['key'], temperature)
-        print('Data sent!')
-    except (ValueError, RuntimeError) as e:
-        print("Failed to get data, retrying\n", e)
-        wifi.reset()
-        continue
-    time.sleep(0.5)
+# Delete a specified feed by feed key
+print('Deleting feed...')
+io.delete_feed(specified_feed['key'])
+print('Feed deleted!')

@@ -1,11 +1,15 @@
 """
-Example of turning on and off a LED
-from an Adafruit IO Dashboard.
+Example of sending temperature
+values to an Adafruit IO feed.
+
+Dependencies:
+    * CircuitPython_ADT7410
+        https://github.com/adafruit/Adafruit_CircuitPython_ADT7410
 """
 import time
 import board
 import busio
-from digitalio import DigitalInOut, Direction
+from digitalio import DigitalInOut
 
 # ESP32 SPI
 from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
@@ -13,8 +17,11 @@ from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
 # Import NeoPixel Library
 import neopixel
 
-# Import Adafruit IO REST Client
-from adafruit_io.adafruit_io import RESTClient, AdafruitIO_RequestError
+# Import Adafruit IO HTTP Client
+from adafruit_io.adafruit_io import IO_HTTP, AdafruitIO_RequestError
+
+# Import ADT7410 Library
+import adafruit_adt7410
 
 # Get wifi details and more from a secrets.py file
 try:
@@ -46,32 +53,33 @@ wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_lig
 aio_username = secrets['aio_username']
 aio_key = secrets['aio_key']
 
-# Create an instance of the Adafruit IO REST client
-io = RESTClient(aio_username, aio_key, wifi)
+# Create an instance of the Adafruit IO HTTP client
+io = IO_HTTP(aio_username, aio_key, wifi)
 
 try:
-    # Get the 'digital' feed from Adafruit IO
-    digital_feed = io.get_feed('digital')
+    # Get the 'temperature' feed from Adafruit IO
+    temperature_feed = io.get_feed('temperature')
 except AdafruitIO_RequestError:
-    # If no 'digital' feed exists, create one
-    digital_feed = io.create_new_feed('digital')
+    # If no 'temperature' feed exists, create one
+    temperature_feed = io.create_new_feed('temperature')
 
-# Set up LED
-LED = DigitalInOut(board.D13)
-LED.direction = Direction.OUTPUT
+# Set up ADT7410 sensor
+i2c_bus = busio.I2C(board.SCL, board.SDA)
+adt = adafruit_adt7410.ADT7410(i2c_bus, address=0x48)
+adt.high_resolution = True
 
 while True:
-    # Get data from 'digital' feed
-    print('getting data from IO...')
-    feed_data = io.receive_data(digital_feed['key'])
+    try:
+        temperature = adt.temperature
+        # set temperature value to two precision points
+        temperature = '%0.2f'%(temperature)
 
-    # Check if data is ON or OFF
-    if int(feed_data['value']) == 1:
-        print('received <- ON\n')
-    elif int(feed_data['value']) == 0:
-        print('received <= OFF\n')
-
-    # Set the LED to the feed value
-    LED.value = int(feed_data['value'])
-
-    time.sleep(5)
+        print('Current Temperature: {0}*C'.format(temperature))
+        print('Sending to Adafruit IO...')
+        io.send_data(temperature_feed['key'], temperature)
+        print('Data sent!')
+    except (ValueError, RuntimeError) as e:
+        print("Failed to get data, retrying\n", e)
+        wifi.reset()
+        continue
+    time.sleep(0.5)
