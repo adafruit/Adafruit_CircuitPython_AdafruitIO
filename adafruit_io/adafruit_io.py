@@ -36,6 +36,7 @@ Implementation Notes
     https://github.com/adafruit/circuitpython/releases
 """
 import time
+import json
 from adafruit_io.adafruit_io_errors import (
     AdafruitIO_RequestError,
     AdafruitIO_ThrottleError,
@@ -152,8 +153,8 @@ class IO_MQTT:
                 # Adafruit IO Group Feed(s)
                 feeds = []
                 messages = []
-                # TODO: Remove eval here...
-                payload = eval(payload)
+                # Conversion of incoming group to a json response
+                payload = json.loads(payload)
                 for feed in payload["feeds"]:
                     feeds.append(feed)
                 for msg in feeds:
@@ -177,7 +178,14 @@ class IO_MQTT:
 
     def loop(self):
         """Manually process messages from Adafruit IO.
-        Use this method to check incoming subscription messages.
+        Call this method to check incoming subscription messages.
+
+        Example usage of polling the message queue using loop.
+
+        ..code-block:: python
+
+            while True:
+                io.loop()
         """
         self._client.loop()
 
