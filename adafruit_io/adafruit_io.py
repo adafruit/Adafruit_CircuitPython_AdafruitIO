@@ -148,7 +148,6 @@ class IO_MQTT:
         if self.on_message is not None:
             # Parse the MQTT topic string
             topic_name = topic.split("/")
-            print(topic_name)
             if topic_name[1] == "groups":
                 # Adafruit IO Group Feed(s)
                 feeds = []
@@ -256,7 +255,7 @@ class IO_MQTT:
         Information about these topics can be found on the Adafruit IO MQTT API Docs.:
         https://io.adafruit.com/api/docs/mqtt.html#time-topics
         """
-        if "seconds" or "millis" in time_type:
+        if "seconds" or "millis" or "hours" in time_type:
             self._client.subscribe("time/" + time_type)
         elif time_type == "iso":
             self._client.subscribe("time/ISO-8601")
@@ -319,12 +318,13 @@ class IO_MQTT:
                 self.publish(t, d)
             time.sleep(timeout)
 
-    def publish(self, feed_key, data, shared_user=None, is_group=False):
+    def publish(self, feed_key, data, metadata = None, shared_user=None, is_group=False):
         """Publishes to an An Adafruit IO Feed.
         :param str feed_key: Adafruit IO Feed key.
         :param str data: Data to publish to the feed or group.
         :param int data: Data to publish to the feed or group.
         :param float data: Data to publish to the feed or group.
+        :param str metadata: Optional metadata associated with the data.
         :param str shared_user: Owner of the Adafruit IO feed, required for
                                 feed sharing.
         :param bool is_group: Set True if publishing to an Adafruit IO Group.
@@ -353,15 +353,28 @@ class IO_MQTT:
         ..code-block:: python
 
             client.publish('temperature', shared_user='myfriend')
+        
+        Example of publishing a value along with locational metadata to a feed.
+        ..code-block:: python
+
+            data = 42
+            # format: "lat, lon, ele"
+            metadata = "40.726190, -74.005334, -6"
+            io.publish("location-feed", data, metadata)
 
         """
         if is_group:
             self._client.publish("{0}/groups/{1}".format(self._user, feed_key), data)
-            return
         if shared_user is not None:
             self._client.publish("{0}/feeds/{1}".format(shared_user, feed_key), data)
+        if metadata is not None:
+            if isinstance(data, int or float):
+                data = str(data)
+            csv_string = data + "," + metadata
+            self._client.publish("{0}/feeds/{1}/csv".format(self._user, feed_key), csv_string)
         else:
             self._client.publish("{0}/feeds/{1}".format(self._user, feed_key), data)
+
 
     def get(self, feed_key):
         """Calling this method will make Adafruit IO publish the most recent
