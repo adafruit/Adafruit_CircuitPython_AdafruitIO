@@ -43,6 +43,7 @@ install:
 
 script:
   - pylint adafruit_io/*.py
-  - ([[ ! -d "examples" ]] || pylint --disable=missing-docstring,invalid-name,bad-whitespace examples/*.py)
+  - ([[ ! -d "examples" ]] || pylint --disable=missing-docstring,invalid-name,bad-whitespace examples/http/*.py)
+  - ([[ ! -d "examples" ]] || pylint --disable=missing-docstring,invalid-name,bad-whitespace examples/mqtt/*.py)
   - circuitpython-build-bundles --filename_prefix adafruit-circuitpython-adafruit_io --library_location .
   - cd docs && sphinx-build -E -W -b html . _build/html && cd ..
