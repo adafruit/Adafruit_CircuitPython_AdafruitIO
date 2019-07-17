@@ -12,8 +12,8 @@ from analogio import AnalogIn
 # Import NeoPixel Library
 import neopixel
 
-# Import Adafruit IO REST Client
-from adafruit_io.adafruit_io import RESTClient, AdafruitIO_RequestError
+# Import Adafruit IO HTTP Client
+from adafruit_io.adafruit_io import IO_HTTP, AdafruitIO_RequestError
 
 # Delay between polling and sending light sensor data, in seconds
 SENSOR_DELAY = 30
@@ -48,8 +48,8 @@ wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_lig
 aio_username = secrets['aio_username']
 aio_key = secrets['aio_key']
 
-# Create an instance of the Adafruit IO REST client
-io = RESTClient(aio_username, aio_key, wifi)
+# Create an instance of the Adafruit IO HTTP client
+io = IO_HTTP(aio_username, aio_key, wifi)
 
 try:
     # Get the 'light' feed from Adafruit IO

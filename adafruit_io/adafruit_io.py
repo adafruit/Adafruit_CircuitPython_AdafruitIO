@@ -23,7 +23,7 @@
 `adafruit_io`
 ================================================================================
 
-A CircuitPython/Python library for communicating with Adafruit IO over WiFi
+A CircuitPython library for communicating with Adafruit IO.
 
 * Author(s): Brent Rubell for Adafruit Industries
 
@@ -34,35 +34,38 @@ Implementation Notes
 
 * Adafruit CircuitPython firmware for the supported boards:
     https://github.com/adafruit/circuitpython/releases
-
-* Adafruit CircuitPython MiniMQTT:
-    https://github.com/adafruit/Adafruit_CircuitPython_MiniMQTT
 """
 import time
-from adafruit_io.adafruit_io_errors import AdafruitIO_RequestError, AdafruitIO_ThrottleError
-from adafruit_io.adafruit_io_errors import AdafruitIO_MQTTError
+from adafruit_io.adafruit_io_errors import (
+    AdafruitIO_RequestError,
+    AdafruitIO_ThrottleError,
+    AdafruitIO_MQTTError,
+)
 
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_Adafruit_IO.git"
 
-CLIENT_HEADERS = {
-    'User-Agent': 'AIO-CircuitPython/{0}'.format(__version__)
-}
+CLIENT_HEADERS = {"User-Agent": "AIO-CircuitPython/{0}".format(__version__)}
 
-class IO_MQTT():
+
+class IO_MQTT:
     """
-    Client for interacting with the Adafruit IO MQTT API. The client establishes
-    a secure connection to Adafruit IO by default.
+    Client for interacting with the Adafruit IO MQTT API.
+    https://io.adafruit.com/api/docs/mqtt.html#adafruit-io-mqtt-api
+
     :param MiniMQTT mqtt_client: MiniMQTT Client object.
     """
+
     # pylint: disable=protected-access
     def __init__(self, mqtt_client):
         # MiniMQTT Object
         mqtt_client_type = str(type(mqtt_client))
-        if 'MQTT' in mqtt_client_type:
+        if "MQTT" in mqtt_client_type:
             self._client = mqtt_client
         else:
-            raise TypeError("This class requires a MiniMQTT client.")
+            raise TypeError(
+                "This class requires a MiniMQTT client object, please create one."
+            )
         self._user = self._client._user
         # User-defined MQTT callback methods must be init'd to None
         self.on_connect = None
@@ -77,7 +80,7 @@ class IO_MQTT():
         self._logger = False
         if self._client._logger is not None:
             self._logger = True
-            self._client.set_logger_level('DEBUG')
+            self._client.set_logger_level("DEBUG")
         self._connected = False
 
     def connect(self):
@@ -105,7 +108,7 @@ class IO_MQTT():
         """Runs when the on_connect callback is run from code.
         """
         if self._logger:
-            self._client._logger.debug('Client called on_connect.')
+            self._client._logger.debug("Client called on_connect.")
         if return_code == 0:
             self._connected = True
         else:
@@ -120,7 +123,7 @@ class IO_MQTT():
         code.
         """
         if self._logger:
-            self._client._logger.debug('Client called on_disconnect')
+            self._client._logger.debug("Client called on_disconnect")
         self._connected = False
         # Call the user-defined on_disconnect callblack if defined
         if self.on_disconnect is not None:
@@ -135,20 +138,20 @@ class IO_MQTT():
         :param str payload: MQTT payload data response from Adafruit IO.
         """
         if self._logger:
-            self._client._logger.debug('Client called on_message.')
+            self._client._logger.debug("Client called on_message.")
         if self.on_message is not None:
             # Parse the MQTT topic string
-            topic_name = topic.split('/')
+            topic_name = topic.split("/")
             if topic_name[1] == "groups":
                 # Adafruit IO Group Feed(s)
                 feeds = []
                 messages = []
                 # TODO: Remove eval here...
                 payload = eval(payload)
-                for feed in payload['feeds']:
+                for feed in payload["feeds"]:
                     feeds.append(feed)
                 for msg in feeds:
-                    payload = payload['feeds'][msg]
+                    payload = payload["feeds"][msg]
                     messages.append(payload)
                 topic_name = feeds
                 message = messages
@@ -159,9 +162,11 @@ class IO_MQTT():
             else:
                 # Standard Adafruit IO Feed
                 topic_name = topic_name[2]
-                message = '' if payload is None else message
+                message = "" if payload is None else message
         else:
-            raise ValueError('You must define an on_message method before calling this callback.')
+            raise ValueError(
+                "You must define an on_message method before calling this callback."
+            )
         self.on_message(self, topic_name, message)
 
     def loop(self):
@@ -198,31 +203,33 @@ class IO_MQTT():
             client.subscribe([('temperature'), ('humidity')])
         """
         if shared_user is not None and feed_key is not None:
-            self._client.subscribe('{0}/feeds/{1}'.format(shared_user, feed_key))
+            self._client.subscribe("{0}/feeds/{1}".format(shared_user, feed_key))
         elif group_key is not None:
-            self._client.subscribe('{0}/groups/{1}'.format(self._user, group_key))
+            self._client.subscribe("{0}/groups/{1}".format(self._user, group_key))
         elif feed_key is not None:
-            self._client.subscribe('{0}/feeds/{1}'.format(self._user, feed_key))
+            self._client.subscribe("{0}/feeds/{1}".format(self._user, feed_key))
         else:
-            raise AdafruitIO_MQTTError('Must provide a feed_key or group_key.')
+            raise AdafruitIO_MQTTError("Must provide a feed_key or group_key.")
 
     def subscribe_to_throttling(self):
         """Subscribes to your personal Adafruit IO /throttle feed.
         https://io.adafruit.com/api/docs/mqtt.html#mqtt-api-rate-limiting
         """
-        self._client.subscribe('%s/throttle'%self._user)
+        self._client.subscribe("%s/throttle" % self._user)
 
     def subscribe_to_errors(self):
         """Subscribes to your personal Adafruit IO /errors feed.
         Notifies you of errors relating to publish/subscribe calls.
         """
-        self._client.subscribe('%s/errors'%self._user)
+        self._client.subscribe("%s/errors" % self._user)
 
     def subscribe_to_randomizer(self, randomizer_id):
         """Subscribes to a random data stream created by the Adafruit IO Words service.
         :param int randomizer_id: Random word record you want data for.
         """
-        self._client.subscribe('{0}/integration/words/{1}'.format(self._user, randomizer_id))
+        self._client.subscribe(
+            "{0}/integration/words/{1}".format(self._user, randomizer_id)
+        )
 
     def subscribe_to_weather(self, weather_record, forecast):
         """Subscribes to a weather forecast using the Adafruit IO PLUS weather
@@ -230,8 +237,11 @@ class IO_MQTT():
         :param int weather_record: Weather record you want data for.
         :param str forecast: Forecast data you'd like to recieve.
         """
-        self._client.subscribe('{0}/integration/weather/{1}/{2}'.format(self._user,
-                                                                        weather_record, forecast))
+        self._client.subscribe(
+            "{0}/integration/weather/{1}/{2}".format(
+                self._user, weather_record, forecast
+            )
+        )
 
     def subscribe_to_time(self, time_type):
         """Adafruit IO provides some built-in MQTT topics for getting the current server time.
@@ -239,12 +249,12 @@ class IO_MQTT():
         Information about these topics can be found on the Adafruit IO MQTT API Docs.:
         https://io.adafruit.com/api/docs/mqtt.html#time-topics
         """
-        if 'seconds' or 'millis' in time_type:
-            self._client.subscribe('time/'+time_type)
-        elif time_type == 'iso':
-            self._client.subscribe('time/ISO-8601')
+        if "seconds" or "millis" in time_type:
+            self._client.subscribe("time/" + time_type)
+        elif time_type == "iso":
+            self._client.subscribe("time/ISO-8601")
         else:
-            raise TypeError('Invalid time feed type specified')
+            raise TypeError("Invalid time feed type specified")
 
     def unsubscribe(self, feed_key=None, group_key=None, shared_user=None):
         """Unsubscribes from an Adafruit IO feed or group.
@@ -268,13 +278,13 @@ class IO_MQTT():
 
         """
         if shared_user is not None and feed_key is not None:
-            self._client.unsubscribe('{0}/feeds/{1}'.format(shared_user, feed_key))
+            self._client.unsubscribe("{0}/feeds/{1}".format(shared_user, feed_key))
         elif group_key is not None:
-            self._client.unsubscribe('{0}/groups/{1}'.format(self._user, feed_key))
+            self._client.unsubscribe("{0}/groups/{1}".format(self._user, feed_key))
         elif feed_key is not None:
-            self._client.unsubscribe('{0}/feeds/{1}'.format(self._user, feed_key))
+            self._client.unsubscribe("{0}/feeds/{1}".format(self._user, feed_key))
         else:
-            raise AdafruitIO_MQTTError('Must provide a feed_key or group_key.')
+            raise AdafruitIO_MQTTError("Must provide a feed_key or group_key.")
 
     # Publishing
     def publish_multiple(self, feeds_and_data, timeout=3, is_group=False):
@@ -294,7 +304,7 @@ class IO_MQTT():
             for t, d in feeds_and_data:
                 feed_data.append((t, d))
         else:
-            raise AdafruitIO_MQTTError('This method accepts a list of tuples.')
+            raise AdafruitIO_MQTTError("This method accepts a list of tuples.")
         for t, d in feed_data:
             if is_group:
                 self.publish(t, d, is_group=True)
@@ -339,12 +349,12 @@ class IO_MQTT():
 
         """
         if is_group:
-            self._client.publish('{0}/groups/{1}'.format(self._user, feed_key), data)
+            self._client.publish("{0}/groups/{1}".format(self._user, feed_key), data)
             return
         if shared_user is not None:
-            self._client.publish('{0}/feeds/{1}'.format(shared_user, feed_key), data)
+            self._client.publish("{0}/feeds/{1}".format(shared_user, feed_key), data)
         else:
-            self._client.publish('{0}/feeds/{1}'.format(self._user, feed_key), data)
+            self._client.publish("{0}/feeds/{1}".format(self._user, feed_key), data)
 
     def get(self, feed_key):
         """Calling this method will make Adafruit IO publish the most recent
@@ -352,27 +362,31 @@ class IO_MQTT():
         https://io.adafruit.com/api/docs/mqtt.html#retained-values
         :param str feed_key: Adafruit IO Feed key.
         """
-        self._client.publish('{0}/feeds{1}/get'.format(self._user, feed_key), '\0')
+        self._client.publish("{0}/feeds{1}/get".format(self._user, feed_key), "\0")
 
-class RESTClient():
+
+class IO_HTTP:
     """
     Client for interacting with the Adafruit IO HTTP API.
+    https://io.adafruit.com/api/docs/#adafruit-io-http-api
         :param str adafruit_io_username: Adafruit IO Username
         :param str adafruit_io_key: Adafruit IO Key
         :param wifi_manager: WiFiManager object from ESPSPI_WiFiManager or ESPAT_WiFiManager
 
     """
+
     def __init__(self, adafruit_io_username, adafruit_io_key, wifi_manager):
         self.username = adafruit_io_username
         self.key = adafruit_io_key
         wifi_type = str(type(wifi_manager))
-        if ('ESPSPI_WiFiManager' in wifi_type or 'ESPAT_WiFiManager' in wifi_type):
+        if "ESPSPI_WiFiManager" in wifi_type or "ESPAT_WiFiManager" in wifi_type:
             self.wifi = wifi_manager
         else:
             raise TypeError("This library requires a WiFiManager object.")
-        self._aio_headers = [{"X-AIO-KEY":self.key,
-                              "Content-Type":'application/json'},
-                             {"X-AIO-KEY":self.key,}]
+        self._aio_headers = [
+            {"X-AIO-KEY": self.key, "Content-Type": "application/json"},
+            {"X-AIO-KEY": self.key},
+        ]
 
     @staticmethod
     def _create_headers(io_headers):
@@ -387,9 +401,14 @@ class RESTClient():
         """Creates JSON data payload
         """
         if metadata is not None:
-            return {'value':data, 'lat':metadata['lat'], 'lon':metadata['lon'],
-                    'ele':metadata['ele'], 'created_at':metadata['created_at']}
-        return {'value':data}
+            return {
+                "value": data,
+                "lat": metadata["lat"],
+                "lon": metadata["lon"],
+                "ele": metadata["ele"],
+                "created_at": metadata["created_at"],
+            }
+        return {"value": data}
 
     @staticmethod
     def _handle_error(response):
@@ -417,9 +436,8 @@ class RESTClient():
         :param json payload: JSON data to send to Adafruit IO
         """
         response = self.wifi.post(
-            path,
-            json=payload,
-            headers=self._create_headers(self._aio_headers[0]))
+            path, json=payload, headers=self._create_headers(self._aio_headers[0])
+        )
         self._handle_error(response)
         return response.json()
 
@@ -429,8 +447,8 @@ class RESTClient():
         :param str path: Formatted Adafruit IO URL from _compose_path
         """
         response = self.wifi.get(
-            path,
-            headers=self._create_headers(self._aio_headers[1]))
+            path, headers=self._create_headers(self._aio_headers[1])
+        )
         self._handle_error(response)
         return response.json()
 
@@ -440,8 +458,8 @@ class RESTClient():
         :param str path: Formatted Adafruit IO URL from _compose_path
         """
         response = self.wifi.delete(
-            path,
-            headers=self._create_headers(self._aio_headers[0]))
+            path, headers=self._create_headers(self._aio_headers[0])
+        )
         self._handle_error(response)
         return response.json()
 
@@ -458,8 +476,8 @@ class RESTClient():
         if precision:
             try:
                 data = round(data, precision)
-            except NotImplementedError: # received a non-float value
-                raise NotImplementedError('Precision requires a floating point value')
+            except NotImplementedError:  # received a non-float value
+                raise NotImplementedError("Precision requires a floating point value")
         payload = self._create_data(data, metadata)
         self._post(path, payload)
 
@@ -488,7 +506,7 @@ class RESTClient():
         :param str feed_key: Feed to add to the group
         """
         path = self._compose_path("groups/{0}/add".format(group_key))
-        payload = {'feed_key':feed_key}
+        payload = {"feed_key": feed_key}
         return self._post(path, payload)
 
     def create_new_group(self, group_key, group_description):
@@ -498,7 +516,7 @@ class RESTClient():
         :param str group_description: Brief summary about the group
         """
         path = self._compose_path("groups")
-        payload = {'name':group_key, 'description':group_description}
+        payload = {"name": group_key, "description": group_description}
         return self._post(path, payload)
 
     def delete_group(self, group_key):
@@ -538,9 +556,7 @@ class RESTClient():
         :param str feed_license: Optional feed license
         """
         path = self._compose_path("feeds")
-        payload = {'name':feed_key,
-                   'description':feed_desc,
-                   'license':feed_license}
+        payload = {"name": feed_key, "description": feed_desc, "license": feed_license}
         return self._post(path, payload)
 
     def delete_feed(self, feed_key):
@@ -574,8 +590,18 @@ class RESTClient():
         Returns a struct_time from the Adafruit IO Server based on the device's IP address.
         https://circuitpython.readthedocs.io/en/latest/shared-bindings/time/__init__.html#time.struct_time
         """
-        path = self._compose_path('integrations/time/struct.json')
+        path = self._compose_path("integrations/time/struct.json")
         time = self._get(path)
-        return time.struct_time((time['year'], time['mon'], time['mday'],
-                                 time['hour'], time['min'], time['sec'],
-                                 time['wday'], time['yday'], time['isdst']))
+        return time.struct_time(
+            (
+                time["year"],
+                time["mon"],
+                time["mday"],
+                time["hour"],
+                time["min"],
+                time["sec"],
+                time["wday"],
+                time["yday"],
+                time["isdst"],
+            )
+        )

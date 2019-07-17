@@ -11,8 +11,8 @@ from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
 # Import NeoPixel Library
 import neopixel
 
-# Import Adafruit IO REST Client
-from adafruit_io.adafruit_io import RESTClient
+# Import Adafruit IO HTTP Client
+from adafruit_io.adafruit_io import IO_HTTP
 
 # Get wifi details and more from a secrets.py file
 try:
@@ -43,8 +43,8 @@ wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_lig
 aio_username = secrets['aio_username']
 aio_key = secrets['aio_key']
 
-# Create an instance of the Adafruit IO REST client
-io = RESTClient(aio_username, aio_key, wifi)
+# Create an instance of the Adafruit IO HTTP client
+io = IO_HTTP(aio_username, aio_key, wifi)
 
 # Create a new group
 print('Creating a new Adafruit IO Group...')

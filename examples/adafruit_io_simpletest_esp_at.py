@@ -10,8 +10,8 @@ import board
 import busio
 from digitalio import DigitalInOut
 
-# Import Adafruit IO REST Client
-from adafruit_io.adafruit_io import RESTClient, AdafruitIO_RequestError
+# Import Adafruit IO HTTP Client
+from adafruit_io.adafruit_io import IO_HTTP, AdafruitIO_RequestError
 
 # ESP32 AT
 from adafruit_espatcontrol import adafruit_espatcontrol, adafruit_espatcontrol_wifimanager
@@ -62,8 +62,8 @@ wifi = adafruit_espatcontrol_wifimanager.ESPAT_WiFiManager(esp, secrets, status_
 aio_username = secrets['aio_username']
 aio_key = secrets['aio_key']
 
-# Create an instance of the Adafruit IO REST client
-io = RESTClient(aio_username, aio_key, wifi)
+# Create an instance of the Adafruit IO HTTP client
+io = IO_HTTP(aio_username, aio_key, wifi)
 
 try:
     # Get the 'temperature' feed from Adafruit IO
