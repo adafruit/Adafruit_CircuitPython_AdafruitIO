@@ -6,16 +6,17 @@
 # Modified by Brent Rubell for Adafruit Industries, 2019
 import time
 from random import randint
+
+
 import board
-import neopixel
 import busio
-from digitalio import DigitalInOut
+import neopixel
 from adafruit_esp32spi import adafruit_esp32spi
 from adafruit_esp32spi import adafruit_esp32spi_wifimanager
 import adafruit_esp32spi.adafruit_esp32spi_socket as socket
-
-from adafruit_minimqtt import MQTT
 from adafruit_io.adafruit_io import IO_MQTT
+from adafruit_minimqtt import MQTT
+from digitalio import DigitalInOut
 
 ### WiFi ###
 
@@ -54,6 +55,7 @@ status_light = neopixel.NeoPixel(
 wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_light)
 
 # Define callback functions which will be called when certain events happen.
+# pylint: disable=unused-argument
 def connected(client):
     # Connected function will be called when the client is connected to Adafruit IO.
     # This is a good place to subscribe to feed changes.  The client parameter
@@ -63,12 +65,12 @@ def connected(client):
     # Subscribe to changes on a feed named DemoFeed.
     client.subscribe("DemoFeed")
 
-
+# pylint: disable=unused-argument
 def disconnected(client):
     # Disconnected function will be called when the client disconnects.
     print("Disconnected from Adafruit IO!")
 
-
+# pylint: disable=unused-argument
 def message(client, feed_id, payload):
     # Message function will be called when a subscribed feed has a new value.
     # The feed_id parameter identifies the feed, and the payload parameter has
@@ -80,17 +82,16 @@ def message(client, feed_id, payload):
 wifi.connect()
 
 # Initialize a new MQTT Client object
-client = MQTT(
+mqtt_client = MQTT(
     socket=socket,
     broker="io.adafruit.com",
     username=secrets["aio_user"],
     password=secrets["aio_key"],
-    network_manager=wifi,
-    log=True,
+    network_manager=wifi
 )
 
 # Initialize an Adafruit IO MQTT Client
-io = IO_MQTT(client)
+io = IO_MQTT(mqtt_client)
 
 # Connect the callback methods defined above to Adafruit IO
 io.on_connect = connected

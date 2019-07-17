@@ -3,11 +3,12 @@
 import time
 from random import randint
 
-import adafruit_esp32spi.adafruit_esp32spi_socket as socket
 import board
 import busio
 import neopixel
-from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
+from adafruit_esp32spi import adafruit_esp32spi
+from adafruit_esp32spi import adafruit_esp32spi_wifimanager
+import adafruit_esp32spi.adafruit_esp32spi_socket as socket
 from adafruit_io.adafruit_io import IO_MQTT
 from adafruit_minimqtt import MQTT
 from digitalio import DigitalInOut
@@ -50,6 +51,7 @@ wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_lig
 
 
 # Define callback functions which will be called when certain events happen.
+# pylint: disable=unused-argument
 def connected(client):
     # Connected function will be called when the client is connected to Adafruit IO.
     # This is a good place to subscribe to feed changes.  The client parameter
@@ -60,12 +62,12 @@ def connected(client):
     # Subscribe to Group
     io.subscribe(group_key=group_name)
 
-
+# pylint: disable=unused-argument
 def disconnected(client):
     # Disconnected function will be called when the client disconnects.
     print("Disconnected from Adafruit IO!")
 
-
+# pylint: disable=unused-argument
 def message(client, feed_id, payload):
     # Message function will be called when a subscribed feed has a new value.
     # The feed_id parameter identifies the feed, and the payload parameter has
@@ -77,7 +79,7 @@ def message(client, feed_id, payload):
 wifi.connect()
 
 # Initialize a new MQTT Client object
-client = MQTT(
+mqtt_client = MQTT(
     socket=socket,
     broker="io.adafruit.com",
     username=secrets["aio_user"],
@@ -86,7 +88,7 @@ client = MQTT(
 )
 
 # Initialize an Adafruit IO MQTT Client
-io = IO_MQTT(client)
+io = IO_MQTT(mqtt_client)
 
 # Connect the callback methods defined above to Adafruit IO
 io.on_connect = connected
@@ -97,8 +99,8 @@ io.on_message = message
 group_name = "weatherstation"
 
 # Feeds within the group
-temp_feed = "brubell/feeds/weatherstation.temperature"
-humid_feed = "brubell/feeds/weatherstation.humidity"
+temp_feed = "weatherstation.temperature"
+humid_feed = "weatherstation.humidity"
 
 # Connect to Adafruit IO
 io.connect()
@@ -109,9 +111,9 @@ while True:
     io.loop()
     temp_reading = randint(0, 100)
     print("Publishing value {0} to feed: {1}".format(temp_reading, temp_feed))
-    client.publish(temp_feed, temp_reading)
+    io.publish(temp_feed, temp_reading)
 
     humid_reading = randint(0, 100)
     print("Publishing value {0} to feed: {1}".format(humid_reading, humid_feed))
-    client.publish(humid_feed, humid_reading)
+    io.publish(humid_feed, humid_reading)
     time.sleep(5)

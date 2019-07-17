@@ -1,9 +1,6 @@
-# Adafruit IO provides some built-in MQTT topics
-# for obtaining the current server time, if you don't have
-# access to a RTC module. 
+# Example of tagging data with location values
+# and sending it to an Adafruit IO feed.
 
-import time
-from random import randint
 import board
 import neopixel
 import busio
@@ -52,36 +49,23 @@ status_light = neopixel.NeoPixel(
 wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_light)
 
 # Define callback functions which will be called when certain events happen.
+# pylint: disable=unused-argument
 def connected(client):
     # Connected function will be called when the client is connected to Adafruit IO.
     # This is a good place to subscribe to feed changes.  The client parameter
     # passed to this function is the Adafruit IO MQTT client so you can make
     # calls against it easily.
     print("Connected to Adafruit IO!")
-    
-    # Subscribe to time/seconds topic
-    # https://io.adafruit.com/api/docs/mqtt.html#time-seconds
-    io.subscribe_to_time('seconds')
 
-    # Subscribe to time/millis topic
-    # https://io.adafruit.com/api/docs/mqtt.html#time-millis
-    io.subscribe_to_time('millis')
+    # Subscribe to a feed named location
+    io.subscribe("location")
 
-    # Subscribe to time/ISO-8601 topic
-    # https://io.adafruit.com/api/docs/mqtt.html#time-iso-8601
-    io.subscribe_to_time('iso')
-
-    # Subscribe to time/hours topic
-    # NOTE: This topic only publishes once every hour.
-    # https://io.adafruit.com/api/docs/mqtt.html#adafruit-io-monitor
-    io.subscribe_to_time('hours')
-
-
+# pylint: disable=unused-argument
 def disconnected(client):
     # Disconnected function will be called when the client disconnects.
     print("Disconnected from Adafruit IO!")
 
-
+# pylint: disable=unused-argument
 def message(client, feed_id, payload):
     # Message function will be called when a subscribed feed has a new value.
     # The feed_id parameter identifies the feed, and the payload parameter has
@@ -93,17 +77,17 @@ def message(client, feed_id, payload):
 wifi.connect()
 
 # Initialize a new MQTT Client object
-client = MQTT(
+mqtt_client = MQTT(
     socket=socket,
     broker="io.adafruit.com",
     username=secrets["aio_user"],
     password=secrets["aio_key"],
     network_manager=wifi,
-    log=True
+    log=True,
 )
 
 # Initialize an Adafruit IO MQTT Client
-io = IO_MQTT(client)
+io = IO_MQTT(mqtt_client)
 
 # Connect the callback methods defined above to Adafruit IO
 io.on_connect = connected
@@ -112,6 +96,19 @@ io.on_message = message
 
 # Connect to Adafruit IO
 io.connect()
+
+# Set data
+data_value = 42
+
+# Set up metadata associated with data_value
+# lat, lon, ele
+metadata = "40.726190, -74.005334, -6"
+
+# Send data and location metadata to the 'location' feed
+print("Sending data and location metadata to IO...")
+io.publish("location", data_value, metadata)
+print("Data sent!")
+
 
 # Listen forever...
 io.loop_blocking()
