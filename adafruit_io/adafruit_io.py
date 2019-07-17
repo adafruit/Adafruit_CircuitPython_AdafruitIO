@@ -35,7 +35,7 @@ Implementation Notes
 * Adafruit CircuitPython firmware for the supported boards:
     https://github.com/adafruit/circuitpython/releases
 """
-import time
+from time import struct_time
 from adafruit_io.adafruit_io_errors import (
     AdafruitIO_RequestError,
     AdafruitIO_ThrottleError,
@@ -66,7 +66,13 @@ class IO_MQTT:
             raise TypeError(
                 "This class requires a MiniMQTT client object, please create one."
             )
-        self._user = self._client._user
+        # Adafruit IO Auth. requires a username
+        try:
+            self._user = self._client._user
+        except:
+            raise TypeError(
+                "Adafruit IO requires a username, please set one in MiniMQTT"
+            )
         # User-defined MQTT callback methods must be init'd to None
         self.on_connect = None
         self.on_disconnect = None
@@ -142,6 +148,7 @@ class IO_MQTT:
         if self.on_message is not None:
             # Parse the MQTT topic string
             topic_name = topic.split("/")
+            print(topic_name)
             if topic_name[1] == "groups":
                 # Adafruit IO Group Feed(s)
                 feeds = []
@@ -162,7 +169,7 @@ class IO_MQTT:
             else:
                 # Standard Adafruit IO Feed
                 topic_name = topic_name[2]
-                message = "" if payload is None else message
+                message = payload
         else:
             raise ValueError(
                 "You must define an on_message method before calling this callback."
@@ -592,7 +599,7 @@ class IO_HTTP:
         """
         path = self._compose_path("integrations/time/struct.json")
         time = self._get(path)
-        return time.struct_time(
+        return struct_time(
             (
                 time["year"],
                 time["mon"],
