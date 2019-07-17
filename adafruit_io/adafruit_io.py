@@ -209,14 +209,14 @@ class IO_MQTT:
         :param str group_key: Adafruit IO Group key.
         :param str shared_user: Owner of the Adafruit IO feed, required for shared feeds.
 
-        Example of subscribing to an Adafruit IO Feed named 'temperature':
+        Example of subscribing to an Adafruit IO Feed named 'temperature'.
 
         .. code-block:: python
 
             client.subscribe('temperature')
 
-        Example of subscribing to two Adafruit IO feeds: `temperature`
-        and `humidity`
+        Example of subscribing to two Adafruit IO feeds: 'temperature'
+        and 'humidity'.
 
         .. code-block:: python
 
@@ -265,7 +265,7 @@ class IO_MQTT:
 
     def subscribe_to_time(self, time_type):
         """Adafruit IO provides some built-in MQTT topics for getting the current server time.
-        :param str time_type: Current Adafruit IO server time. Can be `seconds`, `millis`, or `iso`.
+        :param str time_type: Current Adafruit IO server time. Can be 'seconds', 'millis', or 'iso'.
         Information about these topics can be found on the Adafruit IO MQTT API Docs.:
         https://io.adafruit.com/api/docs/mqtt.html#time-topics
         """
@@ -283,14 +283,14 @@ class IO_MQTT:
         :param str group_key: Adafruit IO Group key.
         :param str shared_user: Owner of the Adafruit IO feed, required for shared feeds.
 
-        Example of unsubscribing from a Feed:
+        Example of unsubscribing from a feed.
 
         .. code-block:: python
 
             client.unsubscribe('temperature')
 
-        Example of unsubscribing from two feeds: `temperature`
-        and `humidity`
+        Example of unsubscribing from two feeds: 'temperature'
+        and 'humidity'
 
         .. code-block:: python
 
@@ -316,6 +316,7 @@ class IO_MQTT:
     def publish_multiple(self, feeds_and_data, timeout=3, is_group=False):
         """Publishes multiple data points to multiple feeds or groups with a variable
         timeout.
+
         :param str feeds_and_data: List of tuples containing topic strings and data values.
         :param int timeout: Delay between publishing data points to Adafruit IO, in seconds.
         :param bool is_group: Set to True if you're publishing to a group.
@@ -342,6 +343,7 @@ class IO_MQTT:
     # pylint: disable=too-many-arguments
     def publish(self, feed_key, data, metadata=None, shared_user=None, is_group=False):
         """Publishes to an An Adafruit IO Feed.
+
         :param str feed_key: Adafruit IO Feed key.
         :param str data: Data to publish to the feed or group.
         :param int data: Data to publish to the feed or group.
@@ -417,6 +419,7 @@ class IO_HTTP:
     """
     Client for interacting with the Adafruit IO HTTP API.
     https://io.adafruit.com/api/docs/#adafruit-io-http-api
+
         :param str adafruit_io_username: Adafruit IO Username
         :param str adafruit_io_key: Adafruit IO Key
         :param wifi_manager: WiFiManager object from ESPSPI_WiFiManager or ESPAT_WiFiManager
