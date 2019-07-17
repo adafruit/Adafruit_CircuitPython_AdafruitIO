@@ -5,13 +5,13 @@ from random import randint
 
 import board
 import busio
-import neopixel
 from adafruit_esp32spi import adafruit_esp32spi
 from adafruit_esp32spi import adafruit_esp32spi_wifimanager
 import adafruit_esp32spi.adafruit_esp32spi_socket as socket
+from digitalio import DigitalInOut
+import neopixel
 from adafruit_io.adafruit_io import IO_MQTT
 from adafruit_minimqtt import MQTT
-from digitalio import DigitalInOut
 
 ### WiFi ###
 
