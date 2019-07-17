@@ -10,14 +10,12 @@ import board
 import neopixel
 import busio
 from digitalio import DigitalInOut
-
-# Import WiFi configuration
 from adafruit_esp32spi import adafruit_esp32spi
 from adafruit_esp32spi import adafruit_esp32spi_wifimanager
 import adafruit_esp32spi.adafruit_esp32spi_socket as socket
 
-# Import the Adafruit IO MQTT Class
-from adafruit_io.adafruit_io import MQTT
+from adafruit_minimqtt import MQTT
+from adafruit_io.adafruit_io import IO_MQTT
 
 ### WiFi ###
 
@@ -41,7 +39,9 @@ esp32_reset = DigitalInOut(board.ESP_RESET)
 spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
 esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
 """Use below for Most Boards"""
-status_light = neopixel.NeoPixel(board.NEOPIXEL, 1, brightness=0.2) # Uncomment for Most Boards
+status_light = neopixel.NeoPixel(
+    board.NEOPIXEL, 1, brightness=0.2
+)  # Uncomment for Most Boards
 """Uncomment below for ItsyBitsy M4"""
 # status_light = dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
 # Uncomment below for an externally defined RGB LED
@@ -59,61 +59,59 @@ def connected(client):
     # This is a good place to subscribe to feed changes.  The client parameter
     # passed to this function is the Adafruit IO MQTT client so you can make
     # calls against it easily.
-    print('Connected to Adafruit IO!  Listening for DemoFeed changes...')
+    print("Connected to Adafruit IO!  Listening for DemoFeed changes...")
     # Subscribe to changes on a feed named DemoFeed.
-    client.subscribe('DemoFeed')
+    client.subscribe("DemoFeed")
+
 
 def disconnected(client):
     # Disconnected function will be called when the client disconnects.
-    print('Disconnected from Adafruit IO!')
-    sys.exit(1)
+    print("Disconnected from Adafruit IO!")
+
 
 def message(client, feed_id, payload):
     # Message function will be called when a subscribed feed has a new value.
     # The feed_id parameter identifies the feed, and the payload parameter has
     # the new value.
-    print('Feed {0} received new value: {1}'.format(feed_id, payload))
+    print("Feed {0} received new value: {1}".format(feed_id, payload))
+
 
 # Connect to WiFi
 wifi.connect()
 
-# Create an Adafruit IO MQTT client.
-client = MQTT(secrets['aio_user'],
-              secrets['aio_password'],
-              wifi,
-              socket)
+# Initialize a new MQTT Client
+client = MQTT(
+    socket=socket,
+    broker="io.adafruit.com",
+    username=secrets["aio_user"],
+    password=secrets["aio_key"],
+    network_manager=wifi,
+)
 
 # Setup the callback functions defined above.
-client.on_connect    = connected
+client.on_connect = connected
 client.on_disconnect = disconnected
-client.on_message    = message
+client.on_message = message
 
-# Connect to the Adafruit IO server.
-client.connect()
+# Initialize an Adafruit IO MQTT Client
+io = IO_MQTT(client)
 
-# Now the program needs to use a client loop function to ensure messages are
-# sent and received.  There are a two options for driving the message loop:
+# Connect to Adafruit IO
+io.connect()
 
-# You can pump the message loop yourself by periodically calling
-# the client loop function.  Notice how the loop below changes to call loop
-# continuously while still sending a new message every 10 seconds.  This is a
-# good option if you don't want to or can't have a thread pumping the message
-# loop in the background.
+# You can call the message loop every X seconds
 last = 0
-print('Publishing a new message every 10 seconds (press Ctrl-C to quit)...')
+print("Publishing a new message every 10 seconds...")
 while True:
     # Explicitly pump the message loop.
-    client.loop()
+    io.loop()
     # Send a new message every 10 seconds.
     if (time.monotonic() - last) >= 5:
         value = randint(0, 100)
-        print('Publishing {0} to DemoFeed.'.format(value))
-        client.publish('DemoFeed', value)
+        print("Publishing {0} to DemoFeed.".format(value))
+        io.publish("DemoFeed", value)
         last = time.monotonic()
 
-# Or you can just call loop_blocking.  This will run a message loop
-# forever, so your program will not get past the loop_blocking call.  This is
-# good for simple programs which only listen to events.  For more complex programs
-# you probably need to have a background thread loop or explicit message loop like
-# the two previous examples above.
-# client.loop_blocking()
+# You can also call loop_blocking if you only want to receive values.
+# NOTE: If uncommented, no code below this line will run.
+# io.loop_blocking()
