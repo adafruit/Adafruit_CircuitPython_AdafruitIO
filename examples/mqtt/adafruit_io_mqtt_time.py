@@ -1,9 +1,7 @@
-# Example of using the Adafruit IO CircuitPython MQTT client
-# to subscribe to an Adafruit IO feed and publish random data
-# to be received by the feed.
-#
-# Example by Tony DiCola for Adafruit Industries
-# Modified by Brent Rubell for Adafruit Industries, 2019
+# Adafruit IO provides some built-in MQTT topics
+# for obtaining the current server time, if you don't have
+# access to a RTC module. 
+
 import time
 from random import randint
 import board
@@ -59,9 +57,24 @@ def connected(client):
     # This is a good place to subscribe to feed changes.  The client parameter
     # passed to this function is the Adafruit IO MQTT client so you can make
     # calls against it easily.
-    print("Connected to Adafruit IO!  Listening for DemoFeed changes...")
-    # Subscribe to changes on a feed named DemoFeed.
-    client.subscribe("DemoFeed")
+    print("Connected to Adafruit IO!")
+    
+    # Subscribe to time/seconds topic
+    # https://io.adafruit.com/api/docs/mqtt.html#time-seconds
+    io.subscribe_to_time('seconds')
+
+    # Subscribe to time/millis topic
+    # https://io.adafruit.com/api/docs/mqtt.html#time-millis
+    io.subscribe_to_time('millis')
+
+    # Subscribe to time/ISO-8601 topic
+    # https://io.adafruit.com/api/docs/mqtt.html#time-iso-8601
+    io.subscribe_to_time('iso')
+
+    # Subscribe to time/hours topic
+    # NOTE: This topic only publishes once every hour.
+    # https://io.adafruit.com/api/docs/mqtt.html#adafruit-io-monitor
+    io.subscribe_to_time('hours')
 
 
 def disconnected(client):
@@ -86,7 +99,7 @@ client = MQTT(
     username=secrets["aio_user"],
     password=secrets["aio_key"],
     network_manager=wifi,
-    log=True,
+    log=True
 )
 
 # Initialize an Adafruit IO MQTT Client
@@ -100,20 +113,5 @@ io.on_message = message
 # Connect to Adafruit IO
 io.connect()
 
-# Below is an example of manually publishing a new  value to Adafruit IO.
-last = 0
-print("Publishing a new message every 10 seconds...")
-while True:
-    # Explicitly pump the message loop.
-    io.loop()
-    # Send a new message every 10 seconds.
-    if (time.monotonic() - last) >= 5:
-        value = randint(0, 100)
-        print("Publishing {0} to DemoFeed.".format(value))
-        io.publish("DemoFeed", value)
-        last = time.monotonic()
-
-
-# You can also call loop_blocking if you only want to receive values.
-# NOTE: If uncommented, no code below this line will run.
-# io.loop_blocking()
+# Listen forever...
+io.loop_blocking()
