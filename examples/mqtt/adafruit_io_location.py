@@ -83,8 +83,7 @@ mqtt_client = MQTT(
     broker="io.adafruit.com",
     username=secrets["aio_user"],
     password=secrets["aio_key"],
-    network_manager=wifi,
-    log=True,
+    network_manager=wifi
 )
 
 # Initialize an Adafruit IO MQTT Client
