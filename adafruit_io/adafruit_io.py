@@ -59,7 +59,7 @@ class IO_MQTT:
 
     # pylint: disable=protected-access
     def __init__(self, mqtt_client):
-        # MiniMQTT Object
+        # Check for MiniMQTT client
         mqtt_client_type = str(type(mqtt_client))
         if "MQTT" in mqtt_client_type:
             self._client = mqtt_client
@@ -67,7 +67,7 @@ class IO_MQTT:
             raise TypeError(
                 "This class requires a MiniMQTT client object, please create one."
             )
-        # Adafruit IO Auth. requires a username
+        # MiniMQTT's username kwarg is optional, IO requires a username
         try:
             self._user = self._client._user
         except:
@@ -85,10 +85,17 @@ class IO_MQTT:
         self._client.on_disconnect = self._on_disconnect_mqtt
         self._client.on_message = self._on_message_mqtt
         self._logger = False
+        # Write to the MiniMQTT logger, if avaliable.
         if self._client._logger is not None:
             self._logger = True
             self._client.set_logger_level("DEBUG")
         self._connected = False
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exception_type, exception_value, traceback):
+        self.disconnect()
 
     def connect(self):
         """Connects to the Adafruit IO MQTT Broker.
@@ -100,7 +107,7 @@ class IO_MQTT:
             raise AdafruitIO_MQTTError("Unable to connect to Adafruit IO.")
 
     def disconnect(self):
-        """Disconnects from Adafruit IO.
+        """Disconnects from Adafruit IO MQTT Broker.
         """
         if self._connected:
             self._client.disconnect()
@@ -112,7 +119,7 @@ class IO_MQTT:
 
     # pylint: disable=not-callable, unused-argument
     def _on_connect_mqtt(self, client, userdata, flags, return_code):
-        """Runs when the on_connect callback is run from code.
+        """Runs when the client calls on_connect.
         """
         if self._logger:
             self._client._logger.debug("Client called on_connect.")
@@ -126,8 +133,7 @@ class IO_MQTT:
 
     # pylint: disable=not-callable, unused-argument
     def _on_disconnect_mqtt(self, client, userdata, return_code):
-        """Runs when the on_disconnect callback is run from
-        code.
+        """Runs when the client calls on_disconnect.
         """
         if self._logger:
             self._client._logger.debug("Client called on_disconnect")
@@ -138,8 +144,8 @@ class IO_MQTT:
 
     # pylint: disable=not-callable
     def _on_message_mqtt(self, client, topic, payload):
-        """Runs when the on_message callback is run from code.
-        Parses incoming data from special Adafruit IO feeds.
+        """Runs when the client calls on_message. Parses and returns
+        incoming data from Adafruit IO feeds.
         :param MQTT client: A MQTT Client Instance.
         :param str topic: MQTT topic response from Adafruit IO.
         :param str payload: MQTT payload data response from Adafruit IO.
@@ -197,7 +203,7 @@ class IO_MQTT:
 
     # Subscriptions
     def subscribe(self, feed_key=None, group_key=None, shared_user=None):
-        """Subscribes to an Adafruit IO feed or group.
+        """Subscribes to your Adafruit IO feed or group.
         Can also subscribe to someone else's feed.
         :param str feed_key: Adafruit IO Feed key.
         :param str group_key: Adafruit IO Group key.
@@ -226,13 +232,13 @@ class IO_MQTT:
             raise AdafruitIO_MQTTError("Must provide a feed_key or group_key.")
 
     def subscribe_to_throttling(self):
-        """Subscribes to your personal Adafruit IO /throttle feed.
+        """Subscribes to your personal Adafruit IO /throttle topic.
         https://io.adafruit.com/api/docs/mqtt.html#mqtt-api-rate-limiting
         """
         self._client.subscribe("%s/throttle" % self._user)
 
     def subscribe_to_errors(self):
-        """Subscribes to your personal Adafruit IO /errors feed.
+        """Subscribes to your personal Adafruit IO /errors topic.
         Notifies you of errors relating to publish/subscribe calls.
         """
         self._client.subscribe("%s/errors" % self._user)
@@ -277,18 +283,24 @@ class IO_MQTT:
         :param str group_key: Adafruit IO Group key.
         :param str shared_user: Owner of the Adafruit IO feed, required for shared feeds.
 
-        Example of unsubscribing from an Adafruit IO Feed named 'temperature':
+        Example of unsubscribing from a Feed:
 
         .. code-block:: python
 
             client.unsubscribe('temperature')
 
-        Example of unsubscribing to two Adafruit IO feeds: `temperature`
+        Example of unsubscribing from two feeds: `temperature`
         and `humidity`
 
         .. code-block:: python
 
             client.unsubscribe([('temperature'), ('humidity')])
+
+        Example of unsubscribing from a shared feed.
+
+        .. code-block:: python
+
+            client.unsubscribe('temperature', shared_user='adabot')
 
         """
         if shared_user is not None and feed_key is not None:
@@ -302,9 +314,10 @@ class IO_MQTT:
 
     # Publishing
     def publish_multiple(self, feeds_and_data, timeout=3, is_group=False):
-        """Publishes multiple data points to multiple feeds or groups.
+        """Publishes multiple data points to multiple feeds or groups with a variable
+        timeout.
         :param str feeds_and_data: List of tuples containing topic strings and data values.
-        :param int timeout: Delay between publishing data points to Adafruit IO.
+        :param int timeout: Delay between publishing data points to Adafruit IO, in seconds.
         :param bool is_group: Set to True if you're publishing to a group.
 
         Example of publishing multiple data points on different feeds to Adafruit IO:
@@ -343,22 +356,22 @@ class IO_MQTT:
 
             client.publish('temperature', 30)
 
-        Example of publishing a floating point value to Adafruit IO on feed 'temperature'.
+        Example of publishing a floating point value to feed 'temperature'.
         ..code-block:: python
 
             client.publish('temperature', 3.14)
 
-        Example of publishing a string to Adafruit IO on feed 'temperature'.
+        Example of publishing a string to feed 'temperature'.
         ..code-block:: python
 
             client.publish('temperature, 'thirty degrees')
 
-        Example of publishing an integer to Adafruit IO on group 'weatherstation'.
+        Example of publishing an integer to group 'weatherstation'.
         ..code-block:: python
 
             client.publish('weatherstation', 12, is_group=True)
 
-        Example of publishing to a shared Adafruit IO feed.
+        Example of publishing to a shared feed.
         ..code-block:: python
 
             client.publish('temperature', shared_user='myfriend')
@@ -391,6 +404,11 @@ class IO_MQTT:
         value on feed_key.
         https://io.adafruit.com/api/docs/mqtt.html#retained-values
         :param str feed_key: Adafruit IO Feed key.
+
+        Example of obtaining a recently published value on a feed:
+        ..code-block:: python
+
+            io.get('temperature')
         """
         self._client.publish("{0}/feeds{1}/get".format(self._user, feed_key), "\0")
 
