@@ -69,7 +69,7 @@ class IO_MQTT:
             )
         # MiniMQTT's username kwarg is optional, IO requires a username
         try:
-            self._user = self._client._user
+            self._user = self._client.user
         except:
             raise TypeError(
                 "Adafruit IO requires a username, please set one in MiniMQTT"
@@ -86,7 +86,7 @@ class IO_MQTT:
         self._client.on_message = self._on_message_mqtt
         self._logger = False
         # Write to the MiniMQTT logger, if avaliable.
-        if self._client._logger is not None:
+        if self._client.logger is not None:
             self._logger = True
             self._client.set_logger_level("DEBUG")
         self._connected = False
