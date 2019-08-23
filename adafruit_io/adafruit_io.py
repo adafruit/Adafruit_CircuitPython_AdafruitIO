@@ -427,7 +427,7 @@ class IO_HTTP:
     """
 
     def __init__(self, adafruit_io_username, adafruit_io_key, wifi_manager):
-        self._username = adafruit_io_username
+        self.username = adafruit_io_username
         self.key = adafruit_io_key
         wifi_type = str(type(wifi_manager))
         if "ESPSPI_WiFiManager" in wifi_type or "ESPAT_WiFiManager" in wifi_type:
@@ -477,7 +477,7 @@ class IO_HTTP:
         """Composes a valid API request path.
         :param str path: Adafruit IO API URL path.
         """
-        return "https://io.adafruit.com/api/v2/{0}/{1}".format(self._username, path)
+        return "https://io.adafruit.com/api/v2/{0}/{1}".format(self.username, path)
 
     # HTTP Requests
     def _post(self, path, payload):
