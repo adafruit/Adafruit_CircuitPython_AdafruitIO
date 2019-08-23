@@ -69,7 +69,7 @@ class IO_MQTT:
             )
         # MiniMQTT's username kwarg is optional, IO requires a username
         try:
-            self._user = self._client._user
+            self._user = self._client.user
         except:
             raise TypeError(
                 "Adafruit IO requires a username, please set one in MiniMQTT"
@@ -86,7 +86,7 @@ class IO_MQTT:
         self._client.on_message = self._on_message_mqtt
         self._logger = False
         # Write to the MiniMQTT logger, if avaliable.
-        if self._client._logger is not None:
+        if self._client.logger is not None:
             self._logger = True
             self._client.set_logger_level("DEBUG")
         self._connected = False
@@ -427,7 +427,7 @@ class IO_HTTP:
     """
 
     def __init__(self, adafruit_io_username, adafruit_io_key, wifi_manager):
-        self.username = adafruit_io_username
+        self._username = adafruit_io_username
         self.key = adafruit_io_key
         wifi_type = str(type(wifi_manager))
         if "ESPSPI_WiFiManager" in wifi_type or "ESPAT_WiFiManager" in wifi_type:
@@ -477,7 +477,7 @@ class IO_HTTP:
         """Composes a valid API request path.
         :param str path: Adafruit IO API URL path.
         """
-        return "https://io.adafruit.com/api/v2/{0}/{1}".format(self.username, path)
+        return "https://io.adafruit.com/api/v2/{0}/{1}".format(self._username, path)
 
     # HTTP Requests
     def _post(self, path, payload):
