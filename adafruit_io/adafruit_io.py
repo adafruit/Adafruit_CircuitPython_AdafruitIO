@@ -69,7 +69,7 @@ class IO_MQTT:
             )
         # MiniMQTT's username kwarg is optional, IO requires a username
         try:
-            self._user = self._client._user
+            self._user = self._client.user
         except:
             raise TypeError(
                 "Adafruit IO requires a username, please set one in MiniMQTT"
@@ -84,9 +84,11 @@ class IO_MQTT:
         self._client.on_connect = self._on_connect_mqtt
         self._client.on_disconnect = self._on_disconnect_mqtt
         self._client.on_message = self._on_message_mqtt
+        self._client.on_subscribe = self._on_subscribe_mqtt
+        self._client.on_unsubscribe = self._on_unsubscribe_mqtt
         self._logger = False
         # Write to the MiniMQTT logger, if avaliable.
-        if self._client._logger is not None:
+        if self._client.logger is not None:
             self._logger = True
             self._client.set_logger_level("DEBUG")
         self._connected = False
@@ -181,6 +183,24 @@ class IO_MQTT:
                 "You must define an on_message method before calling this callback."
             )
         self.on_message(self, topic_name, message)
+
+    # pylint: disable=not-callable
+    def _on_subscribe_mqtt(self, client, user_data, topic, qos):
+        """Runs when the client calls on_subscribe.
+        """
+        if self._logger:
+            self._client._logger.debug("Client called on_subscribe")
+        if self.on_subscribe is not None:
+            self.on_subscribe(self, user_data, topic, qos)
+
+    # pylint: disable=not-callable
+    def _on_unsubscribe_mqtt(self, client, user_data, topic, pid):
+        """Runs when the client calls on_unsubscribe.
+        """
+        if self._logger:
+            self._client._logger.debug("Client called on_unsubscribe")
+        if self.on_unsubscribe is not None:
+            self.on_unsubscribe(self, user_data, topic, pid)
 
     def loop(self):
         """Manually process messages from Adafruit IO.
