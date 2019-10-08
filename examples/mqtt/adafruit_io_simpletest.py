@@ -65,6 +65,14 @@ def connected(client):
     # Subscribe to changes on a feed named DemoFeed.
     client.subscribe("DemoFeed")
 
+def subscribe(client, userdata, topic, granted_qos):
+    # This method is called when the client subscribes to a new feed.
+    print('Subscribed to {0} with QOS level {1}'.format(topic, granted_qos))
+
+def unsubscribe(client, userdata, topic, pid):
+    # This method is called when the client unsubscribes from a feed.
+    print('Unsubscribed from {0} with PID {1}'.format(topic, pid))
+
 # pylint: disable=unused-argument
 def disconnected(client):
     # Disconnected function will be called when the client disconnects.
@@ -96,6 +104,8 @@ io = IO_MQTT(mqtt_client)
 # Connect the callback methods defined above to Adafruit IO
 io.on_connect = connected
 io.on_disconnect = disconnected
+io.on_subscribe = subscribe
+io.on_unsubscribe = unsubscribe
 io.on_message = message
 
 # Connect to Adafruit IO
