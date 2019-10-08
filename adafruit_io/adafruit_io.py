@@ -510,7 +510,9 @@ class IO_HTTP:
             path, json=payload, headers=self._create_headers(self._aio_headers[0])
         )
         self._handle_error(response)
-        return response.json()
+        json_data = response.json()
+        response.close()
+        return json_data
 
     def _get(self, path):
         """
@@ -521,7 +523,9 @@ class IO_HTTP:
             path, headers=self._create_headers(self._aio_headers[1])
         )
         self._handle_error(response)
-        return response.json()
+        json_data = response.json()
+        response.close()
+        return json_data
 
     def _delete(self, path):
         """
@@ -532,7 +536,9 @@ class IO_HTTP:
             path, headers=self._create_headers(self._aio_headers[0])
         )
         self._handle_error(response)
-        return response.json()
+        json_data = response.json()
+        response.close()
+        return json_data
 
     # Data
     def send_data(self, feed_key, data, metadata=None, precision=None):
