@@ -9,8 +9,8 @@ Adafruit_CircuitPython_AdafruitIO
     :target: https://discord.gg/nBQh6qu
     :alt: Discord
 
-.. image:: https://travis-ci.com/adafruit/Adafruit_CircuitPython_AdafruitIO.svg?branch=master
-    :target: https://travis-ci.com/adafruit/Adafruit_CircuitPython_AdafruitIO
+.. image:: https://github.com/adafruit/Adafruit_CircuitPython_AdafruitIO/workflows/Build%20CI/badge.svg
+    :target: https://github.com/adafruit/Adafruit_CircuitPython_AdafruitIO/actions/
     :alt: Build Status
 
 CircuitPython wrapper library for communicating with `Adafruit IO <http://io.adafruit.com>`_.
