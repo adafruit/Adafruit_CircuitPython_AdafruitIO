@@ -11,7 +11,7 @@ import adafruit_esp32spi.adafruit_esp32spi_socket as socket
 from digitalio import DigitalInOut
 import neopixel
 from adafruit_io.adafruit_io import IO_MQTT
-from adafruit_minimqtt import MQTT
+import adafruit_minimqtt as MQTT
 
 ### WiFi ###
 
@@ -74,18 +74,19 @@ def message(client, feed_id, payload):
     # the new value.
     print("Feed {0} received new value: {1}".format(feed_id, payload))
 
-
 # Connect to WiFi
+print("Connecting to WiFi...")
+wifi.connect()
+print("Connected!")
+
+# Initialize MQTT interface with the esp interface
+MQTT.set_socket(socket, esp)
 wifi.connect()
 
 # Initialize a new MQTT Client object
-mqtt_client = MQTT(
-    socket=socket,
-    broker="io.adafruit.com",
-    username=secrets["aio_user"],
-    password=secrets["aio_key"],
-    network_manager=wifi
-)
+mqtt_client = MQTT.MQTT(broker="https://io.adafruit.com",
+                        username=secrets["aio_user"],
+                        password=secrets["aio_key"])
 
 # Initialize an Adafruit IO MQTT Client
 io = IO_MQTT(mqtt_client)
@@ -103,6 +104,7 @@ temp_feed = "weatherstation.temperature"
 humid_feed = "weatherstation.humidity"
 
 # Connect to Adafruit IO
+print("Connecting to Adafruit IO...")
 io.connect()
 
 print("Publishing new messages to group feeds every 5 seconds...")
