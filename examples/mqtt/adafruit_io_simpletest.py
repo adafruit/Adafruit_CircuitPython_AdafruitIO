@@ -92,7 +92,6 @@ print("Connected!")
 
 # Initialize MQTT interface with the esp interface
 MQTT.set_socket(socket, esp)
-wifi.connect()
 
 # Initialize a new MQTT Client object
 mqtt_client = MQTT.MQTT(broker="https://io.adafruit.com",
