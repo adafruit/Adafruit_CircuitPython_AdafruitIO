@@ -1,7 +1,7 @@
 # Adafruit IO provides some built-in MQTT topics
 # for obtaining the current server time, if you don't have
 # access to a RTC module.
-
+import time
 import board
 import busio
 from digitalio import DigitalInOut
