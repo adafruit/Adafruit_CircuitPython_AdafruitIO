@@ -60,25 +60,27 @@ def connected(client):
 
     # Subscribe to time/seconds topic
     # https://io.adafruit.com/api/docs/mqtt.html#time-seconds
-    io.subscribe_to_time('seconds')
+    io.subscribe_to_time("seconds")
 
     # Subscribe to time/millis topic
     # https://io.adafruit.com/api/docs/mqtt.html#time-millis
-    io.subscribe_to_time('millis')
+    io.subscribe_to_time("millis")
 
     # Subscribe to time/ISO-8601 topic
     # https://io.adafruit.com/api/docs/mqtt.html#time-iso-8601
-    io.subscribe_to_time('iso')
+    io.subscribe_to_time("iso")
 
     # Subscribe to time/hours topic
     # NOTE: This topic only publishes once every hour.
     # https://io.adafruit.com/api/docs/mqtt.html#adafruit-io-monitor
-    io.subscribe_to_time('hours')
+    io.subscribe_to_time("hours")
+
 
 # pylint: disable=unused-argument
 def disconnected(client):
     # Disconnected function will be called when the client disconnects.
     print("Disconnected from Adafruit IO!")
+
 
 # pylint: disable=unused-argument
 def message(client, feed_id, payload):

@@ -5,10 +5,10 @@ from random import randint
 
 import board
 import busio
+from digitalio import DigitalInOut
 from adafruit_esp32spi import adafruit_esp32spi
 from adafruit_esp32spi import adafruit_esp32spi_wifimanager
 import adafruit_esp32spi.adafruit_esp32spi_socket as socket
-from digitalio import DigitalInOut
 import neopixel
 from adafruit_io.adafruit_io import IO_MQTT
 from adafruit_minimqtt import MQTT
@@ -62,10 +62,12 @@ def connected(client):
     # Subscribe to Group
     io.subscribe(group_key=group_name)
 
+
 # pylint: disable=unused-argument
 def disconnected(client):
     # Disconnected function will be called when the client disconnects.
     print("Disconnected from Adafruit IO!")
+
 
 # pylint: disable=unused-argument
 def message(client, feed_id, payload):
@@ -84,7 +86,7 @@ mqtt_client = MQTT(
     broker="io.adafruit.com",
     username=secrets["aio_user"],
     password=secrets["aio_key"],
-    network_manager=wifi
+    network_manager=wifi,
 )
 
 # Initialize an Adafruit IO MQTT Client
