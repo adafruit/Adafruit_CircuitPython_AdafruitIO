@@ -7,12 +7,12 @@
 import time
 from random import randint
 
-
 import board
 import busio
+from digitalio import DigitalInOut
+
 from adafruit_wiznet5k.adafruit_wiznet5k import WIZNET5K
 import adafruit_wiznet5k.adafruit_wiznet5k_socket as socket
-from digitalio import DigitalInOut
 from adafruit_io.adafruit_io import IO_MQTT
 import adafruit_minimqtt as MQTT
 
