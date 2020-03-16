@@ -34,37 +34,36 @@ except AttributeError:
 
 spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
 esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
-status_light = neopixel.NeoPixel(board.NEOPIXEL, 1, brightness=0.2) # Uncomment for Most Boards
+status_light = neopixel.NeoPixel(
+    board.NEOPIXEL, 1, brightness=0.2
+)  # Uncomment for Most Boards
 """Uncomment below for ItsyBitsy M4"""
-#status_light = dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
+# status_light = dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
 wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_light)
 
 # Set your Adafruit IO Username and Key in secrets.py
 # (visit io.adafruit.com if you need to create an account,
 # or if you need your Adafruit IO key.)
-aio_username = secrets['aio_username']
-aio_key = secrets['aio_key']
+aio_username = secrets["aio_username"]
+aio_key = secrets["aio_key"]
 
 # Create an instance of the Adafruit IO HTTP client
 io = IO_HTTP(aio_username, aio_key, wifi)
 
 try:
     # Get the 'location' feed from Adafruit IO
-    location_feed = io.get_feed('location')
+    location_feed = io.get_feed("location")
 except AdafruitIO_RequestError:
     # If no 'location' feed exists, create one
-    location_feed = io.create_new_feed('location')
+    location_feed = io.create_new_feed("location")
 
 # Set data
 data_value = 42
 
 # Set up metadata associated with data_value
-metadata = {'lat': 40.726190,
-            'lon': -74.005334,
-            'ele': -6,
-            'created_at': None}
+metadata = {"lat": 40.726190, "lon": -74.005334, "ele": -6, "created_at": None}
 
 # Send data and location metadata to the 'location' feed
-print('Sending data and location metadata to IO...')
-io.send_data(location_feed['key'], data_value, metadata)
-print('Data sent!')
+print("Sending data and location metadata to IO...")
+io.send_data(location_feed["key"], data_value, metadata)
+print("Data sent!")

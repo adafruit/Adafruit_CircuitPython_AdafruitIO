@@ -488,9 +488,9 @@ class IO_HTTP:
         """
         if response.status_code == 429:
             raise AdafruitIO_ThrottleError
-        elif response.status_code == 400:
+        if response.status_code == 400:
             raise AdafruitIO_RequestError(response)
-        elif response.status_code >= 400:
+        if response.status_code >= 400:
             raise AdafruitIO_RequestError(response)
 
     def _compose_path(self, path):

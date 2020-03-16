@@ -36,16 +36,18 @@ except AttributeError:
 
 spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
 esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
-status_light = neopixel.NeoPixel(board.NEOPIXEL, 1, brightness=0.2) # Uncomment for Most Boards
+status_light = neopixel.NeoPixel(
+    board.NEOPIXEL, 1, brightness=0.2
+)  # Uncomment for Most Boards
 """Uncomment below for ItsyBitsy M4"""
-#status_light = dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
+# status_light = dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
 wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_light)
 
 # Set your Adafruit IO Username and Key in secrets.py
 # (visit io.adafruit.com if you need to create an account,
 # or if you need your Adafruit IO key.)
-aio_username = secrets['aio_username']
-aio_key = secrets['aio_key']
+aio_username = secrets["aio_username"]
+aio_key = secrets["aio_key"]
 
 # Create an instance of the Adafruit IO HTTP client
 io = IO_HTTP(aio_username, aio_key, wifi)
@@ -56,18 +58,25 @@ io = IO_HTTP(aio_username, aio_key, wifi)
 # and copy over the location ID)
 location_id = 1234
 
-print('Getting weather record from IO...')
+print("Getting weather record from IO...")
 # Get the specified weather record with current weather
 # and all available forecast information.
 forecast = io.receive_weather(location_id)
 
 # Get today's forecast
-current_forecast = forecast['current']
-print('It is {0} and {1}*F.'.format(current_forecast['summary'], current_forecast['temperature']))
-print('with a humidity of {0}%'.format(current_forecast['humidity'] * 100))
+current_forecast = forecast["current"]
+print(
+    "It is {0} and {1}*F.".format(
+        current_forecast["summary"], current_forecast["temperature"]
+    )
+)
+print("with a humidity of {0}%".format(current_forecast["humidity"] * 100))
 
 # Get tomorrow's forecast
-tom_forecast = forecast['forecast_days_1']
-print('\nTomorrow has a low of {0}*F and a high of {1}*F.'.format(
-    tom_forecast['temperatureLow'], tom_forecast['temperatureHigh']))
-print('with a humidity of {0}%'.format(tom_forecast['humidity'] * 100))
+tom_forecast = forecast["forecast_days_1"]
+print(
+    "\nTomorrow has a low of {0}*F and a high of {1}*F.".format(
+        tom_forecast["temperatureLow"], tom_forecast["temperatureHigh"]
+    )
+)
+print("with a humidity of {0}%".format(tom_forecast["humidity"] * 100))

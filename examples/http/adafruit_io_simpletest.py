@@ -34,34 +34,36 @@ except AttributeError:
 
 spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
 esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
-status_light = neopixel.NeoPixel(board.NEOPIXEL, 1, brightness=0.2) # Uncomment for Most Boards
+status_light = neopixel.NeoPixel(
+    board.NEOPIXEL, 1, brightness=0.2
+)  # Uncomment for Most Boards
 """Uncomment below for ItsyBitsy M4"""
-#status_light = dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
+# status_light = dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
 wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_light)
 
 # Set your Adafruit IO Username and Key in secrets.py
 # (visit io.adafruit.com if you need to create an account,
 # or if you need your Adafruit IO key.)
-aio_username = secrets['aio_username']
-aio_key = secrets['aio_key']
+aio_username = secrets["aio_username"]
+aio_key = secrets["aio_key"]
 
 # Create an instance of the Adafruit IO HTTP client
 io = IO_HTTP(aio_username, aio_key, wifi)
 
 try:
     # Get the 'temperature' feed from Adafruit IO
-    temperature_feed = io.get_feed('temperature')
+    temperature_feed = io.get_feed("temperature")
 except AdafruitIO_RequestError:
     # If no 'temperature' feed exists, create one
-    temperature_feed = io.create_new_feed('temperature')
+    temperature_feed = io.create_new_feed("temperature")
 
 # Send random integer values to the feed
 random_value = randint(0, 50)
-print('Sending {0} to temperature feed...'.format(random_value))
-io.send_data(temperature_feed['key'], random_value)
-print('Data sent!')
+print("Sending {0} to temperature feed...".format(random_value))
+io.send_data(temperature_feed["key"], random_value)
+print("Data sent!")
 
 # Retrieve data value from the feed
-print('Retrieving data from temperature feed...')
-received_data = io.receive_data(temperature_feed['key'])
-print('Data from temperature feed: ', received_data['value'])
+print("Retrieving data from temperature feed...")
+received_data = io.receive_data(temperature_feed["key"])
+print("Data from temperature feed: ", received_data["value"])
