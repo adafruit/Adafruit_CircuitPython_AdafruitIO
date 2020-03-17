@@ -61,10 +61,12 @@ def connected(client):
     # Subscribe to a feed named location
     io.subscribe("location")
 
+
 # pylint: disable=unused-argument
 def disconnected(client):
     # Disconnected function will be called when the client disconnects.
     print("Disconnected from Adafruit IO!")
+
 
 # pylint: disable=unused-argument
 def message(client, feed_id, payload):

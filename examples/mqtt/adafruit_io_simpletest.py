@@ -10,10 +10,10 @@ from random import randint
 
 import board
 import busio
+from digitalio import DigitalInOut
 from adafruit_esp32spi import adafruit_esp32spi
 from adafruit_esp32spi import adafruit_esp32spi_wifimanager
 import adafruit_esp32spi.adafruit_esp32spi_socket as socket
-from digitalio import DigitalInOut
 import neopixel
 from adafruit_io.adafruit_io import IO_MQTT
 import adafruit_minimqtt as MQTT
@@ -65,18 +65,22 @@ def connected(client):
     # Subscribe to changes on a feed named DemoFeed.
     client.subscribe("DemoFeed")
 
+
 def subscribe(client, userdata, topic, granted_qos):
     # This method is called when the client subscribes to a new feed.
-    print('Subscribed to {0} with QOS level {1}'.format(topic, granted_qos))
+    print("Subscribed to {0} with QOS level {1}".format(topic, granted_qos))
+
 
 def unsubscribe(client, userdata, topic, pid):
     # This method is called when the client unsubscribes from a feed.
-    print('Unsubscribed from {0} with PID {1}'.format(topic, pid))
+    print("Unsubscribed from {0} with PID {1}".format(topic, pid))
+
 
 # pylint: disable=unused-argument
 def disconnected(client):
     # Disconnected function will be called when the client disconnects.
     print("Disconnected from Adafruit IO!")
+
 
 # pylint: disable=unused-argument
 def message(client, feed_id, payload):
@@ -97,6 +101,7 @@ MQTT.set_socket(socket, esp)
 mqtt_client = MQTT.MQTT(broker="https://io.adafruit.com",
                         username=secrets["aio_user"],
                         password=secrets["aio_key"])
+
 
 # Initialize an Adafruit IO MQTT Client
 io = IO_MQTT(mqtt_client)

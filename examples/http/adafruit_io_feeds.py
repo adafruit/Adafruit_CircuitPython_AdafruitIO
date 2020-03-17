@@ -33,30 +33,32 @@ except AttributeError:
 
 spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
 esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
-status_light = neopixel.NeoPixel(board.NEOPIXEL, 1, brightness=0.2) # Uncomment for Most Boards
+status_light = neopixel.NeoPixel(
+    board.NEOPIXEL, 1, brightness=0.2
+)  # Uncomment for Most Boards
 """Uncomment below for ItsyBitsy M4"""
-#status_light = dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
+# status_light = dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
 wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_light)
 
 # Set your Adafruit IO Username and Key in secrets.py
 # (visit io.adafruit.com if you need to create an account,
 # or if you need your Adafruit IO key.)
-aio_username = secrets['aio_username']
-aio_key = secrets['aio_key']
+aio_username = secrets["aio_username"]
+aio_key = secrets["aio_key"]
 
 # Create an instance of the Adafruit IO HTTP client
 io = IO_HTTP(aio_username, aio_key, wifi)
 
 # Create a new 'circuitpython' feed with a description
-print('Creating new Adafruit IO feed...')
-feed = io.create_new_feed('circuitpython', 'a Adafruit IO CircuitPython feed')
+print("Creating new Adafruit IO feed...")
+feed = io.create_new_feed("circuitpython", "a Adafruit IO CircuitPython feed")
 
 # List a specified feed
-print('Retrieving new Adafruit IO feed...')
-specified_feed = io.get_feed('circuitpython')
+print("Retrieving new Adafruit IO feed...")
+specified_feed = io.get_feed("circuitpython")
 print(specified_feed)
 
 # Delete a specified feed by feed key
-print('Deleting feed...')
-io.delete_feed(specified_feed['key'])
-print('Feed deleted!')
+print("Deleting feed...")
+io.delete_feed(specified_feed["key"])
+print("Feed deleted!")
