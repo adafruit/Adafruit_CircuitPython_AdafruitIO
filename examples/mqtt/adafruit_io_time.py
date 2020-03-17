@@ -1,7 +1,7 @@
 # Adafruit IO provides some built-in MQTT topics
 # for obtaining the current server time, if you don't have
 # access to a RTC module.
-
+import time
 import board
 import busio
 from digitalio import DigitalInOut
@@ -10,7 +10,7 @@ from adafruit_esp32spi import adafruit_esp32spi_wifimanager
 import adafruit_esp32spi.adafruit_esp32spi_socket as socket
 import neopixel
 
-from adafruit_minimqtt import MQTT
+import adafruit_minimqtt as MQTT
 from adafruit_io.adafruit_io import IO_MQTT
 
 ### WiFi ###
@@ -91,16 +91,17 @@ def message(client, feed_id, payload):
 
 
 # Connect to WiFi
+print("Connecting to WiFi...")
 wifi.connect()
+print("Connected!")
+
+# Initialize MQTT interface with the esp interface
+MQTT.set_socket(socket, esp)
 
 # Initialize a new MQTT Client object
-mqtt_client = MQTT(
-    socket=socket,
-    broker="io.adafruit.com",
-    username=secrets["aio_user"],
-    password=secrets["aio_key"],
-    network_manager=wifi,
-)
+mqtt_client = MQTT.MQTT(broker="https://io.adafruit.com",
+                        username=secrets["aio_user"],
+                        password=secrets["aio_key"])
 
 # Initialize an Adafruit IO MQTT Client
 io = IO_MQTT(mqtt_client)
@@ -113,5 +114,16 @@ io.on_message = message
 # Connect to Adafruit IO
 io.connect()
 
-# Listen forever...
-io.loop_blocking()
+
+# Start a blocking message loop...
+# NOTE: NO code below this loop will execute
+# NOTE: Network reconnection is handled within this loop
+while True:
+    try:
+        io.loop()
+    except (ValueError, RuntimeError) as e:
+        print("Failed to get data, retrying\n", e)
+        wifi.reset()
+        io.reconnect()
+        continue
+    time.sleep(1)
