@@ -51,7 +51,7 @@ CLIENT_HEADERS = {"User-Agent": "AIO-CircuitPython/{0}".format(__version__)}
 
 class IO_MQTT:
     """
-    Client for interacting with the Adafruit IO MQTT API.
+    Client for interacting with Adafruit IO MQTT API.
     https://io.adafruit.com/api/docs/mqtt.html#adafruit-io-mqtt-api
 
     :param MiniMQTT mqtt_client: MiniMQTT Client object.
