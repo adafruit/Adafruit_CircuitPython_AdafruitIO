@@ -89,6 +89,7 @@ def message(client, feed_id, payload):
     # the new value.
     print("Feed {0} received new value: {1}".format(feed_id, payload))
 
+
 # Connect to WiFi
 print("Connecting to WiFi...")
 wifi.connect()
@@ -98,9 +99,11 @@ print("Connected!")
 MQTT.set_socket(socket, esp)
 
 # Initialize a new MQTT Client object
-mqtt_client = MQTT.MQTT(broker="https://io.adafruit.com",
-                        username=secrets["aio_user"],
-                        password=secrets["aio_key"])
+mqtt_client = MQTT.MQTT(
+    broker="https://io.adafruit.com",
+    username=secrets["aio_user"],
+    password=secrets["aio_key"],
+)
 
 
 # Initialize an Adafruit IO MQTT Client

@@ -108,7 +108,6 @@ class IO_MQTT:
         except:
             raise AdafruitIO_MQTTError("Unable to reconnect to Adafruit IO.")
 
-
     def connect(self):
         """Connects to the Adafruit IO MQTT Broker.
         Must be called before any other API methods are called.

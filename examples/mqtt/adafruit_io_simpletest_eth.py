@@ -40,18 +40,22 @@ def connected(client):
     # Subscribe to changes on a feed named DemoFeed.
     client.subscribe("DemoFeed")
 
+
 def subscribe(client, userdata, topic, granted_qos):
     # This method is called when the client subscribes to a new feed.
-    print('Subscribed to {0} with QOS level {1}'.format(topic, granted_qos))
+    print("Subscribed to {0} with QOS level {1}".format(topic, granted_qos))
+
 
 def unsubscribe(client, userdata, topic, pid):
     # This method is called when the client unsubscribes from a feed.
-    print('Unsubscribed from {0} with PID {1}'.format(topic, pid))
+    print("Unsubscribed from {0} with PID {1}".format(topic, pid))
+
 
 # pylint: disable=unused-argument
 def disconnected(client):
     # Disconnected function will be called when the client disconnects.
     print("Disconnected from Adafruit IO!")
+
 
 # pylint: disable=unused-argument
 def message(client, feed_id, payload):
@@ -60,13 +64,16 @@ def message(client, feed_id, payload):
     # the new value.
     print("Feed {0} received new value: {1}".format(feed_id, payload))
 
+
 # Initialize MQTT interface with the ethernet interface
 MQTT.set_socket(socket, eth)
 
 # Initialize a new MQTT Client object
-mqtt_client = MQTT.MQTT(broker="http://io.adafruit.com",
-                        username=secrets["aio_user"],
-                        password=secrets["aio_key"])
+mqtt_client = MQTT.MQTT(
+    broker="http://io.adafruit.com",
+    username=secrets["aio_user"],
+    password=secrets["aio_key"],
+)
 
 # Initialize an Adafruit IO MQTT Client
 io = IO_MQTT(mqtt_client)
