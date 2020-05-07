@@ -136,7 +136,7 @@ latex_documents = [
         "AdafruitAdafruit_IO Library Documentation",
         author,
         "manual",
-    ),
+    )
 ]
 
 # -- Options for manual page output ---------------------------------------
@@ -167,5 +167,5 @@ texinfo_documents = [
         "AdafruitAdafruit_IOLibrary",
         "One line description of project.",
         "Miscellaneous",
-    ),
+    )
 ]
