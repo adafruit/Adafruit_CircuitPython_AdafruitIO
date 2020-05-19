@@ -85,7 +85,7 @@ MQTT.set_socket(cellular_socket, fona)
 
 # Initialize a new MQTT Client object
 mqtt_client = MQTT.MQTT(
-    broker="http://io.adafruit.com",
+    broker="io.adafruit.com",
     username=secrets["aio_user"],
     password=secrets["aio_key"],
 )
