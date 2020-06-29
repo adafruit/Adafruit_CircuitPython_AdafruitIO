@@ -48,5 +48,5 @@ setup(
     "wifi",
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
-    packages=["adafruit_adafruit_io"],
+    packages=["adafruit_io"],
 )
