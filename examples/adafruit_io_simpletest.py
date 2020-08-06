@@ -16,7 +16,7 @@ from adafruit_esp32spi import adafruit_esp32spi_wifimanager
 import adafruit_esp32spi.adafruit_esp32spi_socket as socket
 import neopixel
 from adafruit_io.adafruit_io import IO_MQTT
-import adafruit_minimqtt as MQTT
+import adafruit_minimqtt.adafruit_minimqtt as MQTT
 
 ### WiFi ###
 

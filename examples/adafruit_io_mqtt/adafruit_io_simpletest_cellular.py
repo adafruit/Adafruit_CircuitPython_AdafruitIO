@@ -16,7 +16,7 @@ from adafruit_fona.adafruit_fona_gsm import GSM
 import adafruit_fona.adafruit_fona_socket as cellular_socket
 
 from adafruit_io.adafruit_io import IO_MQTT
-import adafruit_minimqtt as MQTT
+import adafruit_minimqtt.adafruit_minimqtt as MQTT
 
 # Get MQTT details and more from a secrets.py file
 try:
