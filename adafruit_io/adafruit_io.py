@@ -224,12 +224,6 @@ class IO_MQTT:
         """
         self._client.loop()
 
-    def loop_blocking(self):
-        """Starts a blocking loop and to processes messages
-        from Adafruit IO. Code below this call will not run.
-        """
-        self._client.loop_forever()
-
     # Subscriptions
     def subscribe(self, feed_key=None, group_key=None, shared_user=None):
         """Subscribes to your Adafruit IO feed or group.
