@@ -17,11 +17,11 @@ from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
 # Import NeoPixel Library
 import neopixel
 
-# Import Adafruit IO HTTP Client
-from adafruit_io.adafruit_io import IO_HTTP, AdafruitIO_RequestError
-
 # Import ADT7410 Library
 import adafruit_adt7410
+
+# Import Adafruit IO HTTP Client
+from adafruit_io.adafruit_io import IO_HTTP, AdafruitIO_RequestError
 
 # Get wifi details and more from a secrets.py file
 try:
