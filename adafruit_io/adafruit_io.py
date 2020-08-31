@@ -70,10 +70,10 @@ class IO_MQTT:
         # MiniMQTT's username kwarg is optional, IO requires a username
         try:
             self._user = self._client.user
-        except:
+        except Exception as err:
             raise TypeError(
                 "Adafruit IO requires a username, please set one in MiniMQTT"
-            )
+            ) from err
         # User-defined MQTT callback methods must be init'd to None
         self.on_connect = None
         self.on_disconnect = None
@@ -105,8 +105,8 @@ class IO_MQTT:
         """
         try:
             self._client.reconnect()
-        except:
-            raise AdafruitIO_MQTTError("Unable to reconnect to Adafruit IO.")
+        except Exception as err:
+            raise AdafruitIO_MQTTError("Unable to reconnect to Adafruit IO.") from err
 
     def connect(self):
         """Connects to the Adafruit IO MQTT Broker.
@@ -114,8 +114,8 @@ class IO_MQTT:
         """
         try:
             self._client.connect()
-        except:
-            raise AdafruitIO_MQTTError("Unable to connect to Adafruit IO.")
+        except Exception as err:
+            raise AdafruitIO_MQTTError("Unable to connect to Adafruit IO.") from err
 
     def disconnect(self):
         """Disconnects from Adafruit IO MQTT Broker.
@@ -556,10 +556,21 @@ class IO_HTTP:
         if precision:
             try:
                 data = round(data, precision)
-            except NotImplementedError:  # received a non-float value
-                raise NotImplementedError("Precision requires a floating point value")
+            except NotImplementedError as err:  # received a non-float value
+                raise NotImplementedError(
+                    "Precision requires a floating point value"
+                ) from err
         payload = self._create_data(data, metadata)
         self._post(path, payload)
+
+    def receive_all_data(self, feed_key):
+        """
+        Get all data values from a specified Adafruit IO feed. Data is
+        returned in reverse order.
+        :param str feed_key: Adafruit IO feed key
+        """
+        path = self._compose_path("feeds/{0}/data".format(feed_key))
+        return self._get(path)
 
     def receive_data(self, feed_key):
         """

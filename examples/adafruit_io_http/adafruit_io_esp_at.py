@@ -10,9 +10,6 @@ import board
 import busio
 from digitalio import DigitalInOut
 
-# Import Adafruit IO HTTP Client
-from adafruit_io.adafruit_io import IO_HTTP, AdafruitIO_RequestError
-
 # ESP32 AT
 from adafruit_espatcontrol import (
     adafruit_espatcontrol,
@@ -21,6 +18,9 @@ from adafruit_espatcontrol import (
 
 # Use below for Most Boards
 import neopixel
+
+# Import Adafruit IO HTTP Client
+from adafruit_io.adafruit_io import IO_HTTP, AdafruitIO_RequestError
 
 status_light = neopixel.NeoPixel(
     board.NEOPIXEL, 1, brightness=0.2
