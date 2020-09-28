@@ -55,6 +55,7 @@ def connected(client):
     # calls against it easily.
     print("Connected to Adafruit IO!  Listening for DemoFeed changes...")
 
+
 def subscribe(client, userdata, topic, granted_qos):
     # This method is called when the client subscribes to a new feed.
     print("Subscribed to {0} with QOS level {1}".format(topic, granted_qos))
@@ -83,6 +84,7 @@ def on_battery_msg(client, topic, message):
     # Method called whenever user/feeds/battery has a new value
     print("Battery level: {}v".format(message))
 
+
 # Connect to WiFi
 print("Connecting to WiFi...")
 wifi.connect()
@@ -93,7 +95,9 @@ MQTT.set_socket(socket, esp)
 
 # Initialize a new MQTT Client object
 mqtt_client = MQTT.MQTT(
-    broker="io.adafruit.com", username=secrets["aio_username"], password=secrets["aio_key"],
+    broker="io.adafruit.com",
+    username=secrets["aio_username"],
+    password=secrets["aio_key"],
 )
 
 # Initialize an Adafruit IO MQTT Client
