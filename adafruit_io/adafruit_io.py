@@ -100,9 +100,7 @@ class IO_MQTT:
         self.disconnect()
 
     def reconnect(self):
-        """Attempts to reconnect to the Adafruit IO MQTT Broker.
-
-        """
+        """Attempts to reconnect to the Adafruit IO MQTT Broker."""
         try:
             self._client.reconnect()
         except Exception as err:
@@ -118,8 +116,7 @@ class IO_MQTT:
             raise AdafruitIO_MQTTError("Unable to connect to Adafruit IO.") from err
 
     def disconnect(self):
-        """Disconnects from Adafruit IO MQTT Broker.
-        """
+        """Disconnects from Adafruit IO MQTT Broker."""
         if self._connected:
             self._client.disconnect()
 
@@ -130,8 +127,7 @@ class IO_MQTT:
 
     # pylint: disable=not-callable, unused-argument
     def _on_connect_mqtt(self, client, userdata, flags, return_code):
-        """Runs when the client calls on_connect.
-        """
+        """Runs when the client calls on_connect."""
         if self._logger:
             self._client._logger.debug("Client called on_connect.")
         if return_code == 0:
@@ -144,8 +140,7 @@ class IO_MQTT:
 
     # pylint: disable=not-callable, unused-argument
     def _on_disconnect_mqtt(self, client, userdata, return_code):
-        """Runs when the client calls on_disconnect.
-        """
+        """Runs when the client calls on_disconnect."""
         if self._logger:
             self._client._logger.debug("Client called on_disconnect")
         self._connected = False
@@ -195,8 +190,7 @@ class IO_MQTT:
 
     # pylint: disable=not-callable
     def _on_subscribe_mqtt(self, client, user_data, topic, qos):
-        """Runs when the client calls on_subscribe.
-        """
+        """Runs when the client calls on_subscribe."""
         if self._logger:
             self._client._logger.debug("Client called on_subscribe")
         if self.on_subscribe is not None:
@@ -204,12 +198,30 @@ class IO_MQTT:
 
     # pylint: disable=not-callable
     def _on_unsubscribe_mqtt(self, client, user_data, topic, pid):
-        """Runs when the client calls on_unsubscribe.
-        """
+        """Runs when the client calls on_unsubscribe."""
         if self._logger:
             self._client._logger.debug("Client called on_unsubscribe")
         if self.on_unsubscribe is not None:
             self.on_unsubscribe(self, user_data, topic, pid)
+
+    def add_feed_callback(self, feed_key, callback_method):
+        """Executes callback_method whenever a message is
+        received on feed_key.
+        :param str feed_key: Adafruit IO feed key.
+        :param str callback_method: Name of callback method.
+
+        """
+        self._client.add_topic_callback(
+            "{0}/feeds/{1}".format(self._user, feed_key), callback_method
+        )
+
+    def remove_feed_callback(self, feed_key):
+        """Removes a previously registered callback method
+        from executing whenever feed_key receives new data.
+        :param str feed_key: Adafruit IO feed key.
+
+        """
+        self._client.remove_topic_callback("{0}/feeds/{1}".format(self._user, feed_key))
 
     def loop(self):
         """Manually process messages from Adafruit IO.
@@ -464,16 +476,14 @@ class IO_HTTP:
 
     @staticmethod
     def _create_headers(io_headers):
-        """Creates http request headers.
-        """
+        """Creates http request headers."""
         headers = CLIENT_HEADERS.copy()
         headers.update(io_headers)
         return headers
 
     @staticmethod
     def _create_data(data, metadata):
-        """Creates JSON data payload
-        """
+        """Creates JSON data payload"""
         if metadata is not None:
             return {
                 "value": data,
