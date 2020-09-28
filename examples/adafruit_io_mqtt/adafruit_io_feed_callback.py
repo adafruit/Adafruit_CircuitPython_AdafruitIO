@@ -73,7 +73,7 @@ def disconnected(client):
 
 
 # pylint: disable=unused-argument
-def message(client, feed_id, payload):
+def on_message(client, feed_id, payload):
     # Message function will be called when a subscribed feed has a new value.
     # The feed_id parameter identifies the feed, and the payload parameter has
     # the new value.
@@ -108,7 +108,7 @@ io.on_connect = connected
 io.on_disconnect = disconnected
 io.on_subscribe = subscribe
 io.on_unsubscribe = unsubscribe
-io.on_message = message
+io.on_message = on_message
 
 # Connect to Adafruit IO
 print("Connecting to Adafruit IO...")
