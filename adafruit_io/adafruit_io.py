@@ -205,8 +205,12 @@ class IO_MQTT:
             self.on_unsubscribe(self, user_data, topic, pid)
 
     def add_feed_callback(self, feed_key, callback_method):
-        """Executes callback_method whenever a message is
-        received on feed_key.
+        """Attaches a callback_method to an Adafruit IO feed.
+        The callback_method function is called when a
+        new value is written to the feed.
+
+        NOTE: The callback_method registered to this method
+        will only execute after a call to loop().
         :param str feed_key: Adafruit IO feed key.
         :param str callback_method: Name of callback method.
 
@@ -218,6 +222,9 @@ class IO_MQTT:
     def remove_feed_callback(self, feed_key):
         """Removes a previously registered callback method
         from executing whenever feed_key receives new data.
+
+        If an on_message callback is registered, new messages
+        will now call on_message instead of the callback_method.
         :param str feed_key: Adafruit IO feed key.
 
         """
