@@ -210,7 +210,7 @@ class IO_MQTT:
         new value is written to the feed.
 
         NOTE: The callback_method registered to this method
-        will only execute after a call to loop().
+        will only execute during loop().
         :param str feed_key: Adafruit IO feed key.
         :param str callback_method: Name of callback method.
 
@@ -223,8 +223,8 @@ class IO_MQTT:
         """Removes a previously registered callback method
         from executing whenever feed_key receives new data.
 
-        If an on_message callback is registered, new messages
-        will now call on_message instead of the callback_method.
+        After this method is called, incoming messages
+        call the shared on_message.
         :param str feed_key: Adafruit IO feed key.
 
         """
