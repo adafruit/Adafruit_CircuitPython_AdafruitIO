@@ -174,6 +174,8 @@ class IO_MQTT:
                     messages.append(payload)
                 topic_name = feeds
                 message = messages
+            elif topic_name[1] == "throttle":
+                raise AdafruitIO_ThrottleError(payload)
             elif topic_name[0] == "time":
                 # Adafruit IO Time Topic
                 topic_name = topic_name[1]

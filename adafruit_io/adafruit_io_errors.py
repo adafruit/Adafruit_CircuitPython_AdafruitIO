@@ -28,13 +28,7 @@ CircuitPython Adafruit IO Error Classes
 
 
 class AdafruitIO_ThrottleError(Exception):
-    """Adafruit IO request error class for rate-limiting"""
-
-    def __init__(self):
-        super().__init__(
-            "Number of Adafruit IO Requests exceeded! \
-                                                            Please try again in 30 seconds.."
-        )
+    """Adafruit IO request error class for rate-limiting."""
 
 
 class AdafruitIO_RequestError(Exception):
