@@ -1,48 +1,49 @@
-"""
-Example of reading an analog light sensor
-and sending the value to Adafruit IO
-"""
+# Example of publishing the value of an ADC to Adafruit IO
+# adafruit_circuitpython_adafruitio with an esp32spi_socket
 import time
 import board
 import busio
-from digitalio import DigitalInOut
 from analogio import AnalogIn
-from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
-
-# Import NeoPixel Library
-import neopixel
-
-# Import Adafruit IO HTTP Client
+from digitalio import DigitalInOut
+import adafruit_esp32spi.adafruit_esp32spi_socket as socket
+from adafruit_esp32spi import adafruit_esp32spi
+import adafruit_requests as requests
 from adafruit_io.adafruit_io import IO_HTTP, AdafruitIO_RequestError
 
-# Delay between polling and sending light sensor data, in seconds
-SENSOR_DELAY = 30
-
-# Get wifi details and more from a secrets.py file
+# Add a secrets.py to your filesystem that has a dictionary called secrets with "ssid" and
+# "password" keys with your WiFi credentials. DO NOT share that file or commit it into Git or other
+# source control.
+# pylint: disable=no-name-in-module,wrong-import-order
 try:
     from secrets import secrets
 except ImportError:
     print("WiFi secrets are kept in secrets.py, please add them there!")
     raise
 
-# ESP32 Setup
-try:
-    esp32_cs = DigitalInOut(board.ESP_CS)
-    esp32_ready = DigitalInOut(board.ESP_BUSY)
-    esp32_reset = DigitalInOut(board.ESP_RESET)
-except AttributeError:
-    esp32_cs = DigitalInOut(board.D9)
-    esp32_ready = DigitalInOut(board.D10)
-    esp32_reset = DigitalInOut(board.D5)
+# If you are using a board with pre-defined ESP32 Pins:
+esp32_cs = DigitalInOut(board.ESP_CS)
+esp32_ready = DigitalInOut(board.ESP_BUSY)
+esp32_reset = DigitalInOut(board.ESP_RESET)
+
+# If you have an externally connected ESP32:
+# esp32_cs = DigitalInOut(board.D9)
+# esp32_ready = DigitalInOut(board.D10)
+# esp32_reset = DigitalInOut(board.D5)
 
 spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
 esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
-status_light = neopixel.NeoPixel(
-    board.NEOPIXEL, 1, brightness=0.2
-)  # Uncomment for Most Boards
-"""Uncomment below for ItsyBitsy M4"""
-# status_light = dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
-wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_light)
+
+print("Connecting to AP...")
+while not esp.is_connected:
+    try:
+        esp.connect_AP(secrets["ssid"], secrets["password"])
+    except RuntimeError as e:
+        print("could not connect to AP, retrying: ", e)
+        continue
+print("Connected to", str(esp.ssid, "utf-8"), "\tRSSI:", esp.rssi)
+
+socket.set_interface(esp)
+requests.set_socket(socket, esp)
 
 # Set your Adafruit IO Username and Key in secrets.py
 # (visit io.adafruit.com if you need to create an account,
@@ -50,8 +51,8 @@ wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_lig
 aio_username = secrets["aio_username"]
 aio_key = secrets["aio_key"]
 
-# Create an instance of the Adafruit IO HTTP client
-io = IO_HTTP(aio_username, aio_key, wifi)
+# Initialize an Adafruit IO HTTP API object
+io = IO_HTTP(aio_username, aio_key, requests)
 
 try:
     # Get the 'light' feed from Adafruit IO
@@ -60,12 +61,13 @@ except AdafruitIO_RequestError:
     # If no 'light' feed exists, create one
     light_feed = io.create_new_feed("light")
 
-# Set up an analog light sensor on the PyPortal
-adc = AnalogIn(board.LIGHT)
+# Set up an ADC
+adc = AnalogIn(board.A0)
 
+SENSOR_DELAY = 30
 while True:
     light_value = adc.value
-    print("Light Level: ", light_value)
+    print("ADC Value: ", light_value)
     print("Sending to Adafruit IO...")
     io.send_data(light_feed["key"], light_value)
     print("Sent!")
