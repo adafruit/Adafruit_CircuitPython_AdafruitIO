@@ -1,9 +1,11 @@
 # adafruit_circuitpython_adafruitio usage with an esp32spi_socket
+from random import randint
 import board
 import busio
 from digitalio import DigitalInOut
 import adafruit_esp32spi.adafruit_esp32spi_socket as socket
 from adafruit_esp32spi import adafruit_esp32spi
+import adafruit_requests as requests
 from adafruit_io.adafruit_io import IO_HTTP, AdafruitIO_RequestError
 
 # Add a secrets.py to your filesystem that has a dictionary called secrets with "ssid" and
@@ -45,10 +47,11 @@ while not esp.is_connected:
         continue
 print("Connected to", str(esp.ssid, "utf-8"), "\tRSSI:", esp.rssi)
 
-# Initialize an Adafruit IO HTTP API object with
-# a socket and esp32spi interface
 socket.set_interface(esp)
-io = IO_HTTP(aio_username, aio_key, socket)
+requests.set_socket(socket, esp)
+
+# Initialize an Adafruit IO HTTP API object
+io = IO_HTTP(aio_username, aio_key, requests)
 
 try:
     # Get the 'temperature' feed from Adafruit IO
