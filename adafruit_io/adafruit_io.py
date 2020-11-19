@@ -37,7 +37,6 @@ Implementation Notes
 """
 import time
 import json
-import adafruit_requests as requests
 
 from adafruit_io.adafruit_io_errors import (
     AdafruitIO_RequestError,
@@ -468,23 +467,13 @@ class IO_HTTP:
 
         :param str adafruit_io_username: Adafruit IO Username
         :param str adafruit_io_key: Adafruit IO Key
-        :param socket socket_pool: A pool of socket resources for the provided radio.
-        :param esp: A previously declared network interface object.
+        :param requests: A passed adafruit_requests module.
     """
 
-    def __init__(self, adafruit_io_username, adafruit_io_key, socket_pool, esp=None):
+    def __init__(self, adafruit_io_username, adafruit_io_key, requests):
         self.username = adafruit_io_username
         self.key = adafruit_io_key
-
-        if esp:
-            # Use legacy API
-            requests.set_socket(socket_pool, esp)
-            self._http = requests
-        else:
-            # Use requests Session API
-            import ssl
-            self._http = requests.Session(socket_pool, ssl.create_default_context())
-
+        self._http = requests
 
         self._aio_headers = [
             {"X-AIO-KEY": self.key, "Content-Type": "application/json"},
