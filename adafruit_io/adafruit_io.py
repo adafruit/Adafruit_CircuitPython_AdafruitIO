@@ -469,16 +469,22 @@ class IO_HTTP:
         :param str adafruit_io_username: Adafruit IO Username
         :param str adafruit_io_key: Adafruit IO Key
         :param socket socket_pool: A pool of socket resources for the provided radio.
-        :param SSLContext ssl_context: Settings related to SSL that can be applied to a socket by wrapping it. 
-
+        :param esp: A previously declared network interface object.
     """
 
-    def __init__(self, adafruit_io_username, adafruit_io_key, socket_pool, ssl_context=None):
+    def __init__(self, adafruit_io_username, adafruit_io_key, socket_pool, esp=None):
         self.username = adafruit_io_username
         self.key = adafruit_io_key
 
-        # Create new requests Session
-        self._http = requests.Session(socket_pool, ssl_context)
+        if esp:
+            # Use legacy API
+            requests.set_socket(socket_pool, esp)
+            self._http = requests
+        else:
+            # Use requests Session API
+            import ssl
+            self._http = requests.Session(socket_pool, ssl.create_default_context())
+
 
         self._aio_headers = [
             {"X-AIO-KEY": self.key, "Content-Type": "application/json"},
@@ -521,7 +527,7 @@ class IO_HTTP:
         """Composes a valid API request path.
         :param str path: Adafruit IO API URL path.
         """
-        return "http://io.adafruit.com/api/v2/{0}/{1}".format(self.username, path)
+        return "https://io.adafruit.com/api/v2/{0}/{1}".format(self.username, path)
 
     # HTTP Requests
     def _post(self, path, payload):
