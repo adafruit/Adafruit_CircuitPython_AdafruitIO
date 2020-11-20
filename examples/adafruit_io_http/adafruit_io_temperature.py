@@ -7,8 +7,8 @@ from digitalio import DigitalInOut
 import adafruit_esp32spi.adafruit_esp32spi_socket as socket
 from adafruit_esp32spi import adafruit_esp32spi
 import adafruit_requests as requests
-from adafruit_io.adafruit_io import IO_HTTP, AdafruitIO_RequestError
 import adafruit_adt7410
+from adafruit_io.adafruit_io import IO_HTTP, AdafruitIO_RequestError
 
 # Add a secrets.py to your filesystem that has a dictionary called secrets with "ssid" and
 # "password" keys with your WiFi credentials. DO NOT share that file or commit it into Git or other
@@ -67,17 +67,12 @@ adt = adafruit_adt7410.ADT7410(i2c_bus, address=0x48)
 adt.high_resolution = True
 
 while True:
-    try:
-        temperature = adt.temperature
-        # set temperature value to two precision points
-        temperature = "%0.2f" % (temperature)
+    temperature = adt.temperature
+    # set temperature value to two precision points
+    temperature = "%0.2f" % (temperature)
 
-        print("Current Temperature: {0}*C".format(temperature))
-        print("Sending to Adafruit IO...")
-        io.send_data(temperature_feed["key"], temperature)
-        print("Data sent!")
-    except (ValueError, RuntimeError) as e:
-        print("Failed to get data, retrying\n", e)
-        wifi.reset()
-        continue
+    print("Current Temperature: {0}*C".format(temperature))
+    print("Sending to Adafruit IO...")
+    io.send_data(temperature_feed["key"], temperature)
+    print("Data sent!")
     time.sleep(0.5)
