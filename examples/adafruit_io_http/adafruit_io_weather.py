@@ -1,9 +1,5 @@
-"""
-Example of getting weather
-from the Adafruit IO Weather Service
-NOTE: This example is for Adafruit IO
-Plus subscribers only.
-"""
+# Example of using the Adafruit IO+ Weather Service
+# adafruit_circuitpython_adafruitio with an esp32spi_socket
 import time
 import board
 import busio
