@@ -37,6 +37,7 @@ Implementation Notes
 """
 import time
 import json
+
 from adafruit_io.adafruit_io_errors import (
     AdafruitIO_RequestError,
     AdafruitIO_ThrottleError,
@@ -466,18 +467,14 @@ class IO_HTTP:
 
         :param str adafruit_io_username: Adafruit IO Username
         :param str adafruit_io_key: Adafruit IO Key
-        :param wifi_manager: WiFiManager object from ESPSPI_WiFiManager or ESPAT_WiFiManager
-
+        :param requests: A passed adafruit_requests module.
     """
 
-    def __init__(self, adafruit_io_username, adafruit_io_key, wifi_manager):
+    def __init__(self, adafruit_io_username, adafruit_io_key, requests):
         self.username = adafruit_io_username
         self.key = adafruit_io_key
-        wifi_type = str(type(wifi_manager))
-        if "ESPSPI_WiFiManager" in wifi_type or "ESPAT_WiFiManager" in wifi_type:
-            self.wifi = wifi_manager
-        else:
-            raise TypeError("This library requires a WiFiManager object.")
+        self._http = requests
+
         self._aio_headers = [
             {"X-AIO-KEY": self.key, "Content-Type": "application/json"},
             {"X-AIO-KEY": self.key},
@@ -528,7 +525,7 @@ class IO_HTTP:
         :param str path: Formatted Adafruit IO URL from _compose_path
         :param json payload: JSON data to send to Adafruit IO
         """
-        response = self.wifi.post(
+        response = self._http.post(
             path, json=payload, headers=self._create_headers(self._aio_headers[0])
         )
         self._handle_error(response)
@@ -541,7 +538,7 @@ class IO_HTTP:
         GET data from Adafruit IO
         :param str path: Formatted Adafruit IO URL from _compose_path
         """
-        response = self.wifi.get(
+        response = self._http.get(
             path, headers=self._create_headers(self._aio_headers[1])
         )
         self._handle_error(response)
@@ -554,7 +551,7 @@ class IO_HTTP:
         DELETE data from Adafruit IO.
         :param str path: Formatted Adafruit IO URL from _compose_path
         """
-        response = self.wifi.delete(
+        response = self._http.delete(
             path, headers=self._create_headers(self._aio_headers[0])
         )
         self._handle_error(response)

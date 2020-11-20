@@ -1,9 +1,8 @@
-# adafruit_circuitpython_adafruitio usage with native wifi networking
+# adafruit_circuitpython_adafruitio usage with a CPython socket
+import socket
 import ssl
 from random import randint
 import adafruit_requests
-import socketpool
-import wifi
 from adafruit_io.adafruit_io import IO_HTTP, AdafruitIO_RequestError
 
 # Add a secrets.py to your filesystem that has a dictionary called secrets with "ssid" and
@@ -22,13 +21,8 @@ except ImportError:
 aio_username = secrets["aio_username"]
 aio_key = secrets["aio_key"]
 
-print("Connecting to %s" % secrets["ssid"])
-wifi.radio.connect(secrets["ssid"], secrets["password"])
-print("Connected to %s!" % secrets["ssid"])
 
-
-pool = socketpool.SocketPool(wifi.radio)
-requests = adafruit_requests.Session(pool, ssl.create_default_context())
+requests = adafruit_requests.Session(socket, ssl.create_default_context())
 # Initialize an Adafruit IO HTTP API object
 io = IO_HTTP(aio_username, aio_key, requests)
 
