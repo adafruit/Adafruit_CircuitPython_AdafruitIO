@@ -457,7 +457,7 @@ class IO_MQTT:
 
             io.get('temperature')
         """
-        self._client.publish("{0}/feeds{1}/get".format(self._user, feed_key), "\0")
+        self._client.publish("{0}/feeds/{1}/get".format(self._user, feed_key), "\0")
 
 
 class IO_HTTP:
