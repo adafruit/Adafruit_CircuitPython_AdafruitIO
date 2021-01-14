@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
+# SPDX-License-Identifier: MIT
+
 # Example of sending ADT7410 sensor temperature values to IO
 # adafruit_circuitpython_adafruitio with an esp32spi_socket
 import time

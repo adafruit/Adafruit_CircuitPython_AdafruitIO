@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
+# SPDX-License-Identifier: MIT
+
 # adafruit_circuitpython_adafruitio usage with an esp32spi_socket
 from random import randint
 import board

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
+# SPDX-License-Identifier: MIT
+
 # Example of publishing the value of an ADC to Adafruit IO
 # adafruit_circuitpython_adafruitio with an esp32spi_socket
 import time

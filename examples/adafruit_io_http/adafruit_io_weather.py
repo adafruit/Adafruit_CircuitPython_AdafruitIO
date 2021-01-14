@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
+# SPDX-License-Identifier: MIT
+
 # Example of using the Adafruit IO+ Weather Service
 # adafruit_circuitpython_adafruitio with an esp32spi_socket
 import board

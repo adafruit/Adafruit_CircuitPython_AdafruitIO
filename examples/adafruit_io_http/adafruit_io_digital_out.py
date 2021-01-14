@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
+# SPDX-License-Identifier: MIT
+
 # Turn on and off a LED from your Adafruit IO Dashboard.
 # adafruit_circuitpython_adafruitio with an esp32spi_socket
 import time

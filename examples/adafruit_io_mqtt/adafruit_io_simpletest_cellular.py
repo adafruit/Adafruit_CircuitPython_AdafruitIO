@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
+# SPDX-License-Identifier: MIT
+
 # Example of using the Adafruit IO CircuitPython MQTT client
 # to subscribe to an Adafruit IO feed and publish random data
 # to be received by the feed.
