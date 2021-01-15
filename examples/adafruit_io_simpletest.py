@@ -5,6 +5,7 @@
 # Example of using the Adafruit IO CircuitPython MQTT client
 # to subscribe to an Adafruit IO feed and publish random data
 # to be received by the feed.
+import time
 from random import randint
 
 
