@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
+# SPDX-License-Identifier: MIT
+
 # Adafruit IO HTTP API - Feed Interactions
 # Documentation: https://io.adafruit.com/api/docs/#feeds
 # adafruit_circuitpython_adafruitio with an esp32spi_socket

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
+# SPDX-License-Identifier: MIT
+
 # Subscribing to an Adafruit IO Group
 # and Publishing to the feeds in the group
 import time

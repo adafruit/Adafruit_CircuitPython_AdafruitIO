@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
+# SPDX-License-Identifier: MIT
+
 # Example for using Adafruit IO's random data (randomizer) service
 # adafruit_circuitpython_adafruitio with an esp32spi_socket
 import time

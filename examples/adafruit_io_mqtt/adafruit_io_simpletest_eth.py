@@ -1,9 +1,10 @@
+# SPDX-FileCopyrightText: Tony DiCola for Adafruit Industries
+# SPDX-FileCopyrightText: 2019 Brent Rubell for Adafruit Industries
+# SPDX-License-Identifier: MIT
+
 # Example of using the Adafruit IO CircuitPython MQTT client
 # to subscribe to an Adafruit IO feed and publish random data
 # to be received by the feed.
-#
-# Example by Tony DiCola for Adafruit Industries
-# Modified by Brent Rubell for Adafruit Industries, 2019
 import time
 from random import randint
 

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
+# SPDX-License-Identifier: MIT
+
 # Adafruit IO provides some built-in MQTT topics
 # for obtaining the current server time, if you don't have
 # access to a RTC module.
