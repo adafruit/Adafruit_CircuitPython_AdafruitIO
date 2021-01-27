@@ -28,7 +28,7 @@ from adafruit_io.adafruit_io_errors import (
 )
 
 __version__ = "0.0.0-auto.0"
-__repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_Adafruit_IO.git"
+__repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_AdafruitIO.git"
 
 CLIENT_HEADERS = {"User-Agent": "AIO-CircuitPython/{0}".format(__version__)}
 
