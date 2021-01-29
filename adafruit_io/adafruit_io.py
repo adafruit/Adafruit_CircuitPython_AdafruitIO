@@ -589,16 +589,6 @@ class IO_HTTP:
         return self._delete(path)
 
     # Groups
-    def add_feed_to_group(self, group_key, feed_key):
-        """
-        Adds an existing feed to a group
-        :param str group_key: Group
-        :param str feed_key: Feed to add to the group
-        """
-        path = self._compose_path("groups/{0}/add".format(group_key))
-        payload = {"feed_key": feed_key}
-        return self._post(path, payload)
-
     def create_new_group(self, group_key, group_description):
         """
         Creates a new Adafruit IO Group.
@@ -624,6 +614,26 @@ class IO_HTTP:
         """
         path = self._compose_path("groups/{0}".format(group_key))
         return self._get(path)
+
+    def create_feed_in_group(self, group_key, feed_name):
+        """Creates a new feed in an existing group.
+        :param str group_key: Group name.
+        :param str feed_name: Name of new feed.
+
+        """
+        path = self._compose_path("groups/{0}/feeds".format(group_key))
+        payload = {"feed": {"name": feed_name}}
+        return self._post(path, payload)
+
+    def add_feed_to_group(self, group_key, feed_key):
+        """
+        Adds an existing feed to a group
+        :param str group_key: Group
+        :param str feed_key: Feed to add to the group
+        """
+        path = self._compose_path("groups/{0}/add".format(group_key))
+        payload = {"feed_key": feed_key}
+        return self._post(path, payload)
 
     # Feeds
     def get_feed(self, feed_key, detailed=False):
