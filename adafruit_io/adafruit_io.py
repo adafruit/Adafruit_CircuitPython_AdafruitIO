@@ -202,7 +202,7 @@ class IO_MQTT:
 
         """
         self._client.add_topic_callback(
-            "{0}/feeds/{1}".format(self._user, feed_key), callback_method
+            "{0}/f/{1}".format(self._user, feed_key), callback_method
         )
 
     def remove_feed_callback(self, feed_key):
@@ -214,7 +214,7 @@ class IO_MQTT:
         :param str feed_key: Adafruit IO feed key.
 
         """
-        self._client.remove_topic_callback("{0}/feeds/{1}".format(self._user, feed_key))
+        self._client.remove_topic_callback("{0}/f/{1}".format(self._user, feed_key))
 
     def loop(self):
         """Manually process messages from Adafruit IO.
@@ -251,11 +251,11 @@ class IO_MQTT:
             client.subscribe([('temperature'), ('humidity')])
         """
         if shared_user is not None and feed_key is not None:
-            self._client.subscribe("{0}/feeds/{1}".format(shared_user, feed_key))
+            self._client.subscribe("{0}/f/{1}".format(shared_user, feed_key))
         elif group_key is not None:
-            self._client.subscribe("{0}/groups/{1}".format(self._user, group_key))
+            self._client.subscribe("{0}/g/{1}".format(self._user, group_key))
         elif feed_key is not None:
-            self._client.subscribe("{0}/feeds/{1}".format(self._user, feed_key))
+            self._client.subscribe("{0}/f/{1}".format(self._user, feed_key))
         else:
             raise AdafruitIO_MQTTError("Must provide a feed_key or group_key.")
 
@@ -332,11 +332,11 @@ class IO_MQTT:
 
         """
         if shared_user is not None and feed_key is not None:
-            self._client.unsubscribe("{0}/feeds/{1}".format(shared_user, feed_key))
+            self._client.unsubscribe("{0}/f/{1}".format(shared_user, feed_key))
         elif group_key is not None:
-            self._client.unsubscribe("{0}/groups/{1}".format(self._user, feed_key))
+            self._client.unsubscribe("{0}/g/{1}".format(self._user, feed_key))
         elif feed_key is not None:
-            self._client.unsubscribe("{0}/feeds/{1}".format(self._user, feed_key))
+            self._client.unsubscribe("{0}/f/{1}".format(self._user, feed_key))
         else:
             raise AdafruitIO_MQTTError("Must provide a feed_key or group_key.")
 
@@ -416,18 +416,18 @@ class IO_MQTT:
 
         """
         if is_group:
-            self._client.publish("{0}/groups/{1}".format(self._user, feed_key), data)
+            self._client.publish("{0}/g/{1}".format(self._user, feed_key), data)
         if shared_user is not None:
-            self._client.publish("{0}/feeds/{1}".format(shared_user, feed_key), data)
+            self._client.publish("{0}/f/{1}".format(shared_user, feed_key), data)
         if metadata is not None:
             if isinstance(data, int or float):
                 data = str(data)
             csv_string = data + "," + metadata
             self._client.publish(
-                "{0}/feeds/{1}/csv".format(self._user, feed_key), csv_string
+                "{0}/f/{1}/csv".format(self._user, feed_key), csv_string
             )
         else:
-            self._client.publish("{0}/feeds/{1}".format(self._user, feed_key), data)
+            self._client.publish("{0}/f/{1}".format(self._user, feed_key), data)
 
     def get(self, feed_key):
         """Calling this method will make Adafruit IO publish the most recent
@@ -440,7 +440,7 @@ class IO_MQTT:
 
             io.get('temperature')
         """
-        self._client.publish("{0}/feeds/{1}/get".format(self._user, feed_key), "\0")
+        self._client.publish("{0}/f/{1}/get".format(self._user, feed_key), "\0")
 
 
 class IO_HTTP:
