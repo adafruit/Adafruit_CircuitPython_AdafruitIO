@@ -51,9 +51,9 @@ class IO_MQTT:
             raise TypeError(
                 "This class requires a MiniMQTT client object, please create one."
             )
-        # MiniMQTT's username kwarg is optional, IO requires a username
+        # Adafruit IO MQTT API MUST require a username
         try:
-            self._user = self._client.user
+            self._user = self._client._username
         except Exception as err:
             raise TypeError(
                 "Adafruit IO requires a username, please set one in MiniMQTT"
@@ -70,11 +70,6 @@ class IO_MQTT:
         self._client.on_message = self._on_message_mqtt
         self._client.on_subscribe = self._on_subscribe_mqtt
         self._client.on_unsubscribe = self._on_unsubscribe_mqtt
-        self._logger = False
-        # Write to the MiniMQTT logger, if avaliable.
-        if self._client.logger is not None:
-            self._logger = True
-            self._client.set_logger_level("DEBUG")
         self._connected = False
 
     def __enter__(self):
@@ -112,8 +107,6 @@ class IO_MQTT:
     # pylint: disable=not-callable, unused-argument
     def _on_connect_mqtt(self, client, userdata, flags, return_code):
         """Runs when the client calls on_connect."""
-        if self._logger:
-            self._client._logger.debug("Client called on_connect.")
         if return_code == 0:
             self._connected = True
         else:
@@ -125,8 +118,6 @@ class IO_MQTT:
     # pylint: disable=not-callable, unused-argument
     def _on_disconnect_mqtt(self, client, userdata, return_code):
         """Runs when the client calls on_disconnect."""
-        if self._logger:
-            self._client._logger.debug("Client called on_disconnect")
         self._connected = False
         # Call the user-defined on_disconnect callblack if defined
         if self.on_disconnect is not None:
@@ -140,8 +131,6 @@ class IO_MQTT:
         :param str topic: MQTT topic response from Adafruit IO.
         :param str payload: MQTT payload data response from Adafruit IO.
         """
-        if self._logger:
-            self._client._logger.debug("Client called on_message.")
         if self.on_message is not None:
             # Parse the MQTT topic string
             topic_name = topic.split("/")
@@ -177,16 +166,12 @@ class IO_MQTT:
     # pylint: disable=not-callable
     def _on_subscribe_mqtt(self, client, user_data, topic, qos):
         """Runs when the client calls on_subscribe."""
-        if self._logger:
-            self._client._logger.debug("Client called on_subscribe")
         if self.on_subscribe is not None:
             self.on_subscribe(self, user_data, topic, qos)
 
     # pylint: disable=not-callable
     def _on_unsubscribe_mqtt(self, client, user_data, topic, pid):
         """Runs when the client calls on_unsubscribe."""
-        if self._logger:
-            self._client._logger.debug("Client called on_unsubscribe")
         if self.on_unsubscribe is not None:
             self.on_unsubscribe(self, user_data, topic, pid)
 
