@@ -282,12 +282,10 @@ class IO_MQTT:
         Information about these topics can be found on the Adafruit IO MQTT API Docs.:
         https://io.adafruit.com/api/docs/mqtt.html#time-topics
         """
-        if "seconds" or "millis" or "hours" in time_type:
-            self._client.subscribe("time/" + time_type)
-        elif time_type == "iso":
+        if time_type == "iso":
             self._client.subscribe("time/ISO-8601")
         else:
-            raise TypeError("Invalid time feed type specified")
+            self._client.subscribe("time/" + time_type)
 
     def unsubscribe(self, feed_key=None, group_key=None, shared_user=None):
         """Unsubscribes from an Adafruit IO feed or group.
