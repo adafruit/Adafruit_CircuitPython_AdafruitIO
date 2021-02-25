@@ -457,16 +457,16 @@ class IO_HTTP:
 
     @staticmethod
     def _create_data(data, metadata):
-        """Creates JSON data payload"""
-        if metadata is not None:
-            return {
-                "value": data,
-                "lat": metadata["lat"],
-                "lon": metadata["lon"],
-                "ele": metadata["ele"],
-                "created_at": metadata["created_at"],
-            }
-        return {"value": data}
+        """Returns a data payload as expected by the Adafruit IO HTTP API
+        :param data: Payload value.
+        :param dict metadata: Payload metadata.
+
+        """
+        payload = {"value": data}
+        if metadata:  # metadata is expected as a dict, append key/vals
+            for k, val in metadata.items():
+                payload[k] = val
+        return payload
 
     @staticmethod
     def _handle_error(response):
