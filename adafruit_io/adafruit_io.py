@@ -282,12 +282,10 @@ class IO_MQTT:
         Information about these topics can be found on the Adafruit IO MQTT API Docs.:
         https://io.adafruit.com/api/docs/mqtt.html#time-topics
         """
-        if "seconds" or "millis" or "hours" in time_type:
-            self._client.subscribe("time/" + time_type)
-        elif time_type == "iso":
+        if time_type == "iso":
             self._client.subscribe("time/ISO-8601")
         else:
-            raise TypeError("Invalid time feed type specified")
+            self._client.subscribe("time/" + time_type)
 
     def unsubscribe(self, feed_key=None, group_key=None, shared_user=None):
         """Unsubscribes from an Adafruit IO feed or group.
@@ -457,16 +455,16 @@ class IO_HTTP:
 
     @staticmethod
     def _create_data(data, metadata):
-        """Creates JSON data payload"""
-        if metadata is not None:
-            return {
-                "value": data,
-                "lat": metadata["lat"],
-                "lon": metadata["lon"],
-                "ele": metadata["ele"],
-                "created_at": metadata["created_at"],
-            }
-        return {"value": data}
+        """Returns a data payload as expected by the Adafruit IO HTTP API
+        :param data: Payload value.
+        :param dict metadata: Payload metadata.
+
+        """
+        payload = {"value": data}
+        if metadata:  # metadata is expected as a dict, append key/vals
+            for k, val in metadata.items():
+                payload[k] = val
+        return payload
 
     @staticmethod
     def _handle_error(response):
