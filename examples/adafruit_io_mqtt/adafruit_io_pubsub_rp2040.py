@@ -97,7 +97,7 @@ io.connect()
 # Subscribe to all messages on the led feed
 io.subscribe("led")
 
-refresh_time = 0.0
+prv_refresh_time = 0.0
 while True:
     # Poll for incoming messages
     try:
@@ -108,7 +108,7 @@ while True:
         io.reconnect()
         continue
     # Send a new temperature reading to IO every 30 seconds
-    if (time.monotonic() - refresh_time) > 30:
+    if (time.monotonic() - prv_refresh_time) > 30:
         # take the cpu's temperature
         cpu_temp = cpu.temperature
         # truncate to two decimal points
@@ -118,4 +118,4 @@ while True:
         print("Publishing %s to temperature feed..." % cpu_temp)
         io.publish("temperature", cpu_temp)
         print("Published!")
-        refresh_time = time.monotonic()
+        prv_refresh_time = time.monotonic()
