@@ -20,6 +20,7 @@ Implementation Notes
 """
 import time
 import json
+import re
 
 from adafruit_io.adafruit_io_errors import (
     AdafruitIO_RequestError,
@@ -31,6 +32,18 @@ __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_AdafruitIO.git"
 
 CLIENT_HEADERS = {"User-Agent": "AIO-CircuitPython/{0}".format(__version__)}
+
+
+def validate_feed_key(feed_key):
+    """Validates a provided feed key against Adafruit IO's system rules.
+    https://learn.adafruit.com/naming-things-in-adafruit-io/the-two-feed-identifiers
+    """
+    if len(feed_key) > 128:  # validate feed key length
+        raise ValueError("Feed key must be less than 128 characters.")
+    if not bool(re.match("^[a-z0-9-]+$", feed_key)):  # validate key naming scheme
+        raise TypeError(
+            "Feed key must contain lower case English letters, numbers, and dash."
+        )
 
 
 class IO_MQTT:
@@ -186,6 +199,7 @@ class IO_MQTT:
         :param str callback_method: Name of callback method.
 
         """
+        validate_feed_key(feed_key)
         self._client.add_topic_callback(
             "{0}/f/{1}".format(self._user, feed_key), callback_method
         )
@@ -199,6 +213,7 @@ class IO_MQTT:
         :param str feed_key: Adafruit IO feed key.
 
         """
+        validate_feed_key(feed_key)
         self._client.remove_topic_callback("{0}/f/{1}".format(self._user, feed_key))
 
     def loop(self):
@@ -235,6 +250,7 @@ class IO_MQTT:
 
             client.subscribe([('temperature'), ('humidity')])
         """
+        validate_feed_key(feed_key)
         if shared_user is not None and feed_key is not None:
             self._client.subscribe("{0}/f/{1}".format(shared_user, feed_key))
         elif group_key is not None:
@@ -314,6 +330,7 @@ class IO_MQTT:
             client.unsubscribe('temperature', shared_user='adabot')
 
         """
+        validate_feed_key(feed_key)
         if shared_user is not None and feed_key is not None:
             self._client.unsubscribe("{0}/f/{1}".format(shared_user, feed_key))
         elif group_key is not None:
@@ -398,6 +415,7 @@ class IO_MQTT:
             io.publish("location-feed", data, metadata)
 
         """
+        validate_feed_key(feed_key)
         if is_group:
             self._client.publish("{0}/g/{1}".format(self._user, feed_key), data)
         if shared_user is not None:
@@ -423,6 +441,7 @@ class IO_MQTT:
 
             io.get('temperature')
         """
+        validate_feed_key(feed_key)
         self._client.publish("{0}/f/{1}/get".format(self._user, feed_key), "\0")
 
 
@@ -534,6 +553,7 @@ class IO_HTTP:
         :param dict metadata: Optional metadata associated with the data
         :param int precision: Optional amount of precision points to send with floating point data
         """
+        validate_feed_key(feed_key)
         path = self._compose_path("feeds/{0}/data".format(feed_key))
         if precision:
             try:
@@ -551,6 +571,7 @@ class IO_HTTP:
         returned in reverse order.
         :param str feed_key: Adafruit IO feed key
         """
+        validate_feed_key(feed_key)
         path = self._compose_path("feeds/{0}/data".format(feed_key))
         return self._get(path)
 
@@ -559,6 +580,7 @@ class IO_HTTP:
         Return the most recent value for the specified feed.
         :param string feed_key: Adafruit IO feed key
         """
+        validate_feed_key(feed_key)
         path = self._compose_path("feeds/{0}/data/last".format(feed_key))
         return self._get(path)
 
@@ -568,6 +590,7 @@ class IO_HTTP:
         :param string feed: Adafruit IO feed key
         :param string data_id: Data point to delete from the feed
         """
+        validate_feed_key(feed_key)
         path = self._compose_path("feeds/{0}/data/{1}".format(feed_key, data_id))
         return self._delete(path)
 
@@ -614,6 +637,7 @@ class IO_HTTP:
         :param str group_key: Group
         :param str feed_key: Feed to add to the group
         """
+        validate_feed_key(feed_key)
         path = self._compose_path("groups/{0}/add".format(group_key))
         payload = {"feed_key": feed_key}
         return self._post(path, payload)
@@ -625,6 +649,7 @@ class IO_HTTP:
         :param str feed_key: Adafruit IO Feed Key
         :param bool detailed: Returns a more verbose feed record
         """
+        validate_feed_key(feed_key)
         if detailed:
             path = self._compose_path("feeds/{0}/details".format(feed_key))
         else:
@@ -638,6 +663,7 @@ class IO_HTTP:
         :param str feed_desc: Optional description of feed
         :param str feed_license: Optional feed license
         """
+        validate_feed_key(feed_key)
         path = self._compose_path("feeds")
         payload = {"name": feed_key, "description": feed_desc, "license": feed_license}
         return self._post(path, payload)
@@ -647,6 +673,7 @@ class IO_HTTP:
         Deletes an existing feed.
         :param str feed_key: Valid feed key
         """
+        validate_feed_key(feed_key)
         path = self._compose_path("feeds/{0}".format(feed_key))
         return self._delete(path)
 
