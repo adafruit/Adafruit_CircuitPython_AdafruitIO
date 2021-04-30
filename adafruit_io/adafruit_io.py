@@ -565,6 +565,26 @@ class IO_HTTP:
         payload = self._create_data(data, metadata)
         self._post(path, payload)
 
+    def send_batch_data(self, feed_key, data, metadata=None, precision=None):
+        """
+        Sends a batch array of data to a specified Adafruit IO feed
+        :param str feed_key: Adafruit IO feed key
+        :param str data: Data to send
+        :param dict metadata: Optional metadata associated with the data
+        :param int precision: Optional amount of precision points to send with floating point data
+        """
+        data = []
+        path = self._compose_path("feeds/{0}/data/batch".format(feed_key))
+        if precision:
+            try:
+                data = round(data, precision)
+            except NotImplementedError as err:
+                raise NotImplementedError(
+                    "Precision requires a floating point value"
+                ) from err
+        payload = self._create_data(data, metadata)
+        self._post(path, payload)
+
     def receive_all_data(self, feed_key):
         """
         Get all data values from a specified Adafruit IO feed. Data is
