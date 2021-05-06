@@ -567,6 +567,17 @@ class IO_HTTP:
         payload = self._create_data(data, metadata)
         self._post(path, payload)
 
+    def send_batch_data(self, feed_key, data_list):
+        """
+        Sends a batch array of data to a specified Adafruit IO feed
+        :param str feed_key: Adafruit IO feed key
+        :param list Data: Data list to send
+        """
+        validate_feed_key(feed_key)
+        path = "feeds/{0}/data/batch".format(feed_key)
+        data_dict = type(data_list)((data._asdict() for data in data_list))
+        self._post(path, {"data": data_dict})
+
     def receive_all_data(self, feed_key):
         """
         Get all data values from a specified Adafruit IO feed. Data is
