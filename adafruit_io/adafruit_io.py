@@ -218,7 +218,7 @@ class IO_MQTT:
         validate_feed_key(feed_key)
         self._client.remove_topic_callback("{0}/f/{1}".format(self._user, feed_key))
 
-    def loop(self):
+    def loop(self, timeout=1):
         """Manually process messages from Adafruit IO.
         Call this method to check incoming subscription messages.
 
@@ -229,7 +229,7 @@ class IO_MQTT:
             while True:
                 io.loop()
         """
-        self._client.loop()
+        self._client.loop(timeout)
 
     # Subscriptions
     def subscribe(self, feed_key=None, group_key=None, shared_user=None):
