@@ -221,6 +221,7 @@ class IO_MQTT:
     def loop(self, timeout=1):
         """Manually process messages from Adafruit IO.
         Call this method to check incoming subscription messages.
+        :param int timeout: Socket timeout, in seconds.
 
         Example usage of polling the message queue using loop.
 
