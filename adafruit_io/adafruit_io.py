@@ -44,7 +44,7 @@ def validate_feed_key(feed_key):
         re.match(r"^[a-zA-Z0-9-]+((\/|\.)[a-zA-Z0-9-]+)?$", feed_key)
     ):  # validate key naming scheme
         raise TypeError(
-            "Feed key must contain English letters, numbers, dash, and one period or one forward slash."
+            "Feed key must contain English letters, numbers, dash, and a period or a forward slash."
         )
 
 
