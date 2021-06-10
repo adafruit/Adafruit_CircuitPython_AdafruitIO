@@ -41,10 +41,10 @@ def validate_feed_key(feed_key):
     if len(feed_key) > 128:  # validate feed key length
         raise ValueError("Feed key must be less than 128 characters.")
     if not bool(
-        re.match(r"^[a-z0-9-]+(\.[a-z0-9-]+)?$", feed_key)
+        re.match(r"^[a-zA-Z0-9-]+((\/|\.)[a-zA-Z0-9-]+)?$", feed_key)
     ):  # validate key naming scheme
         raise TypeError(
-            "Feed key must contain lower case English letters, numbers, dash, and one period."
+            "Feed key must contain English letters, numbers, dash, and one period or one forward slash."
         )
 
 
