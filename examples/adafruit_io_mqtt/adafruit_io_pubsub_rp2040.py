@@ -105,6 +105,7 @@ while True:
     except (ValueError, RuntimeError) as e:
         print("Failed to get data, retrying\n", e)
         wifi.reset()
+        wifi.connect()
         io.reconnect()
         continue
     # Send a new temperature reading to IO every 30 seconds
