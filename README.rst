@@ -59,6 +59,11 @@ Usage examples for the Adafruit IO HTTP API are within the examples/http folder.
 
 Usage examples for the Adafruit IO MQTT API are within the examples/mqtt folder.
 
+Documentation
+=============
+
+API documentation for this library can be found on `Read the Docs <https://circuitpython.readthedocs.io/projects/adafruitio/en/latest/>`_.
+
 Contributing
 ============
 
