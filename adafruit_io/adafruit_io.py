@@ -686,6 +686,24 @@ class IO_HTTP:
         payload = {"name": feed_key, "description": feed_desc, "license": feed_license}
         return self._post(path, payload)
 
+    def create_and_get_feed(
+        self, feed_key, detailed=False, feed_desc=None, feed_license=None
+    ):
+        """
+        Attempts to return a feed; if the feed does not exist, it is created, and then returned.
+        :param str feed_key: Adafruit IO Feed Key
+        :param bool detailed: Returns a more verbose existing feed record
+        :param str feed_desc: Optional description of feed to be created
+        :param str feed_license: Optional feed license to be created
+        """
+        try:
+            return self.get_feed(feed_key, detailed=detailed)
+        except AdafruitIO_RequestError:
+            self.create_new_feed(
+                feed_key, feed_desc=feed_desc, feed_license=feed_license
+            )
+            return self.get_feed(feed_key, detailed=detailed)
+
     def delete_feed(self, feed_key):
         """
         Deletes an existing feed.
