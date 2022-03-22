@@ -22,6 +22,7 @@ import time
 import json
 import re
 
+from adafruit_minimqtt.adafruit_minimqtt import MMQTTException
 from adafruit_io.adafruit_io_errors import (
     AdafruitIO_RequestError,
     AdafruitIO_ThrottleError,
@@ -117,7 +118,10 @@ class IO_MQTT:
     @property
     def is_connected(self):
         """Returns if connected to Adafruit IO MQTT Broker."""
-        return self._client.is_connected
+        try:
+            return self._client.is_connected()
+        except MMQTTException:
+            return False
 
     # pylint: disable=not-callable, unused-argument
     def _on_connect_mqtt(self, client, userdata, flags, return_code):
