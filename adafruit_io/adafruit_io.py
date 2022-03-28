@@ -146,6 +146,7 @@ class IO_MQTT:
     def _on_message_mqtt(self, client, topic, payload):
         """Runs when the client calls on_message. Parses and returns
         incoming data from Adafruit IO feeds.
+
         :param MQTT client: A MQTT Client Instance.
         :param str topic: MQTT topic response from Adafruit IO.
         :param str payload: MQTT payload data response from Adafruit IO.
@@ -201,9 +202,9 @@ class IO_MQTT:
 
         NOTE: The callback_method registered to this method
         will only execute during loop().
+
         :param str feed_key: Adafruit IO feed key.
         :param str callback_method: Name of callback method.
-
         """
         validate_feed_key(feed_key)
         self._client.add_topic_callback(
@@ -216,8 +217,8 @@ class IO_MQTT:
 
         After this method is called, incoming messages
         call the shared on_message.
-        :param str feed_key: Adafruit IO feed key.
 
+        :param str feed_key: Adafruit IO feed key.
         """
         validate_feed_key(feed_key)
         self._client.remove_topic_callback("{0}/f/{1}".format(self._user, feed_key))
@@ -225,11 +226,12 @@ class IO_MQTT:
     def loop(self, timeout=1):
         """Manually process messages from Adafruit IO.
         Call this method to check incoming subscription messages.
+
         :param int timeout: Socket timeout, in seconds.
 
         Example usage of polling the message queue using loop.
 
-        ..code-block:: python
+        .. code-block:: python
 
             while True:
                 io.loop()
@@ -240,6 +242,7 @@ class IO_MQTT:
     def subscribe(self, feed_key=None, group_key=None, shared_user=None):
         """Subscribes to your Adafruit IO feed or group.
         Can also subscribe to someone else's feed.
+
         :param str feed_key: Adafruit IO Feed key.
         :param str group_key: Adafruit IO Group key.
         :param str shared_user: Owner of the Adafruit IO feed, required for shared feeds.
@@ -283,6 +286,7 @@ class IO_MQTT:
 
     def subscribe_to_randomizer(self, randomizer_id):
         """Subscribes to a random data stream created by the Adafruit IO Words service.
+
         :param int randomizer_id: Random word record you want data for.
         """
         self._client.subscribe(
@@ -292,6 +296,7 @@ class IO_MQTT:
     def subscribe_to_weather(self, weather_record, forecast):
         """Subscribes to a weather forecast using the Adafruit IO PLUS weather
         service. This feature is only avaliable to Adafruit IO PLUS subscribers.
+
         :param int weather_record: Weather record you want data for.
         :param str forecast: Forecast data you'd like to recieve.
         """
@@ -303,7 +308,9 @@ class IO_MQTT:
 
     def subscribe_to_time(self, time_type):
         """Adafruit IO provides some built-in MQTT topics for getting the current server time.
+
         :param str time_type: Current Adafruit IO server time. Can be 'seconds', 'millis', or 'iso'.
+
         Information about these topics can be found on the Adafruit IO MQTT API Docs.:
         https://io.adafruit.com/api/docs/mqtt.html#time-topics
         """
@@ -315,6 +322,7 @@ class IO_MQTT:
     def unsubscribe(self, feed_key=None, group_key=None, shared_user=None):
         """Unsubscribes from an Adafruit IO feed or group.
         Can also subscribe to someone else's feed.
+
         :param str feed_key: Adafruit IO Feed key.
         :param str group_key: Adafruit IO Group key.
         :param str shared_user: Owner of the Adafruit IO feed, required for shared feeds.
@@ -337,7 +345,6 @@ class IO_MQTT:
         .. code-block:: python
 
             client.unsubscribe('temperature', shared_user='adabot')
-
         """
         if shared_user is not None and feed_key is not None:
             validate_feed_key(feed_key)
@@ -361,10 +368,10 @@ class IO_MQTT:
         :param bool is_group: Set to True if you're publishing to a group.
 
         Example of publishing multiple data points on different feeds to Adafruit IO:
-        ..code-block:: python
+
+        .. code-block:: python
 
             client.publish_multiple([('humidity', 24.5), ('temperature', 54)])
-
         """
         if isinstance(feeds_and_data, list):
             feed_data = []
@@ -393,38 +400,43 @@ class IO_MQTT:
         :param bool is_group: Set True if publishing to an Adafruit IO Group.
 
         Example of publishing an integer to Adafruit IO on feed 'temperature'.
-        ..code-block:: python
+
+        .. code-block:: python
 
             client.publish('temperature', 30)
 
         Example of publishing a floating point value to feed 'temperature'.
-        ..code-block:: python
+
+        .. code-block:: python
 
             client.publish('temperature', 3.14)
 
         Example of publishing a string to feed 'temperature'.
-        ..code-block:: python
+
+        .. code-block:: python
 
             client.publish('temperature, 'thirty degrees')
 
         Example of publishing an integer to group 'weatherstation'.
-        ..code-block:: python
+
+        .. code-block:: python
 
             client.publish('weatherstation', 12, is_group=True)
 
         Example of publishing to a shared feed.
-        ..code-block:: python
+
+        .. code-block:: python
 
             client.publish('temperature', shared_user='myfriend')
 
         Example of publishing a value along with locational metadata to a feed.
-        ..code-block:: python
+
+        .. code-block:: python
 
             data = 42
             # format: "lat, lon, ele"
             metadata = "40.726190, -74.005334, -6"
             io.publish("location-feed", data, metadata)
-
         """
         validate_feed_key(feed_key)
         if is_group:
@@ -445,10 +457,12 @@ class IO_MQTT:
         """Calling this method will make Adafruit IO publish the most recent
         value on feed_key.
         https://io.adafruit.com/api/docs/mqtt.html#retained-values
+
         :param str feed_key: Adafruit IO Feed key.
 
         Example of obtaining a recently published value on a feed:
-        ..code-block:: python
+
+        .. code-block:: python
 
             io.get('temperature')
         """
@@ -461,9 +475,9 @@ class IO_HTTP:
     Client for interacting with the Adafruit IO HTTP API.
     https://io.adafruit.com/api/docs/#adafruit-io-http-api
 
-        :param str adafruit_io_username: Adafruit IO Username
-        :param str adafruit_io_key: Adafruit IO Key
-        :param requests: A passed adafruit_requests module.
+    :param str adafruit_io_username: Adafruit IO Username
+    :param str adafruit_io_key: Adafruit IO Key
+    :param requests: A passed adafruit_requests module.
     """
 
     def __init__(self, adafruit_io_username, adafruit_io_key, requests):
@@ -486,9 +500,9 @@ class IO_HTTP:
     @staticmethod
     def _create_data(data, metadata):
         """Returns a data payload as expected by the Adafruit IO HTTP API
+
         :param data: Payload value.
         :param dict metadata: Payload metadata.
-
         """
         payload = {"value": data}
         if metadata:  # metadata is expected as a dict, append key/vals
@@ -510,6 +524,7 @@ class IO_HTTP:
 
     def _compose_path(self, path):
         """Composes a valid API request path.
+
         :param str path: Adafruit IO API URL path.
         """
         return "https://io.adafruit.com/api/v2/{0}/{1}".format(self.username, path)
@@ -518,6 +533,7 @@ class IO_HTTP:
     def _post(self, path, payload):
         """
         POST data to Adafruit IO
+
         :param str path: Formatted Adafruit IO URL from _compose_path
         :param json payload: JSON data to send to Adafruit IO
         """
@@ -532,6 +548,7 @@ class IO_HTTP:
     def _get(self, path):
         """
         GET data from Adafruit IO
+
         :param str path: Formatted Adafruit IO URL from _compose_path
         """
         response = self._http.get(
@@ -545,6 +562,7 @@ class IO_HTTP:
     def _delete(self, path):
         """
         DELETE data from Adafruit IO.
+
         :param str path: Formatted Adafruit IO URL from _compose_path
         """
         response = self._http.delete(
@@ -559,6 +577,7 @@ class IO_HTTP:
     def send_data(self, feed_key, data, metadata=None, precision=None):
         """
         Sends value data to a specified Adafruit IO feed.
+
         :param str feed_key: Adafruit IO feed key
         :param str data: Data to send to the Adafruit IO feed
         :param dict metadata: Optional metadata associated with the data
@@ -579,6 +598,7 @@ class IO_HTTP:
     def send_batch_data(self, feed_key, data_list):
         """
         Sends a batch array of data to a specified Adafruit IO feed
+
         :param str feed_key: Adafruit IO feed key
         :param list Data: Data list to send
         """
@@ -591,6 +611,7 @@ class IO_HTTP:
         """
         Get all data values from a specified Adafruit IO feed. Data is
         returned in reverse order.
+
         :param str feed_key: Adafruit IO feed key
         """
         validate_feed_key(feed_key)
@@ -600,6 +621,7 @@ class IO_HTTP:
     def receive_data(self, feed_key):
         """
         Return the most recent value for the specified feed.
+
         :param string feed_key: Adafruit IO feed key
         """
         validate_feed_key(feed_key)
@@ -609,6 +631,7 @@ class IO_HTTP:
     def delete_data(self, feed_key, data_id):
         """
         Deletes an existing Data point from a feed.
+
         :param string feed: Adafruit IO feed key
         :param string data_id: Data point to delete from the feed
         """
@@ -620,6 +643,7 @@ class IO_HTTP:
     def create_new_group(self, group_key, group_description):
         """
         Creates a new Adafruit IO Group.
+
         :param str group_key: Adafruit IO Group Key
         :param str group_description: Brief summary about the group
         """
@@ -630,6 +654,7 @@ class IO_HTTP:
     def delete_group(self, group_key):
         """
         Deletes an existing group.
+
         :param str group_key: Adafruit IO Group Key
         """
         path = self._compose_path("groups/{0}".format(group_key))
@@ -638,6 +663,7 @@ class IO_HTTP:
     def get_group(self, group_key):
         """
         Returns Group based on Group Key
+
         :param str group_key: Adafruit IO Group Key
         """
         path = self._compose_path("groups/{0}".format(group_key))
@@ -645,9 +671,9 @@ class IO_HTTP:
 
     def create_feed_in_group(self, group_key, feed_name):
         """Creates a new feed in an existing group.
+
         :param str group_key: Group name.
         :param str feed_name: Name of new feed.
-
         """
         path = self._compose_path("groups/{0}/feeds".format(group_key))
         payload = {"feed": {"name": feed_name}}
@@ -656,6 +682,7 @@ class IO_HTTP:
     def add_feed_to_group(self, group_key, feed_key):
         """
         Adds an existing feed to a group
+
         :param str group_key: Group
         :param str feed_key: Feed to add to the group
         """
@@ -668,6 +695,7 @@ class IO_HTTP:
     def get_feed(self, feed_key, detailed=False):
         """
         Returns an Adafruit IO feed based on the feed key
+
         :param str feed_key: Adafruit IO Feed Key
         :param bool detailed: Returns a more verbose feed record
         """
@@ -681,6 +709,7 @@ class IO_HTTP:
     def create_new_feed(self, feed_key, feed_desc=None, feed_license=None):
         """
         Creates a new Adafruit IO feed.
+
         :param str feed_key: Adafruit IO Feed Key
         :param str feed_desc: Optional description of feed
         :param str feed_license: Optional feed license
@@ -695,6 +724,7 @@ class IO_HTTP:
     ):
         """
         Attempts to return a feed; if the feed does not exist, it is created, and then returned.
+
         :param str feed_key: Adafruit IO Feed Key
         :param bool detailed: Returns a more verbose existing feed record
         :param str feed_desc: Optional description of feed to be created
@@ -711,6 +741,7 @@ class IO_HTTP:
     def delete_feed(self, feed_key):
         """
         Deletes an existing feed.
+
         :param str feed_key: Valid feed key
         """
         validate_feed_key(feed_key)
@@ -722,6 +753,7 @@ class IO_HTTP:
         """
         Get data from the Adafruit IO Weather Forecast Service
         NOTE: This service is avaliable to Adafruit IO Plus subscribers only.
+
         :param int weather_id: ID for retrieving a specified weather record.
         """
         path = self._compose_path("integrations/weather/{0}".format(weather_id))
@@ -730,6 +762,7 @@ class IO_HTTP:
     def receive_random_data(self, generator_id):
         """
         Get data from the Adafruit IO Random Data Stream Service
+
         :param int generator_id: Specified randomizer record
         """
         path = self._compose_path("integrations/words/{0}".format(generator_id))
