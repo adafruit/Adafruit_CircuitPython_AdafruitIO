@@ -351,7 +351,7 @@ class IO_MQTT:
             self._client.unsubscribe("{0}/f/{1}".format(shared_user, feed_key))
         elif group_key is not None:
             validate_feed_key(group_key)
-            self._client.unsubscribe("{0}/g/{1}".format(self._user, feed_key))
+            self._client.unsubscribe("{0}/g/{1}".format(self._user, group_key))
         elif feed_key is not None:
             validate_feed_key(feed_key)
             self._client.unsubscribe("{0}/f/{1}".format(self._user, feed_key))
