@@ -22,6 +22,11 @@ import time
 import json
 import re
 
+try:
+    from typing import List, Tuple, Any
+except ImportError:
+    pass
+
 from adafruit_minimqtt.adafruit_minimqtt import MMQTTException
 from adafruit_io.adafruit_io_errors import (
     AdafruitIO_RequestError,
@@ -35,7 +40,7 @@ __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_AdafruitIO.git"
 CLIENT_HEADERS = {"User-Agent": "AIO-CircuitPython/{0}".format(__version__)}
 
 
-def validate_feed_key(feed_key):
+def validate_feed_key(feed_key: str):
     """Validates a provided feed key against Adafruit IO's system rules.
     https://learn.adafruit.com/naming-things-in-adafruit-io/the-two-feed-identifiers
     """
@@ -143,7 +148,7 @@ class IO_MQTT:
             self.on_disconnect(self)
 
     # pylint: disable=not-callable
-    def _on_message_mqtt(self, client, topic, payload):
+    def _on_message_mqtt(self, client, topic: str, payload: str):
         """Runs when the client calls on_message. Parses and returns
         incoming data from Adafruit IO feeds.
 
@@ -195,7 +200,7 @@ class IO_MQTT:
         if self.on_unsubscribe is not None:
             self.on_unsubscribe(self, user_data, topic, pid)
 
-    def add_feed_callback(self, feed_key, callback_method):
+    def add_feed_callback(self, feed_key: str, callback_method: str):
         """Attaches a callback_method to an Adafruit IO feed.
         The callback_method function is called when a
         new value is written to the feed.
@@ -211,7 +216,7 @@ class IO_MQTT:
             "{0}/f/{1}".format(self._user, feed_key), callback_method
         )
 
-    def remove_feed_callback(self, feed_key):
+    def remove_feed_callback(self, feed_key: str):
         """Removes a previously registered callback method
         from executing whenever feed_key receives new data.
 
@@ -239,7 +244,7 @@ class IO_MQTT:
         self._client.loop(timeout)
 
     # Subscriptions
-    def subscribe(self, feed_key=None, group_key=None, shared_user=None):
+    def subscribe(self, feed_key: str=None, group_key: str=None, shared_user: str=None):
         """Subscribes to your Adafruit IO feed or group.
         Can also subscribe to someone else's feed.
 
@@ -387,7 +392,7 @@ class IO_MQTT:
             time.sleep(timeout)
 
     # pylint: disable=too-many-arguments
-    def publish(self, feed_key, data, metadata=None, shared_user=None, is_group=False):
+    def publish(self, feed_key: str, data: Any, metadata: str=None, shared_use: str=None, is_group: bool=False):
         """Publishes to an An Adafruit IO Feed.
 
         :param str feed_key: Adafruit IO Feed key.
@@ -453,7 +458,7 @@ class IO_MQTT:
         else:
             self._client.publish("{0}/f/{1}".format(self._user, feed_key), data)
 
-    def get(self, feed_key):
+    def get(self, feed_key: str):
         """Calling this method will make Adafruit IO publish the most recent
         value on feed_key.
         https://io.adafruit.com/api/docs/mqtt.html#retained-values
@@ -498,7 +503,7 @@ class IO_HTTP:
         return headers
 
     @staticmethod
-    def _create_data(data, metadata):
+    def _create_data(data, metadata: dict):
         """Returns a data payload as expected by the Adafruit IO HTTP API
 
         :param data: Payload value.
@@ -522,7 +527,7 @@ class IO_HTTP:
         if response.status_code >= 400:
             raise AdafruitIO_RequestError(response)
 
-    def _compose_path(self, path):
+    def _compose_path(self, path: str):
         """Composes a valid API request path.
 
         :param str path: Adafruit IO API URL path.
@@ -530,7 +535,7 @@ class IO_HTTP:
         return "https://io.adafruit.com/api/v2/{0}/{1}".format(self.username, path)
 
     # HTTP Requests
-    def _post(self, path, payload):
+    def _post(self, path: str, payload: json):
         """
         POST data to Adafruit IO
 
@@ -545,7 +550,7 @@ class IO_HTTP:
         response.close()
         return json_data
 
-    def _get(self, path):
+    def _get(self, path: str):
         """
         GET data from Adafruit IO
 
@@ -559,7 +564,7 @@ class IO_HTTP:
         response.close()
         return json_data
 
-    def _delete(self, path):
+    def _delete(self, path: str):
         """
         DELETE data from Adafruit IO.
 
@@ -574,7 +579,7 @@ class IO_HTTP:
         return json_data
 
     # Data
-    def send_data(self, feed_key, data, metadata=None, precision=None):
+    def send_data(self, feed_key: str, data: str, metadata: dict=None, precision: int=None):
         """
         Sends value data to a specified Adafruit IO feed.
 
@@ -595,7 +600,7 @@ class IO_HTTP:
         payload = self._create_data(data, metadata)
         self._post(path, payload)
 
-    def send_batch_data(self, feed_key, data_list):
+    def send_batch_data(self, feed_key: str, data_list: list):
         """
         Sends a batch array of data to a specified Adafruit IO feed
 
@@ -607,7 +612,7 @@ class IO_HTTP:
         data_dict = type(data_list)((data._asdict() for data in data_list))
         self._post(path, {"data": data_dict})
 
-    def receive_all_data(self, feed_key):
+    def receive_all_data(self, feed_key: str):
         """
         Get all data values from a specified Adafruit IO feed. Data is
         returned in reverse order.
@@ -618,7 +623,7 @@ class IO_HTTP:
         path = self._compose_path("feeds/{0}/data".format(feed_key))
         return self._get(path)
 
-    def receive_data(self, feed_key):
+    def receive_data(self, feed_key: str):
         """
         Return the most recent value for the specified feed.
 
@@ -628,7 +633,7 @@ class IO_HTTP:
         path = self._compose_path("feeds/{0}/data/last".format(feed_key))
         return self._get(path)
 
-    def delete_data(self, feed_key, data_id):
+    def delete_data(self, feed_key: str, data_id: str):
         """
         Deletes an existing Data point from a feed.
 
@@ -640,7 +645,7 @@ class IO_HTTP:
         return self._delete(path)
 
     # Groups
-    def create_new_group(self, group_key, group_description):
+    def create_new_group(self, group_key:str , group_description: str):
         """
         Creates a new Adafruit IO Group.
 
@@ -651,7 +656,7 @@ class IO_HTTP:
         payload = {"name": group_key, "description": group_description}
         return self._post(path, payload)
 
-    def delete_group(self, group_key):
+    def delete_group(self, group_key: str):
         """
         Deletes an existing group.
 
@@ -660,7 +665,7 @@ class IO_HTTP:
         path = self._compose_path("groups/{0}".format(group_key))
         return self._delete(path)
 
-    def get_group(self, group_key):
+    def get_group(self, group_key: str):
         """
         Returns Group based on Group Key
 
@@ -669,7 +674,7 @@ class IO_HTTP:
         path = self._compose_path("groups/{0}".format(group_key))
         return self._get(path)
 
-    def create_feed_in_group(self, group_key, feed_name):
+    def create_feed_in_group(self, group_key: str, feed_name: str):
         """Creates a new feed in an existing group.
 
         :param str group_key: Group name.
@@ -679,7 +684,7 @@ class IO_HTTP:
         payload = {"feed": {"name": feed_name}}
         return self._post(path, payload)
 
-    def add_feed_to_group(self, group_key, feed_key):
+    def add_feed_to_group(self, group_key: str, feed_key: str):
         """
         Adds an existing feed to a group
 
@@ -692,7 +697,7 @@ class IO_HTTP:
         return self._post(path, payload)
 
     # Feeds
-    def get_feed(self, feed_key, detailed=False):
+    def get_feed(self, feed_key: str, detailed: bool=False):
         """
         Returns an Adafruit IO feed based on the feed key
 
@@ -706,7 +711,7 @@ class IO_HTTP:
             path = self._compose_path("feeds/{0}".format(feed_key))
         return self._get(path)
 
-    def create_new_feed(self, feed_key, feed_desc=None, feed_license=None):
+    def create_new_feed(self, feed_key: str, feed_desc: str=None, feed_license: str=None):
         """
         Creates a new Adafruit IO feed.
 
@@ -720,7 +725,7 @@ class IO_HTTP:
         return self._post(path, payload)
 
     def create_and_get_feed(
-        self, feed_key, detailed=False, feed_desc=None, feed_license=None
+        self, feed_key: str, detailed: bool=False, feed_desc: str=None, feed_license: str=None
     ):
         """
         Attempts to return a feed; if the feed does not exist, it is created, and then returned.
@@ -738,7 +743,7 @@ class IO_HTTP:
             )
             return self.get_feed(feed_key, detailed=detailed)
 
-    def delete_feed(self, feed_key):
+    def delete_feed(self, feed_key: str):
         """
         Deletes an existing feed.
 
@@ -749,7 +754,7 @@ class IO_HTTP:
         return self._delete(path)
 
     # Adafruit IO Connected Services
-    def receive_weather(self, weather_id):
+    def receive_weather(self, weather_id: int):
         """
         Get data from the Adafruit IO Weather Forecast Service
         NOTE: This service is avaliable to Adafruit IO Plus subscribers only.
@@ -759,7 +764,7 @@ class IO_HTTP:
         path = self._compose_path("integrations/weather/{0}".format(weather_id))
         return self._get(path)
 
-    def receive_random_data(self, generator_id):
+    def receive_random_data(self, generator_id: int):
         """
         Get data from the Adafruit IO Random Data Stream Service
 
