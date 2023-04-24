@@ -289,7 +289,7 @@ class IO_MQTT:
         """
         self._client.subscribe("%s/errors" % self._user)
 
-    def subscribe_to_randomizer(self, randomizer_id):
+    def subscribe_to_randomizer(self, randomizer_id: int):
         """Subscribes to a random data stream created by the Adafruit IO Words service.
 
         :param int randomizer_id: Random word record you want data for.
@@ -298,7 +298,7 @@ class IO_MQTT:
             "{0}/integration/words/{1}".format(self._user, randomizer_id)
         )
 
-    def subscribe_to_weather(self, weather_record, forecast):
+    def subscribe_to_weather(self, weather_record: int, forecast: str):
         """Subscribes to a weather forecast using the Adafruit IO PLUS weather
         service. This feature is only avaliable to Adafruit IO PLUS subscribers.
 
@@ -324,7 +324,7 @@ class IO_MQTT:
         else:
             self._client.subscribe("time/" + time_type)
 
-    def unsubscribe(self, feed_key=None, group_key=None, shared_user=None):
+    def unsubscribe(self, feed_key: str=None, group_key: str=None, shared_user: str=None):
         """Unsubscribes from an Adafruit IO feed or group.
         Can also subscribe to someone else's feed.
 
@@ -364,11 +364,11 @@ class IO_MQTT:
             raise AdafruitIO_MQTTError("Must provide a feed_key or group_key.")
 
     # Publishing
-    def publish_multiple(self, feeds_and_data, timeout=3, is_group=False):
+    def publish_multiple(self, feeds_and_data: List, timeout: int=3, is_group: bool=False):
         """Publishes multiple data points to multiple feeds or groups with a variable
         timeout.
 
-        :param str feeds_and_data: List of tuples containing topic strings and data values.
+        :param list feeds_and_data: List of tuples containing topic strings and data values.
         :param int timeout: Delay between publishing data points to Adafruit IO, in seconds.
         :param bool is_group: Set to True if you're publishing to a group.
 
