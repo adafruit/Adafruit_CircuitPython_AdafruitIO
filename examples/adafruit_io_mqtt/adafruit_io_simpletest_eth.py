@@ -30,6 +30,7 @@ spi_bus = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
 # Initialize ethernet interface with DHCP
 eth = WIZNET5K(spi_bus, cs)
 
+
 # Define callback functions which will be called when certain events happen.
 # pylint: disable=unused-argument
 def connected(client):

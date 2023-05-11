@@ -31,6 +31,7 @@ print("Connecting to %s" % secrets["ssid"])
 wifi.radio.connect(secrets["ssid"], secrets["password"])
 print("Connected to %s!" % secrets["ssid"])
 
+
 # Define callback functions which will be called when certain events happen.
 # pylint: disable=unused-argument
 def connected(client):

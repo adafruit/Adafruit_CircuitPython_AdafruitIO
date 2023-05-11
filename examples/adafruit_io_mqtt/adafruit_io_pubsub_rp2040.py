@@ -35,6 +35,7 @@ wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets)
 led_pin = DigitalInOut(board.LED)
 led_pin.switch_to_output()
 
+
 # Define callback functions which will be called when certain events happen.
 # pylint: disable=unused-argument
 def connected(client):

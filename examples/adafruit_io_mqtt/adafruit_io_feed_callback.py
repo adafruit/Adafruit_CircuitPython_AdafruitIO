@@ -49,6 +49,7 @@ status_light = neopixel.NeoPixel(
 # status_light = adafruit_rgbled.RGBLED(RED_LED, BLUE_LED, GREEN_LED)
 wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_light)
 
+
 # Define callback functions which will be called when certain events happen.
 # pylint: disable=unused-argument
 def connected(client):
