@@ -537,12 +537,12 @@ class IO_HTTP:
         :param str path: Formatted Adafruit IO URL from _compose_path
         :param json payload: JSON data to send to Adafruit IO
         """
-        response = self._http.post(
+        with self._http.post(
             path, json=payload, headers=self._create_headers(self._aio_headers[0])
-        )
-        self._handle_error(response)
-        json_data = response.json()
-        response.close()
+        ) as response:
+            self._handle_error(response)
+            json_data = response.json()
+
         return json_data
 
     def _get(self, path):
@@ -551,12 +551,11 @@ class IO_HTTP:
 
         :param str path: Formatted Adafruit IO URL from _compose_path
         """
-        response = self._http.get(
+        with self._http.get(
             path, headers=self._create_headers(self._aio_headers[1])
-        )
-        self._handle_error(response)
-        json_data = response.json()
-        response.close()
+        ) as response:
+            self._handle_error(response)
+            json_data = response.json()
         return json_data
 
     def _delete(self, path):
@@ -565,12 +564,12 @@ class IO_HTTP:
 
         :param str path: Formatted Adafruit IO URL from _compose_path
         """
-        response = self._http.delete(
+        with self._http.delete(
             path, headers=self._create_headers(self._aio_headers[0])
-        )
-        self._handle_error(response)
-        json_data = response.json()
-        response.close()
+        ) as response:
+            self._handle_error(response)
+            json_data = response.json()
+
         return json_data
 
     # Data
