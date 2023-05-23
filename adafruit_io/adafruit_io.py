@@ -252,13 +252,6 @@ class IO_MQTT:
         .. code-block:: python
 
             client.subscribe('temperature')
-
-        Example of subscribing to two Adafruit IO feeds: 'temperature'
-        and 'humidity'.
-
-        .. code-block:: python
-
-            client.subscribe([('temperature'), ('humidity')])
         """
         if shared_user is not None and feed_key is not None:
             validate_feed_key(feed_key)
@@ -332,13 +325,6 @@ class IO_MQTT:
         .. code-block:: python
 
             client.unsubscribe('temperature')
-
-        Example of unsubscribing from two feeds: 'temperature'
-        and 'humidity'
-
-        .. code-block:: python
-
-            client.unsubscribe([('temperature'), ('humidity')])
 
         Example of unsubscribing from a shared feed.
 
