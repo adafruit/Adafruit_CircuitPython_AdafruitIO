@@ -257,13 +257,6 @@ class IO_MQTT:
         .. code-block:: python
 
             client.subscribe('temperature')
-
-        Example of subscribing to two Adafruit IO feeds: 'temperature'
-        and 'humidity'.
-
-        .. code-block:: python
-
-            client.subscribe([('temperature'), ('humidity')])
         """
         if shared_user is not None and feed_key is not None:
             validate_feed_key(feed_key)
@@ -337,13 +330,6 @@ class IO_MQTT:
         .. code-block:: python
 
             client.unsubscribe('temperature')
-
-        Example of unsubscribing from two feeds: 'temperature'
-        and 'humidity'
-
-        .. code-block:: python
-
-            client.unsubscribe([('temperature'), ('humidity')])
 
         Example of unsubscribing from a shared feed.
 
@@ -542,12 +528,12 @@ class IO_HTTP:
         :param str path: Formatted Adafruit IO URL from _compose_path
         :param json payload: JSON data to send to Adafruit IO
         """
-        response = self._http.post(
+        with self._http.post(
             path, json=payload, headers=self._create_headers(self._aio_headers[0])
-        )
-        self._handle_error(response)
-        json_data = response.json()
-        response.close()
+        ) as response:
+            self._handle_error(response)
+            json_data = response.json()
+
         return json_data
 
     def _get(self, path: str):
@@ -556,12 +542,11 @@ class IO_HTTP:
 
         :param str path: Formatted Adafruit IO URL from _compose_path
         """
-        response = self._http.get(
+        with self._http.get(
             path, headers=self._create_headers(self._aio_headers[1])
-        )
-        self._handle_error(response)
-        json_data = response.json()
-        response.close()
+        ) as response:
+            self._handle_error(response)
+            json_data = response.json()
         return json_data
 
     def _delete(self, path: str):
@@ -570,12 +555,12 @@ class IO_HTTP:
 
         :param str path: Formatted Adafruit IO URL from _compose_path
         """
-        response = self._http.delete(
+        with self._http.delete(
             path, headers=self._create_headers(self._aio_headers[0])
-        )
-        self._handle_error(response)
-        json_data = response.json()
-        response.close()
+        ) as response:
+            self._handle_error(response)
+            json_data = response.json()
+
         return json_data
 
     # Data

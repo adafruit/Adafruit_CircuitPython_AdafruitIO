@@ -45,6 +45,7 @@ while not gsm.is_connected:
     gsm.connect()
     time.sleep(5)
 
+
 # Define callback functions which will be called when certain events happen.
 # pylint: disable=unused-argument
 def connected(client):
