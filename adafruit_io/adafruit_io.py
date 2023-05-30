@@ -23,7 +23,7 @@ import json
 import re
 
 try:
-    from typing import List, Tuple, Any
+    from typing import List, Any
 except ImportError:
     pass
 
@@ -244,7 +244,9 @@ class IO_MQTT:
         self._client.loop(timeout)
 
     # Subscriptions
-    def subscribe(self, feed_key: str=None, group_key: str=None, shared_user: str=None):
+    def subscribe(
+        self, feed_key: str = None, group_key: str = None, shared_user: str = None
+    ):
         """Subscribes to your Adafruit IO feed or group.
         Can also subscribe to someone else's feed.
 
@@ -317,7 +319,9 @@ class IO_MQTT:
         else:
             self._client.subscribe("time/" + time_type)
 
-    def unsubscribe(self, feed_key: str=None, group_key: str=None, shared_user: str=None):
+    def unsubscribe(
+        self, feed_key: str = None, group_key: str = None, shared_user: str = None
+    ):
         """Unsubscribes from an Adafruit IO feed or group.
         Can also subscribe to someone else's feed.
 
@@ -350,7 +354,9 @@ class IO_MQTT:
             raise AdafruitIO_MQTTError("Must provide a feed_key or group_key.")
 
     # Publishing
-    def publish_multiple(self, feeds_and_data: List, timeout: int=3, is_group: bool=False):
+    def publish_multiple(
+        self, feeds_and_data: List, timeout: int = 3, is_group: bool = False
+    ):
         """Publishes multiple data points to multiple feeds or groups with a variable
         timeout.
 
@@ -378,8 +384,15 @@ class IO_MQTT:
             time.sleep(timeout)
 
     # pylint: disable=too-many-arguments
-    def publish(self, feed_key: str, data: Any, metadata: str=None, shared_use: str=None, is_group: bool=False):
-        """Publishes to an An Adafruit IO Feed.
+    def publish(
+        self,
+        feed_key: str,
+        data: Any,
+        metadata: str = None,
+        shared_user: str = None,
+        is_group: bool = False,
+    ):
+        """Publishes to an Adafruit IO Feed.
 
         :param str feed_key: Adafruit IO Feed key.
         :param str data: Data to publish to the feed or group.
@@ -564,7 +577,9 @@ class IO_HTTP:
         return json_data
 
     # Data
-    def send_data(self, feed_key: str, data: str, metadata: dict=None, precision: int=None):
+    def send_data(
+        self, feed_key: str, data: str, metadata: dict = None, precision: int = None
+    ):
         """
         Sends value data to a specified Adafruit IO feed.
 
@@ -630,7 +645,7 @@ class IO_HTTP:
         return self._delete(path)
 
     # Groups
-    def create_new_group(self, group_key:str , group_description: str):
+    def create_new_group(self, group_key: str, group_description: str):
         """
         Creates a new Adafruit IO Group.
 
@@ -682,7 +697,7 @@ class IO_HTTP:
         return self._post(path, payload)
 
     # Feeds
-    def get_feed(self, feed_key: str, detailed: bool=False):
+    def get_feed(self, feed_key: str, detailed: bool = False):
         """
         Returns an Adafruit IO feed based on the feed key
 
@@ -696,7 +711,9 @@ class IO_HTTP:
             path = self._compose_path("feeds/{0}".format(feed_key))
         return self._get(path)
 
-    def create_new_feed(self, feed_key: str, feed_desc: str=None, feed_license: str=None):
+    def create_new_feed(
+        self, feed_key: str, feed_desc: str = None, feed_license: str = None
+    ):
         """
         Creates a new Adafruit IO feed.
 
@@ -710,7 +727,11 @@ class IO_HTTP:
         return self._post(path, payload)
 
     def create_and_get_feed(
-        self, feed_key: str, detailed: bool=False, feed_desc: str=None, feed_license: str=None
+        self,
+        feed_key: str,
+        detailed: bool = False,
+        feed_desc: str = None,
+        feed_license: str = None,
     ):
         """
         Attempts to return a feed; if the feed does not exist, it is created, and then returned.
