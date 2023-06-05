@@ -23,7 +23,7 @@ import json
 import re
 
 try:
-    from typing import List, Any
+    from typing import List, Any, Callable, Optional
 except ImportError:
     pass
 
@@ -200,7 +200,7 @@ class IO_MQTT:
         if self.on_unsubscribe is not None:
             self.on_unsubscribe(self, user_data, topic, pid)
 
-    def add_feed_callback(self, feed_key: str, callback_method: str):
+    def add_feed_callback(self, feed_key: str, callback_method: Callable):
         """Attaches a callback_method to an Adafruit IO feed.
         The callback_method function is called when a
         new value is written to the feed.
@@ -245,7 +245,10 @@ class IO_MQTT:
 
     # Subscriptions
     def subscribe(
-        self, feed_key: str = None, group_key: str = None, shared_user: str = None
+        self,
+        feed_key: str = None,
+        group_key: str = None,
+        shared_user: Optional[str] = None,
     ):
         """Subscribes to your Adafruit IO feed or group.
         Can also subscribe to someone else's feed.
@@ -306,7 +309,7 @@ class IO_MQTT:
             )
         )
 
-    def subscribe_to_time(self, time_type):
+    def subscribe_to_time(self, time_type: str):
         """Adafruit IO provides some built-in MQTT topics for getting the current server time.
 
         :param str time_type: Current Adafruit IO server time. Can be 'seconds', 'millis', or 'iso'.
@@ -320,7 +323,10 @@ class IO_MQTT:
             self._client.subscribe("time/" + time_type)
 
     def unsubscribe(
-        self, feed_key: str = None, group_key: str = None, shared_user: str = None
+        self,
+        feed_key: str = None,
+        group_key: str = None,
+        shared_user: Optional[str] = None,
     ):
         """Unsubscribes from an Adafruit IO feed or group.
         Can also subscribe to someone else's feed.
@@ -387,7 +393,7 @@ class IO_MQTT:
     def publish(
         self,
         feed_key: str,
-        data: Any,
+        data: str,
         metadata: str = None,
         shared_user: str = None,
         is_group: bool = False,
@@ -534,7 +540,7 @@ class IO_HTTP:
         return "https://io.adafruit.com/api/v2/{0}/{1}".format(self.username, path)
 
     # HTTP Requests
-    def _post(self, path: str, payload: json):
+    def _post(self, path: str, payload: Any):
         """
         POST data to Adafruit IO
 
@@ -578,7 +584,11 @@ class IO_HTTP:
 
     # Data
     def send_data(
-        self, feed_key: str, data: str, metadata: dict = None, precision: int = None
+        self,
+        feed_key: str,
+        data: str,
+        metadata: Optional[dict] = None,
+        precision: Optional[int] = None,
     ):
         """
         Sends value data to a specified Adafruit IO feed.
@@ -712,7 +722,10 @@ class IO_HTTP:
         return self._get(path)
 
     def create_new_feed(
-        self, feed_key: str, feed_desc: str = None, feed_license: str = None
+        self,
+        feed_key: str,
+        feed_desc: Optional[str] = None,
+        feed_license: Optional[str] = None,
     ):
         """
         Creates a new Adafruit IO feed.
@@ -730,8 +743,8 @@ class IO_HTTP:
         self,
         feed_key: str,
         detailed: bool = False,
-        feed_desc: str = None,
-        feed_license: str = None,
+        feed_desc: Optional[str] = None,
+        feed_license: Optional[str] = None,
     ):
         """
         Attempts to return a feed; if the feed does not exist, it is created, and then returned.
