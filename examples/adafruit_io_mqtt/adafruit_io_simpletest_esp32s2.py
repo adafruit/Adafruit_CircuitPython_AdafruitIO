@@ -3,6 +3,7 @@
 import time
 from random import randint
 
+import os
 import ssl
 import socketpool
 import wifi
@@ -16,9 +17,19 @@ from adafruit_io.adafruit_io import IO_MQTT
 # source control.
 # pylint: disable=no-name-in-module,wrong-import-order
 try:
-    from secrets import secrets
+    if os.getenv("AIO_USERNAME") and os.getenv("AIO_KEY"):
+        secrets = {
+            "aio_username": os.getenv("AIO_USERNAME"),
+            "aio_key": os.getenv("AIO_KEY"),
+            "ssid": os.getenv("CIRCUITPY_WIFI_SSID"),
+            "password": os.getenv("CIRCUITPY_WIFI_PASSWORD"),
+        }
+    else:
+        from secrets import secrets
 except ImportError:
-    print("WiFi secrets are kept in secrets.py, please add them there!")
+    print(
+        "WiFi + Adafruit IO secrets are kept in secrets.py or settings.toml, please add them there!"
+    )
     raise
 
 # Set your Adafruit IO Username and Key in secrets.py
@@ -27,9 +38,10 @@ except ImportError:
 aio_username = secrets["aio_username"]
 aio_key = secrets["aio_key"]
 
-print("Connecting to %s" % secrets["ssid"])
-wifi.radio.connect(secrets["ssid"], secrets["password"])
-print("Connected to %s!" % secrets["ssid"])
+if not wifi.radio.connected:
+    print("Connecting to %s" % secrets["ssid"])
+    wifi.radio.connect(secrets["ssid"], secrets["password"])
+    print("Connected to %s!" % secrets["ssid"])
 
 
 # Define callback functions which will be called when certain events happen.
@@ -74,11 +86,12 @@ pool = socketpool.SocketPool(wifi.radio)
 # Initialize a new MQTT Client object
 mqtt_client = MQTT.MQTT(
     broker="io.adafruit.com",
-    port=1883,
+    port=8883,
     username=secrets["aio_username"],
     password=secrets["aio_key"],
     socket_pool=pool,
     ssl_context=ssl.create_default_context(),
+    is_ssl=True,
 )
 
 # Initialize an Adafruit IO MQTT Client
