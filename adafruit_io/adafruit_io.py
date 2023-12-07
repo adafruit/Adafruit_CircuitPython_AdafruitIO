@@ -53,6 +53,7 @@ def validate_feed_key(feed_key: str):
             "Feed key must contain English letters, numbers, dash, and a period or a forward slash."
         )
 
+
 def validate_n_values(n_values: int):
     """Validates a provided number of values to retrieve data from Adafruit IO.
 
@@ -62,7 +63,10 @@ def validate_n_values(n_values: int):
 
     """
     if n_values < 1 or n_values > 1000:  # validate 0 < n_values <= 1000
-        raise ValueError("Number of values must be greater than zero and less than or equal to 1000")
+        raise ValueError(
+            "Number of values must be greater than zero and less than or equal to 1000"
+        )
+
 
 class IO_MQTT:
     """
@@ -642,7 +646,7 @@ class IO_HTTP:
         validate_feed_key(feed_key)
         path = self._compose_path("feeds/{0}/data".format(feed_key))
         return self._get(path)
-    
+
     def receive_n_data(self, feed_key: str, n_values: int):
         """
         Get n data values from a specified Adafruit IO feed. Data is
@@ -652,7 +656,7 @@ class IO_HTTP:
         """
         validate_n_values(n_values)
         validate_feed_key(feed_key)
-        path = self._compose_path("feeds/{0}/data?limit={1}".format(feed_key,n_values))
+        path = self._compose_path("feeds/{0}/data?limit={1}".format(feed_key, n_values))
         return self._get(path)
 
     def receive_data(self, feed_key: str):
