@@ -58,8 +58,7 @@ def validate_n_values(n_values: int):
     """Validates a provided number of values to retrieve data from Adafruit IO.
 
     Although Adafruit IO will accept values < 1 and > 1000, this avoids two types of issues:
-    <1      - Coding errors
-    >1000   - Pagination-related expectation management
+    n_values < 1 (coding errors) and n_values > 1000 (pagination required for HTTP API)
 
     """
     if n_values < 1 or n_values > 1000:  # validate 0 < n_values <= 1000
@@ -649,10 +648,11 @@ class IO_HTTP:
 
     def receive_n_data(self, feed_key: str, n_values: int):
         """
-        Get n data values from a specified Adafruit IO feed. Data is
+        Get most recent n data values from a specified feed. Data is
         returned in reverse order.
 
         :param str feed_key: Adafruit IO feed key
+        :param int n_values: Number of data values
         """
         validate_n_values(n_values)
         validate_feed_key(feed_key)
