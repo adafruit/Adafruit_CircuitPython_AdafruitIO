@@ -7,9 +7,10 @@ import time
 import board
 import busio
 from digitalio import DigitalInOut, Direction
-import adafruit_esp32spi.adafruit_esp32spi_socket as socket
+import adafruit_connection_manager
+import adafruit_esp32spi.adafruit_esp32spi_socket as pool
 from adafruit_esp32spi import adafruit_esp32spi
-import adafruit_requests as requests
+import adafruit_requests
 from adafruit_io.adafruit_io import IO_HTTP, AdafruitIO_RequestError
 
 # Add a secrets.py to your filesystem that has a dictionary called secrets with "ssid" and
@@ -44,8 +45,9 @@ while not esp.is_connected:
         continue
 print("Connected to", str(esp.ssid, "utf-8"), "\tRSSI:", esp.rssi)
 
-socket.set_interface(esp)
-requests.set_socket(socket, esp)
+# Initialize a requests session
+ssl_context = adafruit_connection_manager.create_fake_ssl_context(pool, esp)
+requests = adafruit_requests.Session(pool, ssl_context)
 
 # Set your Adafruit IO Username and Key in secrets.py
 # (visit io.adafruit.com if you need to create an account,

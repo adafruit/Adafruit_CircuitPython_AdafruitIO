@@ -12,9 +12,10 @@ import board
 import busio
 import digitalio
 
+import adafruit_connection_manager
 from adafruit_fona.adafruit_fona import FONA
 from adafruit_fona.adafruit_fona_gsm import GSM
-import adafruit_fona.adafruit_fona_socket as cellular_socket
+import adafruit_fona.adafruit_fona_socket as pool
 
 import adafruit_minimqtt.adafruit_minimqtt as MQTT
 from adafruit_io.adafruit_io import IO_MQTT
@@ -82,8 +83,7 @@ def message(client, feed_id, payload):
     print("Feed {0} received new value: {1}".format(feed_id, payload))
 
 
-# Initialize MQTT interface with the ethernet interface
-MQTT.set_socket(cellular_socket, fona)
+ssl_context = adafruit_connection_manager.create_fake_ssl_context(pool, fona)
 
 # Initialize a new MQTT Client object
 mqtt_client = MQTT.MQTT(
@@ -91,6 +91,8 @@ mqtt_client = MQTT.MQTT(
     port=1883,
     username=secrets["aio_username"],
     password=secrets["aio_key"],
+    socket_pool=pool,
+    ssl_context=ssl_context,
 )
 
 # Initialize an Adafruit IO MQTT Client
