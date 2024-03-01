@@ -12,8 +12,9 @@ import board
 import busio
 from digitalio import DigitalInOut
 
+import adafruit_connection_manager
 from adafruit_wiznet5k.adafruit_wiznet5k import WIZNET5K
-import adafruit_wiznet5k.adafruit_wiznet5k_socket as socket
+import adafruit_wiznet5k.adafruit_wiznet5k_socket as pool
 import adafruit_minimqtt.adafruit_minimqtt as MQTT
 from adafruit_io.adafruit_io import IO_MQTT
 
@@ -67,8 +68,7 @@ def message(client, feed_id, payload):
     print("Feed {0} received new value: {1}".format(feed_id, payload))
 
 
-# Initialize MQTT interface with the ethernet interface
-MQTT.set_socket(socket, eth)
+ssl_context = adafruit_connection_manager.create_fake_ssl_context(pool, eth)
 
 # Initialize a new MQTT Client object
 mqtt_client = MQTT.MQTT(
@@ -76,6 +76,8 @@ mqtt_client = MQTT.MQTT(
     port=1883,
     username=secrets["aio_username"],
     password=secrets["aio_key"],
+    socket_pool=pool,
+    ssl_context=ssl_context,
 )
 
 # Initialize an Adafruit IO MQTT Client
