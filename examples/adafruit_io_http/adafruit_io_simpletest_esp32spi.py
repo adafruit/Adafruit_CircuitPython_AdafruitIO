@@ -7,7 +7,6 @@ import board
 import busio
 from digitalio import DigitalInOut
 import adafruit_connection_manager
-import adafruit_esp32spi.adafruit_esp32spi_socket as pool
 from adafruit_esp32spi import adafruit_esp32spi
 import adafruit_requests
 from adafruit_io.adafruit_io import IO_HTTP, AdafruitIO_RequestError
@@ -45,7 +44,8 @@ while not esp.is_connected:
 print("Connected to", str(esp.ssid, "utf-8"), "\tRSSI:", esp.rssi)
 
 # Initialize a requests session
-ssl_context = adafruit_connection_manager.create_fake_ssl_context(pool, esp)
+pool = adafruit_connection_manager.get_radio_socketpool(esp)
+ssl_context = adafruit_connection_manager.get_radio_ssl_context(esp)
 requests = adafruit_requests.Session(pool, ssl_context)
 
 # Set your Adafruit IO Username and Key in secrets.py
