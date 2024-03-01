@@ -14,7 +14,6 @@ from digitalio import DigitalInOut
 
 import adafruit_connection_manager
 from adafruit_wiznet5k.adafruit_wiznet5k import WIZNET5K
-import adafruit_wiznet5k.adafruit_wiznet5k_socket as pool
 import adafruit_minimqtt.adafruit_minimqtt as MQTT
 from adafruit_io.adafruit_io import IO_MQTT
 
@@ -68,7 +67,8 @@ def message(client, feed_id, payload):
     print("Feed {0} received new value: {1}".format(feed_id, payload))
 
 
-ssl_context = adafruit_connection_manager.create_fake_ssl_context(pool, eth)
+pool = adafruit_connection_manager.get_radio_socketpool(eth)
+ssl_context = adafruit_connection_manager.get_radio_ssl_context(eth)
 
 # Initialize a new MQTT Client object
 mqtt_client = MQTT.MQTT(
