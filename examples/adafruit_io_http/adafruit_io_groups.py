@@ -63,13 +63,24 @@ io = IO_HTTP(aio_username, aio_key, requests)
 print("Creating a new Adafruit IO Group...")
 sensor_group = io.create_new_group("envsensors", "a group of environmental sensors")
 
-# Add the 'temperature' feed to the group
-print("Adding feed temperature to group...")
-io.add_feed_to_group(sensor_group["key"], "temperature")
+# Create the 'temperature' feed in the group
+print("Creating feed temperature inside group...")
+io.create_feed_in_group(sensor_group["key"], "temperature")
+
+# Create the 'humidity' feed then add to group (it will still be in Default group too)
+print("Creating feed humidity then adding to group...")
+humidity_feed = io.create_new_feed("humidity", "a feed for humidity data")
+io.add_feed_to_group(sensor_group["key"], humidity_feed["key"])
 
 # Get info from the group
+print("Getting fresh group info...")
+sensor_group = io.get_group("envsensors")  # refresh data via HTTP API
 print(sensor_group)
 
 # Delete the group
 print("Deleting group...")
 io.delete_group("envsensors")
+
+# Delete the remaining humidity feed (it was in Two Groups so not deleted with our group)
+print("Deleting feed humidity (still in default group)...")
+io.delete_feed(humidity_feed["key"])
