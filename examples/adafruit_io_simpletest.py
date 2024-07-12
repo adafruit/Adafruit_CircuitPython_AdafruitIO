@@ -85,6 +85,15 @@ def disconnected(client):
 
 
 # pylint: disable=unused-argument
+def publish(client, userdata, topic, pid):
+    """This method is called when the client publishes data to a feed."""
+    print(f"Published to {topic} with PID {pid}")
+    if userdata is not None:
+        print("Published User data: ", end="")
+        print(userdata)
+
+
+# pylint: disable=unused-argument
 def message(client, feed_id, payload):
     # Message function will be called when a subscribed feed has a new value.
     # The feed_id parameter identifies the feed, and the payload parameter has
@@ -120,6 +129,7 @@ io.on_disconnect = disconnected
 io.on_subscribe = subscribe
 io.on_unsubscribe = unsubscribe
 io.on_message = message
+io.on_publish = publish
 
 # Connect to Adafruit IO
 print("Connecting to Adafruit IO...")

@@ -98,12 +98,14 @@ class IO_MQTT:
         self.on_message = None
         self.on_subscribe = None
         self.on_unsubscribe = None
+        self.on_publish = None
         # MQTT event callbacks
         self._client.on_connect = self._on_connect_mqtt
         self._client.on_disconnect = self._on_disconnect_mqtt
         self._client.on_message = self._on_message_mqtt
         self._client.on_subscribe = self._on_subscribe_mqtt
         self._client.on_unsubscribe = self._on_unsubscribe_mqtt
+        self._client.on_publish = self._on_publish_mqtt
         self._connected = False
 
     def __enter__(self):
@@ -200,6 +202,12 @@ class IO_MQTT:
                 "You must define an on_message method before calling this callback."
             )
         self.on_message(self, topic_name, message)
+
+    # pylint: disable=not-callable, unused-argument
+    def _on_publish_mqtt(self, client, user_data, topic, pid):
+        """Runs when the client calls on_publish."""
+        if self.on_publish is not None:
+            self.on_publish(self, user_data, topic, pid)
 
     # pylint: disable=not-callable
     def _on_subscribe_mqtt(self, client, user_data, topic, qos):
