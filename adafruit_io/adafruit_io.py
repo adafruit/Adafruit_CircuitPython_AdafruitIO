@@ -648,7 +648,9 @@ class IO_HTTP:
         validate_feed_key(group_key)
         path = self._compose_path("groups/{0}/data".format(group_key))
         if not isinstance(feeds_and_data, list):
-            raise ValueError("This method accepts a list of dicts with \"key\" and \"value\".")
+            raise ValueError(
+                'This method accepts a list of dicts with "key" and "value".'
+            )
         if metadata is not None:
             self._post(path, {**metadata, "feeds": feeds_and_data})
         else:
