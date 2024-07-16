@@ -848,6 +848,7 @@ class IO_HTTP:
         https://circuitpython.readthedocs.io/en/latest/shared-bindings/time/__init__.html#time.struct_time
 
         :param str tz: Timezone to return the time in, see https://io.adafruit.com/services/time
+        default is based on the device's IP address being geolocated, falling back to UTC.
         """
         path = self._compose_path("integrations/time/struct.json")
         if tz is not None:
