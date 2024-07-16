@@ -643,7 +643,7 @@ class IO_HTTP:
 
         :param str group_key: Adafruit IO feed key
         :param list feeds_and_data: A list of dicts, with feed "key" and "value" entries
-        :param dict metadata: Optional metadata associated with the data e.g. created_at, lat, lon, ele
+        :param dict metadata: Optional metadata for the data e.g. created_at, lat, lon, ele
         """
         validate_feed_key(group_key)
         path = self._compose_path("groups/{0}/data".format(group_key))
