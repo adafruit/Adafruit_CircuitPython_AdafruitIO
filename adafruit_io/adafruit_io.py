@@ -641,7 +641,7 @@ class IO_HTTP:
         validate_feed_key(feed_key)
         if not isinstance(data_list, list) or data_list == []:
             raise ValueError("Data must be a list of dicts or namedtuples")
-        if not isinstance(data_list[0], dict): # assume namedtuple
+        if not isinstance(data_list[0], dict):  # assume namedtuple
             data_list = type(data_list)((data._asdict() for data in data_list))
         if not all("value" in data for data in data_list):
             raise ValueError("Data list items must at least contain a 'value' key")
