@@ -846,9 +846,10 @@ class IO_HTTP:
         """
         Returns a struct_time from the Adafruit IO Server based on the device's IP address.
         https://circuitpython.readthedocs.io/en/latest/shared-bindings/time/__init__.html#time.struct_time
+        The default time returned is based on the device's IP address being geolocated,
+        falling back to UTC if unable to be geolocated. The timezone can be manually set.
 
         :param str timezone: Timezone to return time in, see https://io.adafruit.com/services/time
-        default is based on the device's IP address being geolocated, falling back to UTC.
         """
         path = self._compose_path("integrations/time/struct.json")
         if timezone is not None:
