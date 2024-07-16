@@ -842,12 +842,16 @@ class IO_HTTP:
         path = self._compose_path("integrations/words/{0}".format(generator_id))
         return self._get(path)
 
-    def receive_time(self):
+    def receive_time(self, tz: str = None):
         """
         Returns a struct_time from the Adafruit IO Server based on the device's IP address.
         https://circuitpython.readthedocs.io/en/latest/shared-bindings/time/__init__.html#time.struct_time
+
+        :param str tz: Timezone to return the time in, see https://io.adafruit.com/services/time
         """
         path = self._compose_path("integrations/time/struct.json")
+        if tz is not None:
+            path += "?tz={0}".format(tz)
         time_struct = self._get(path)
         return time.struct_time(
             (

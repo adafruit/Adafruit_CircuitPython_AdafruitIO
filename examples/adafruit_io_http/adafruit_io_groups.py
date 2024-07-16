@@ -106,7 +106,7 @@ print(io.get_feed(humidity_feed["key"]))
 
 # fetch current time
 print("Fetching current time from IO... ", end="")
-year, month, day, hour, minute, second, *_ = io.receive_time()
+year, month, day, hour, minute, second, *_ = io.receive_time(tz="UTC")
 old_time = datetime.datetime(year, month, day, hour, minute, second)
 print(old_time.isoformat())
 
