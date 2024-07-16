@@ -652,7 +652,10 @@ class IO_HTTP:
                 'This method accepts a list of dicts with "key" and "value".'
             )
         if metadata is not None:
-            self._post(path, {**metadata, "feeds": feeds_and_data})
+            if not isinstance(metadata, dict):
+                raise ValueError("Metadata must be a dictionary.")
+            metadata.update({"feeds": feeds_and_data})
+            self._post(path, metadata)
         else:
             self._post(path, {"feeds": feeds_and_data})
 
