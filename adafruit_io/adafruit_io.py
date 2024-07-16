@@ -631,9 +631,28 @@ class IO_HTTP:
         :param list Data: Data list to send
         """
         validate_feed_key(feed_key)
-        path = "feeds/{0}/data/batch".format(feed_key)
+        path = self._compose_path("feeds/{0}/data/batch".format(feed_key))
         data_dict = type(data_list)((data._asdict() for data in data_list))
         self._post(path, {"data": data_dict})
+
+    def send_group_data(
+        self, group_key: str, feeds_and_data: list, metadata: Optional[dict] = None
+    ):
+        """
+        Sends data to specified Adafruit IO feeds in a group
+
+        :param str group_key: Adafruit IO feed key
+        :param list feeds_and_data: A list of dicts, with feed "key" and "value" entries
+        :param dict metadata: Optional metadata associated with the data e.g. created_at, lat, lon, ele
+        """
+        validate_feed_key(group_key)
+        path = self._compose_path("groups/{0}/data".format(group_key))
+        if not isinstance(feeds_and_data, list):
+            raise ValueError("This method accepts a list of dicts with \"key\" and \"value\".")
+        if metadata is not None:
+            self._post(path, {**metadata, "feeds": feeds_and_data})
+        else:
+            self._post(path, {"feeds": feeds_and_data})
 
     def receive_all_data(self, feed_key: str):
         """

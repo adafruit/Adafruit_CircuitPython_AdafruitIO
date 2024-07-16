@@ -4,6 +4,7 @@
 # Adafruit IO HTTP API - Group Interactions
 # Documentation: https://io.adafruit.com/api/docs/#groups
 # adafruit_circuitpython_adafruitio with an esp32spi_socket
+import datetime
 import board
 import busio
 from digitalio import DigitalInOut
@@ -50,6 +51,13 @@ pool = adafruit_connection_manager.get_radio_socketpool(esp)
 ssl_context = adafruit_connection_manager.get_radio_ssl_context(esp)
 requests = adafruit_requests.Session(pool, ssl_context)
 
+# If you are testing on python with blinka, use real requests below and comment out above:
+# import os, datetime, requests as real_requests
+# from adafruit_io.adafruit_io import IO_HTTP
+# secrets = {"aio_username": os.getenv("AIO_USERNAME"), "aio_key": os.getenv("AIO_KEY")}
+# requests = real_requests.Session()
+
+
 # Set your Adafruit IO Username and Key in secrets.py
 # (visit io.adafruit.com if you need to create an account,
 # or if you need your Adafruit IO key.)
@@ -72,8 +80,29 @@ print("Creating feed humidity then adding to group...")
 humidity_feed = io.create_new_feed("humidity", "a feed for humidity data")
 io.add_feed_to_group(sensor_group["key"], humidity_feed["key"])
 
+# show humidity feed is in two groups
+print("Getting fresh humidity feed info... (notice groups)")
+print(io.get_feed(humidity_feed["key"]))
+
+# Publish data for multiple feeds to a group, use different timestamps for no reason
+print("Publishing batch data to group feeds with created_at set 99minutes ago...")
+thetime = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=99)
+io.send_group_data(
+    group_key=sensor_group["key"],
+    feeds_and_data=[
+        {"key": "temperature", "value": 20.0},
+        {"key": "humidity", "value": 40.0},
+    ],
+    metadata={
+        "lat": 50.1858942,
+        "lon": -4.9677478,
+        "ele": 4,
+        "created_at": thetime.isoformat(),
+    },
+)
+
 # Get info from the group
-print("Getting fresh group info...")
+print("Getting fresh group info... (notice created_at vs updated_at)")
 sensor_group = io.get_group("envsensors")  # refresh data via HTTP API
 print(sensor_group)
 
