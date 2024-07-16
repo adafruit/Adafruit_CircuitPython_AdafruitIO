@@ -56,11 +56,13 @@ def connected(client):
     client.subscribe("DemoFeed")
 
 
+# pylint: disable=unused-argument
 def subscribe(client, userdata, topic, granted_qos):
     # This method is called when the client subscribes to a new feed.
     print("Subscribed to {0} with QOS level {1}".format(topic, granted_qos))
 
 
+# pylint: disable=unused-argument
 def unsubscribe(client, userdata, topic, pid):
     # This method is called when the client unsubscribes from a feed.
     print("Unsubscribed from {0} with PID {1}".format(topic, pid))
@@ -70,6 +72,15 @@ def unsubscribe(client, userdata, topic, pid):
 def disconnected(client):
     # Disconnected function will be called when the client disconnects.
     print("Disconnected from Adafruit IO!")
+
+
+# pylint: disable=unused-argument
+def publish(client, userdata, topic, pid):
+    # This method is called when the client publishes data to a feed.
+    print("Published to {0} with PID {1}".format(topic, pid))
+    if userdata is not None:
+        print("Published User data: ", end="")
+        print(userdata)
 
 
 # pylint: disable=unused-argument
@@ -103,6 +114,7 @@ io.on_disconnect = disconnected
 io.on_subscribe = subscribe
 io.on_unsubscribe = unsubscribe
 io.on_message = message
+io.on_publish = publish
 
 # Connect to Adafruit IO
 print("Connecting to Adafruit IO...")

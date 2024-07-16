@@ -43,9 +43,19 @@ def connected(client):
     print("Connected to Adafruit IO! ")
 
 
+# pylint: disable=unused-argument
 def subscribe(client, userdata, topic, granted_qos):
     # This method is called when the client subscribes to a new feed.
     print("Subscribed to {0} with QOS level {1}".format(topic, granted_qos))
+
+
+# pylint: disable=unused-argument
+def publish(client, userdata, topic, pid):
+    # This method is called when the client publishes data to a feed.
+    print("Published to {0} with PID {1}".format(topic, pid))
+    if userdata is not None:
+        print("Published User data: ", end="")
+        print(userdata)
 
 
 # pylint: disable=unused-argument
@@ -54,6 +64,7 @@ def disconnected(client):
     print("Disconnected from Adafruit IO!")
 
 
+# pylint: disable=unused-argument
 def on_led_msg(client, topic, message):
     # Method called whenever user/feeds/led has a new value
     print("New message on topic {0}: {1} ".format(topic, message))
@@ -90,6 +101,7 @@ io = IO_MQTT(mqtt_client)
 io.on_connect = connected
 io.on_disconnect = disconnected
 io.on_subscribe = subscribe
+io.on_publish = publish
 
 # Set up a callback for the led feed
 io.add_feed_callback("led", on_led_msg)
