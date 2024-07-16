@@ -636,12 +636,17 @@ class IO_HTTP:
         Sends a batch array of data to a specified Adafruit IO feed
 
         :param str feed_key: Adafruit IO feed key
-        :param list Data: Data list to send
+        :param list Data: Data list to send (namedtuples or dicts with 'value' key)
         """
         validate_feed_key(feed_key)
+        if not isinstance(data_list, list) or data_list == []:
+            raise ValueError("Data must be a list of dicts or namedtuples")
+        if not isinstance(data_list[0], dict): # assume namedtuple
+            data_list = type(data_list)((data._asdict() for data in data_list))
+        if not all("value" in data for data in data_list):
+            raise ValueError("Data list items must at least contain a 'value' key")
         path = self._compose_path("feeds/{0}/data/batch".format(feed_key))
-        data_dict = type(data_list)((data._asdict() for data in data_list))
-        self._post(path, {"data": data_dict})
+        self._post(path, {"data": data_list})
 
     def send_group_data(
         self, group_key: str, feeds_and_data: list, metadata: Optional[dict] = None
