@@ -71,7 +71,10 @@ requests = adafruit_requests.Session(pool, ssl_context)
 # If you are testing on python with blinka, use real requests below and comment out above:
 # import os, datetime, requests as real_requests
 # from adafruit_io.adafruit_io import IO_HTTP
-# secrets = {"aio_username": os.getenv("AIO_USERNAME"), "aio_key": os.getenv("AIO_KEY")}
+# secrets = {
+#     "aio_username": os.getenv("ADAFRUIT_AIO_USERNAME"),
+#     "aio_key": os.getenv("ADAFRUIT_AIO_KEY"),
+# }
 # requests = real_requests.Session()
 
 
