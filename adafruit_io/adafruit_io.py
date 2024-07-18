@@ -639,9 +639,33 @@ class IO_HTTP:
         :param list Data: Data list to send
         """
         validate_feed_key(feed_key)
-        path = "feeds/{0}/data/batch".format(feed_key)
+        path = self._compose_path("feeds/{0}/data/batch".format(feed_key))
         data_dict = type(data_list)((data._asdict() for data in data_list))
         self._post(path, {"data": data_dict})
+
+    def send_group_data(
+        self, group_key: str, feeds_and_data: list, metadata: Optional[dict] = None
+    ):
+        """
+        Sends data to specified Adafruit IO feeds in a group
+
+        :param str group_key: Adafruit IO feed key
+        :param list feeds_and_data: A list of dicts, with feed "key" and "value" entries
+        :param dict metadata: Optional metadata for the data e.g. created_at, lat, lon, ele
+        """
+        validate_feed_key(group_key)
+        path = self._compose_path("groups/{0}/data".format(group_key))
+        if not isinstance(feeds_and_data, list):
+            raise ValueError(
+                'This method accepts a list of dicts with "key" and "value".'
+            )
+        if metadata is not None:
+            if not isinstance(metadata, dict):
+                raise ValueError("Metadata must be a dictionary.")
+            metadata.update({"feeds": feeds_and_data})
+            self._post(path, metadata)
+        else:
+            self._post(path, {"feeds": feeds_and_data})
 
     def receive_all_data(self, feed_key: str):
         """
@@ -826,14 +850,21 @@ class IO_HTTP:
         path = self._compose_path("integrations/words/{0}".format(generator_id))
         return self._get(path)
 
-    def receive_time(self):
+    def receive_time(self, timezone: str = None):
         """
         Returns a struct_time from the Adafruit IO Server based on the device's IP address.
         https://circuitpython.readthedocs.io/en/latest/shared-bindings/time/__init__.html#time.struct_time
+        The default time returned is based on the device's IP address being geolocated,
+        falling back to UTC if unable to be geolocated. The timezone can be manually set.
+
+        :param str timezone: Timezone to return time in, see https://io.adafruit.com/services/time
         """
         path = self._compose_path("integrations/time/struct.json")
+        if timezone is not None:
+            path += "?tz={0}".format(timezone)
         time_struct = self._get(path)
         return time.struct_time(
+            # pylint: disable=line-too-long
             (
                 time_struct["year"],
                 time_struct["mon"],
