@@ -63,7 +63,12 @@ for i in range(5):
             random_value, time_offset
         )
     )
-    data.append({"value": random_value, "created_at": created_at.isoformat()})
+    data.append(
+        {
+            "value": random_value,
+            "created_at": created_at.isoformat(),  # optional metadata like lat, lon, ele, etc
+        }
+    )
 
 # Send the data to the feed as a single batch
 io.send_batch_data(temperature_feed["key"], data)
