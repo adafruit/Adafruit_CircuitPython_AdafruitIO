@@ -855,6 +855,23 @@ class IO_HTTP:
         path = self._compose_path("integrations/words/{0}".format(generator_id))
         return self._get(path)
 
+    def receive_user_info(self):
+        """
+        Get detailed account information for the current user.
+
+        See https://io.adafruit.com/api/docs/#get-user-info
+        """
+        return self._get("https://io.adafruit.com/api/v2/user")
+
+    def receive_user_rate_info(self):
+        """
+        Get rate limit and usage information for the current user.
+
+        See https://io.adafruit.com/api/docs/#get-detailed-user-info
+        """
+        path = self._compose_path("throttle")
+        return self._get(path)
+
     def receive_time(self, timezone: str = None):
         """
         Returns a struct_time from the Adafruit IO Server based on the device's IP address.
