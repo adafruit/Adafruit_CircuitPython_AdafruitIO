@@ -855,6 +855,77 @@ class IO_HTTP:
         path = self._compose_path("integrations/words/{0}".format(generator_id))
         return self._get(path)
 
+    def get_user_info(self):
+        """
+        Get detailed account information for the current user.
+
+        See https://io.adafruit.com/api/docs/#get-user-info
+        """
+        return self._get("https://io.adafruit.com/api/v2/user")
+
+    def get_user_rate_info(self):
+        """
+        Get rate limit and usage information for the current user.
+
+        See https://io.adafruit.com/api/docs/#get-detailed-user-info
+
+        Example output:
+        ```
+        {
+        "data_rate_limit": 30,
+        "active_data_rate": 0,
+        "authentication_rate": 0,
+        "subscribe_authorization_rate": 0,
+        "publish_authorization_rate": 0,
+        "hourly_ban_rate": 0,
+        "mqtt_ban_error_message": null,
+        "active_sms_rate": 0
+        }
+        ```
+        """
+        path = self._compose_path("throttle")
+        return self._get(path)
+
+    def get_remaining_throttle_limit(self):
+        """
+        Get the remaining data points allowed before hitting the throttle limit.
+        This retrieves the user rate limit and deducts usage for the current user.
+
+        See https://io.adafruit.com/api/docs/#get-detailed-user-info
+        """
+        user_rates = self.get_user_rate_info()
+        if user_rates is None:
+            raise ValueError(
+                "Could not get user info, get_user_rate_info returned None."
+            )
+        return user_rates["data_rate_limit"] - user_rates["active_data_rate"]
+
+    def get_throttle_limit(self):
+        """
+        Get user throttle limit a.k.a "data_rate_limit" for the current user.
+
+        See https://io.adafruit.com/api/docs/#get-detailed-user-info
+        """
+        user_rates = self.get_user_rate_info()
+        if user_rates is None:
+            raise ValueError(
+                "Could not get user info, get_user_rate_info returned None."
+            )
+        return user_rates["data_rate_limit"]
+
+    def get_current_usage(self):
+        """
+        Get current rate usage a.k.a "active_data_rate" for the current user.
+
+        See https://io.adafruit.com/api/docs/#get-detailed-user-info
+        """
+        user_rates = self.get_user_rate_info()
+        if user_rates is None:
+            raise ValueError(
+                "Could not get user info, get_user_rate_info returned None."
+            )
+        return user_rates["active_data_rate"]
+
     def receive_time(self, timezone: str = None):
         """
         Returns a struct_time from the Adafruit IO Server based on the device's IP address.
