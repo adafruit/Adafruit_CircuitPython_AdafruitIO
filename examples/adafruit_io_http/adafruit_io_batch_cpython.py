@@ -3,38 +3,19 @@
 
 # adafruit_circuitpython_adafruitio usage for batch data with a CPython socket.
 import datetime
+from os import getenv
 import socket
 import ssl
 from random import randint
 import adafruit_requests
 from adafruit_io.adafruit_io import IO_HTTP, AdafruitIO_RequestError
 
-# Add a secrets.py to your filesystem that has a dictionary called secrets with "aio_username"
-# and "aio_key" entries with your IO credentials, or set environment variables/defaults below.
-# *** DO NOT share that file or commit it into Git or other source control. ***
-# pylint: disable=no-name-in-module,wrong-import-order
-try:
-    from secrets import secrets
-except ImportError:
-    import os
-
-    secrets = {
-        "aio_username": os.getenv("ADAFRUIT_AIO_USERNAME", "Your_Username_Here"),
-        "aio_key": os.getenv("ADAFRUIT_AIO_KEY", "Your_Adafruit_IO_Key_Here"),
-    }
-    if (
-        secrets["aio_key"] == "Your_Adafruit_IO_Key_Here"
-        or secrets["aio_username"] == "Your_Username_Here"
-    ):
-        print("Adafruit IO secrets are kept in secrets.py, please add them there!")
-        raise
-
-# Set your Adafruit IO Username and Key in secrets.py
-# (visit io.adafruit.com if you need to create an account,
-# or if you need your Adafruit IO key.)
-aio_username = secrets["aio_username"]
-aio_key = secrets["aio_key"]
-
+# Get WiFi details and Adafruit IO keys, ensure these are setup in settings.toml
+# (visit io.adafruit.com if you need to create an account, or if you need your Adafruit IO key.)
+ssid = getenv("CIRCUITPY_WIFI_SSID")
+password = getenv("CIRCUITPY_WIFI_PASSWORD")
+aio_username = getenv("ADAFRUIT_AIO_USERNAME")
+aio_key = getenv("ADAFRUIT_AIO_KEY")
 
 requests = adafruit_requests.Session(socket, ssl.create_default_context())
 # Initialize an Adafruit IO HTTP API object

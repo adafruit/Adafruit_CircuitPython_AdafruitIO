@@ -1,47 +1,27 @@
 # SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
 # SPDX-License-Identifier: MIT
 import time
+from os import getenv
 from random import randint
 
-import os
-import ssl
-import socketpool
 import wifi
+import adafruit_connection_manager
 import adafruit_minimqtt.adafruit_minimqtt as MQTT
 from adafruit_io.adafruit_io import IO_MQTT
 
+# Get WiFi details and Adafruit IO keys, ensure these are setup in settings.toml
+# (visit io.adafruit.com if you need to create an account, or if you need your Adafruit IO key.)
+ssid = getenv("CIRCUITPY_WIFI_SSID")
+password = getenv("CIRCUITPY_WIFI_PASSWORD")
+aio_username = getenv("ADAFRUIT_AIO_USERNAME")
+aio_key = getenv("ADAFRUIT_AIO_KEY")
+
 ### WiFi ###
 
-# Add a secrets.py to your filesystem that has a dictionary called secrets with "ssid" and
-# "password" keys with your WiFi credentials. DO NOT share that file or commit it into Git or other
-# source control.
-# pylint: disable=no-name-in-module,wrong-import-order
-try:
-    if os.getenv("AIO_USERNAME") and os.getenv("AIO_KEY"):
-        secrets = {
-            "aio_username": os.getenv("AIO_USERNAME"),
-            "aio_key": os.getenv("AIO_KEY"),
-            "ssid": os.getenv("CIRCUITPY_WIFI_SSID"),
-            "password": os.getenv("CIRCUITPY_WIFI_PASSWORD"),
-        }
-    else:
-        from secrets import secrets
-except ImportError:
-    print(
-        "WiFi + Adafruit IO secrets are kept in secrets.py or settings.toml, please add them there!"
-    )
-    raise
-
-# Set your Adafruit IO Username and Key in secrets.py
-# (visit io.adafruit.com if you need to create an account,
-# or if you need your Adafruit IO key.)
-aio_username = secrets["aio_username"]
-aio_key = secrets["aio_key"]
-
 if not wifi.radio.connected:
-    print("Connecting to %s" % secrets["ssid"])
-    wifi.radio.connect(secrets["ssid"], secrets["password"])
-    print("Connected to %s!" % secrets["ssid"])
+    print("Connecting to %s" % ssid)
+    wifi.radio.connect(ssid, password)
+    print("Connected to %s!" % ssid)
 
 
 # Define callback functions which will be called when certain events happen.
@@ -91,17 +71,18 @@ def message(client, feed_id, payload):
     print("Feed {0} received new value: {1}".format(feed_id, payload))
 
 
-# Create a socket pool
-pool = socketpool.SocketPool(wifi.radio)
+# Create a socket pool and ssl_context
+pool = adafruit_connection_manager.get_radio_socketpool(wifi.radio)
+ssl_context = adafruit_connection_manager.get_radio_ssl_context(wifi.radio)
 
 # Initialize a new MQTT Client object
 mqtt_client = MQTT.MQTT(
     broker="io.adafruit.com",
     port=8883,
-    username=secrets["aio_username"],
-    password=secrets["aio_key"],
+    username=aio_username,
+    password=aio_key,
     socket_pool=pool,
-    ssl_context=ssl.create_default_context(),
+    ssl_context=ssl_context,
     is_ssl=True,
 )
 

@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: MIT
 
 import time
+from os import getenv
 from microcontroller import cpu
 import board
 import busio
@@ -12,14 +13,14 @@ from adafruit_esp32spi import adafruit_esp32spi_wifimanager
 import adafruit_minimqtt.adafruit_minimqtt as MQTT
 from adafruit_io.adafruit_io import IO_MQTT
 
-### WiFi ###
+# Get WiFi details and Adafruit IO keys, ensure these are setup in settings.toml
+# (visit io.adafruit.com if you need to create an account, or if you need your Adafruit IO key.)
+ssid = getenv("CIRCUITPY_WIFI_SSID")
+password = getenv("CIRCUITPY_WIFI_PASSWORD")
+aio_username = getenv("ADAFRUIT_AIO_USERNAME")
+aio_key = getenv("ADAFRUIT_AIO_KEY")
 
-# Get wifi details and more from a secrets.py file
-try:
-    from secrets import secrets
-except ImportError:
-    print("WiFi secrets are kept in secrets.py, please add them there!")
-    raise
+### WiFi ###
 
 # Raspberry Pi RP2040
 esp32_cs = DigitalInOut(board.GP13)
@@ -29,7 +30,7 @@ esp32_reset = DigitalInOut(board.GP15)
 spi = busio.SPI(board.GP10, board.GP11, board.GP12)
 esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
 
-wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets)
+wifi = adafruit_esp32spi_wifimanager.WiFiManager(esp, ssid, password)
 
 # Configure the RP2040 Pico LED Pin as an output
 led_pin = DigitalInOut(board.LED)
@@ -88,8 +89,8 @@ ssl_context = adafruit_connection_manager.get_radio_ssl_context(esp)
 mqtt_client = MQTT.MQTT(
     broker="io.adafruit.com",
     port=1883,
-    username=secrets["aio_username"],
-    password=secrets["aio_key"],
+    username=aio_username,
+    password=aio_key,
     socket_pool=pool,
     ssl_context=ssl_context,
 )

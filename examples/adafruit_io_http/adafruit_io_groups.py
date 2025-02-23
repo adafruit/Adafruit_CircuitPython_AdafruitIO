@@ -4,6 +4,7 @@
 # Adafruit IO HTTP API - Group Interactions
 # Documentation: https://io.adafruit.com/api/docs/#groups
 # adafruit_circuitpython_adafruitio with an esp32spi_socket
+from os import getenv
 import adafruit_datetime as datetime
 import board
 import busio
@@ -13,28 +14,12 @@ from adafruit_esp32spi import adafruit_esp32spi
 import adafruit_requests
 from adafruit_io.adafruit_io import IO_HTTP
 
-
-# Add a secrets.py to your filesystem that has a dictionary called secrets with "ssid" and
-# "password" keys with your WiFi credentials, along with "aio_username" and "aio_key" for
-# your Adafruit IO user/key. DO NOT share that file or commit it into Git or other source control.
-# pylint: disable=no-name-in-module,wrong-import-order
-try:
-    from secrets import secrets
-except ImportError:
-    import os
-
-    if os.getenv("ADAFRUIT_AIO_USERNAME") and os.getenv("ADAFRUIT_AIO_KEY"):
-        secrets = {
-            "aio_username": os.getenv("ADAFRUIT_AIO_USERNAME", "Your_Username_Here"),
-            "aio_key": os.getenv("ADAFRUIT_AIO_KEY", "Your_Adafruit_IO_Key_Here"),
-            "ssid": os.getenv("CIRCUITPY_WIFI_SSID", ""),
-            "password": os.getenv("CIRCUITPY_WIFI_PASSWORD", ""),
-        }
-    else:
-        print(
-            "WiFi + Adafruit IO secrets are kept in secrets.py, please add them there!"
-        )
-        raise
+# Get WiFi details and Adafruit IO keys, ensure these are setup in settings.toml
+# (visit io.adafruit.com if you need to create an account, or if you need your Adafruit IO key.)
+ssid = getenv("CIRCUITPY_WIFI_SSID")
+password = getenv("CIRCUITPY_WIFI_PASSWORD")
+aio_username = getenv("ADAFRUIT_AIO_USERNAME")
+aio_key = getenv("ADAFRUIT_AIO_KEY")
 
 # If you are using a board with pre-defined ESP32 Pins:
 esp32_cs = DigitalInOut(board.ESP_CS)
@@ -52,14 +37,14 @@ esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
 print("Connecting to AP...")
 while not esp.is_connected:
     try:
-        esp.connect_AP(secrets["ssid"], secrets["password"])
+        esp.connect_AP(ssid, password)
     except RuntimeError as e:
         print("could not connect to AP, retrying: ", e)
         continue
 print("Connected to", str(esp.ssid, "utf-8"), "\tRSSI:", esp.rssi)
 
 # If you are using a wifi based mcu use this instead of esp code above, remove the from
-# adafruit_esp32spi import line, optionally esp.connect(secrets["ssid"], secrets["password"])
+# adafruit_esp32spi import line, optionally esp.connect(ssid, password)
 # import wifi
 # esp = wifi.radio
 
@@ -71,18 +56,7 @@ requests = adafruit_requests.Session(pool, ssl_context)
 # If you are testing on python with blinka, use real requests below and comment out above:
 # import os, datetime, requests as real_requests
 # from adafruit_io.adafruit_io import IO_HTTP
-# secrets = {
-#     "aio_username": os.getenv("ADAFRUIT_AIO_USERNAME"),
-#     "aio_key": os.getenv("ADAFRUIT_AIO_KEY"),
-# }
 # requests = real_requests.Session()
-
-
-# Set your Adafruit IO Username and Key in secrets.py
-# (visit io.adafruit.com if you need to create an account,
-# or if you need your Adafruit IO key.)
-aio_username = secrets["aio_username"]
-aio_key = secrets["aio_key"]
 
 # Initialize an Adafruit IO HTTP API object
 io = IO_HTTP(aio_username, aio_key, requests)
