@@ -6,6 +6,7 @@
 # to subscribe to an Adafruit IO feed and publish random data
 # to be received by the feed.
 import time
+from os import getenv
 from random import randint
 
 import board
@@ -20,12 +21,13 @@ import adafruit_fona.adafruit_fona_socket as pool
 import adafruit_minimqtt.adafruit_minimqtt as MQTT
 from adafruit_io.adafruit_io import IO_MQTT
 
-# Get MQTT details and more from a secrets.py file
-try:
-    from secrets import secrets
-except ImportError:
-    print("MQTT secrets are kept in secrets.py, please add them there!")
-    raise
+# Get Fona details and Adafruit IO keys, ensure these are setup in settings.toml
+# (visit io.adafruit.com if you need to create an account, or if you need your Adafruit IO key.)
+apn = getenv("apn")
+apn_username = getenv("apn_username")
+apn_password = getenv("apn_password")
+aio_username = getenv("ADAFRUIT_AIO_USERNAME")
+aio_key = getenv("ADAFRUIT_AIO_KEY")
 
 # Create a serial connection for the FONA connection
 uart = busio.UART(board.TX, board.RX)
@@ -35,7 +37,7 @@ rst = digitalio.DigitalInOut(board.D4)
 fona = FONA(uart, rst)
 
 # initialize gsm
-gsm = GSM(fona, (secrets["apn"], secrets["apn_username"], secrets["apn_password"]))
+gsm = GSM(fona, (apn, apn_username, apn_password))
 
 while not gsm.is_attached:
     print("Attaching to network...")
@@ -100,8 +102,8 @@ ssl_context = adafruit_connection_manager.create_fake_ssl_context(pool, fona)
 mqtt_client = MQTT.MQTT(
     broker="io.adafruit.com",
     port=1883,
-    username=secrets["aio_username"],
-    password=secrets["aio_key"],
+    username=aio_username,
+    password=aio_key,
     socket_pool=pool,
     ssl_context=ssl_context,
 )

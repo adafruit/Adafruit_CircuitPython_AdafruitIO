@@ -6,6 +6,7 @@
 # to subscribe to an Adafruit IO feed and publish random data
 # to be received by the feed.
 import time
+from os import getenv
 from random import randint
 
 import board
@@ -17,12 +18,12 @@ from adafruit_wiznet5k.adafruit_wiznet5k import WIZNET5K
 import adafruit_minimqtt.adafruit_minimqtt as MQTT
 from adafruit_io.adafruit_io import IO_MQTT
 
-# Get MQTT details and more from a secrets.py file
-try:
-    from secrets import secrets
-except ImportError:
-    print("MQTT secrets are kept in secrets.py, please add them there!")
-    raise
+# Get WiFi details and Adafruit IO keys, ensure these are setup in settings.toml
+# (visit io.adafruit.com if you need to create an account, or if you need your Adafruit IO key.)
+ssid = getenv("CIRCUITPY_WIFI_SSID")
+password = getenv("CIRCUITPY_WIFI_PASSWORD")
+aio_username = getenv("ADAFRUIT_AIO_USERNAME")
+aio_key = getenv("ADAFRUIT_AIO_KEY")
 
 cs = DigitalInOut(board.D10)
 spi_bus = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
@@ -85,8 +86,8 @@ ssl_context = adafruit_connection_manager.get_radio_ssl_context(eth)
 mqtt_client = MQTT.MQTT(
     broker="io.adafruit.com",
     port=1883,
-    username=secrets["aio_username"],
-    password=secrets["aio_key"],
+    username=aio_username,
+    password=aio_key,
     socket_pool=pool,
     ssl_context=ssl_context,
 )

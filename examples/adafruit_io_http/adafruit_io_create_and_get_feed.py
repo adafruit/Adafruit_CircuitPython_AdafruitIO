@@ -4,37 +4,28 @@
 Example using create_and_get_feed. Creates a new feed if it does not exist and sends to it, or
 sends to an existing feed once it has been created.
 """
-import ssl
+from os import getenv
 import adafruit_requests
-import socketpool
 import wifi
 import microcontroller
+import adafruit_connection_manager
 from adafruit_io.adafruit_io import IO_HTTP
 
-# Add a secrets.py to your filesystem that has a dictionary called secrets with "ssid" and
-# "password" keys with your WiFi credentials, and "aio_username" and "aio_key" keys with your
-# Adafruit IO credentials, DO NOT share that file or commit it into Git or other
-# source control.
-# pylint: disable=no-name-in-module,wrong-import-order
-try:
-    from secrets import secrets
-except ImportError:
-    print(
-        "WiFi and Adafruit IO credentials are kept in secrets.py, please add them there!"
-    )
-    raise
+# Get WiFi details and Adafruit IO keys, ensure these are setup in settings.toml
+# (visit io.adafruit.com if you need to create an account, or if you need your Adafruit IO key.)
+ssid = getenv("CIRCUITPY_WIFI_SSID")
+password = getenv("CIRCUITPY_WIFI_PASSWORD")
+aio_username = getenv("ADAFRUIT_AIO_USERNAME")
+aio_key = getenv("ADAFRUIT_AIO_KEY")
 
-# Connect to Wi-Fi using credentials from secrets.py
-wifi.radio.connect(secrets["ssid"], secrets["password"])
-print("Connected to {}!".format(secrets["ssid"]))
+# Connect to Wi-Fi using credentials from settings.toml
+wifi.radio.connect(ssid, password)
+print("Connected to {}!".format(ssid))
 print("IP:", wifi.radio.ipv4_address)
 
-pool = socketpool.SocketPool(wifi.radio)
-requests = adafruit_requests.Session(pool, ssl.create_default_context())
-
-# Obtain Adafruit IO credentials from secrets.py
-aio_username = secrets["aio_username"]
-aio_key = secrets["aio_key"]
+pool = adafruit_connection_manager.get_radio_socketpool(wifi.radio)
+ssl_context = adafruit_connection_manager.get_radio_ssl_context(wifi.radio)
+requests = adafruit_requests.Session(pool, ssl_context)
 
 # Initialize an Adafruit IO HTTP API object
 io = IO_HTTP(aio_username, aio_key, requests)
