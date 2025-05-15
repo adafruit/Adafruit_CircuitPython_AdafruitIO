@@ -5,12 +5,14 @@
 # adafruit_circuitpython_adafruitio with an esp32spi_socket
 import time
 from os import getenv
+
+import adafruit_connection_manager
+import adafruit_requests
 import board
 import busio
-from digitalio import DigitalInOut, Direction
-import adafruit_connection_manager
 from adafruit_esp32spi import adafruit_esp32spi
-import adafruit_requests
+from digitalio import DigitalInOut, Direction
+
 from adafruit_io.adafruit_io import IO_HTTP, AdafruitIO_RequestError
 
 # Get WiFi details and Adafruit IO keys, ensure these are setup in settings.toml

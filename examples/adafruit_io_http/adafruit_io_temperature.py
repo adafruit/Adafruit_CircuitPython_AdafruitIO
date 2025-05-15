@@ -5,13 +5,15 @@
 # adafruit_circuitpython_adafruitio with an esp32spi_socket
 import time
 from os import getenv
+
+import adafruit_adt7410
+import adafruit_connection_manager
+import adafruit_requests
 import board
 import busio
-from digitalio import DigitalInOut
-import adafruit_connection_manager
 from adafruit_esp32spi import adafruit_esp32spi
-import adafruit_requests
-import adafruit_adt7410
+from digitalio import DigitalInOut
+
 from adafruit_io.adafruit_io import IO_HTTP, AdafruitIO_RequestError
 
 # Get WiFi details and Adafruit IO keys, ensure these are setup in settings.toml
@@ -68,7 +70,7 @@ while True:
     # set temperature value to two precision points
     temperature = "%0.2f" % (temperature)
 
-    print("Current Temperature: {0}*C".format(temperature))
+    print(f"Current Temperature: {temperature}*C")
     print("Sending to Adafruit IO...")
     io.send_data(temperature_feed["key"], temperature)
     print("Data sent!")

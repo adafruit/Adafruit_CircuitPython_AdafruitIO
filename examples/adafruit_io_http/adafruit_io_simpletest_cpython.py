@@ -2,11 +2,13 @@
 # SPDX-License-Identifier: MIT
 
 # adafruit_circuitpython_adafruitio usage with a CPython socket
-from os import getenv
 import socket
 import ssl
+from os import getenv
 from random import randint
+
 import adafruit_requests
+
 from adafruit_io.adafruit_io import IO_HTTP, AdafruitIO_RequestError
 
 # Get WiFi details and Adafruit IO keys, ensure these are setup in settings.toml
@@ -29,7 +31,7 @@ except AdafruitIO_RequestError:
 
 # Send random integer values to the feed
 random_value = randint(0, 50)
-print("Sending {0} to temperature feed...".format(random_value))
+print(f"Sending {random_value} to temperature feed...")
 io.send_data(temperature_feed["key"], random_value)
 print("Data sent!")
 

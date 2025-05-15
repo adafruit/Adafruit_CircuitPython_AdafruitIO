@@ -3,11 +3,13 @@
 
 # adafruit_circuitpython_adafruitio usage for batch data with a CPython socket.
 import datetime
-from os import getenv
 import socket
 import ssl
+from os import getenv
 from random import randint
+
 import adafruit_requests
+
 from adafruit_io.adafruit_io import IO_HTTP, AdafruitIO_RequestError
 
 # Get WiFi details and Adafruit IO keys, ensure these are setup in settings.toml
@@ -40,9 +42,7 @@ for i in range(5):
     time_offset = i - 5
     created_at = current_time + datetime.timedelta(seconds=time_offset)
     print(
-        "Adding datapoint {0} (at T:{1}) to collection for batch-temperature feed...".format(
-            random_value, time_offset
-        )
+        f"Adding datapoint {random_value} (at T:{time_offset}) to collection for batch-temperature feed..."  # noqa: E501
     )
     data.append(
         {
