@@ -3,15 +3,17 @@
 
 # Example of publishing the value of an ADC to Adafruit IO
 # adafruit_circuitpython_adafruitio with an esp32spi_socket
-from os import getenv
 import time
+from os import getenv
+
+import adafruit_connection_manager
+import adafruit_requests
 import board
 import busio
+from adafruit_esp32spi import adafruit_esp32spi
 from analogio import AnalogIn
 from digitalio import DigitalInOut
-import adafruit_connection_manager
-from adafruit_esp32spi import adafruit_esp32spi
-import adafruit_requests
+
 from adafruit_io.adafruit_io import IO_HTTP, AdafruitIO_RequestError
 
 # Get WiFi details and Adafruit IO keys, ensure these are setup in settings.toml

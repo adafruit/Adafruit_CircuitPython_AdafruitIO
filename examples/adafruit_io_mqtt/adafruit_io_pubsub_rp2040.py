@@ -3,14 +3,15 @@
 
 import time
 from os import getenv
-from microcontroller import cpu
+
+import adafruit_connection_manager
+import adafruit_minimqtt.adafruit_minimqtt as MQTT
 import board
 import busio
+from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
 from digitalio import DigitalInOut
-import adafruit_connection_manager
-from adafruit_esp32spi import adafruit_esp32spi
-from adafruit_esp32spi import adafruit_esp32spi_wifimanager
-import adafruit_minimqtt.adafruit_minimqtt as MQTT
+from microcontroller import cpu
+
 from adafruit_io.adafruit_io import IO_MQTT
 
 # Get WiFi details and Adafruit IO keys, ensure these are setup in settings.toml
@@ -38,37 +39,32 @@ led_pin.switch_to_output()
 
 
 # Define callback functions which will be called when certain events happen.
-# pylint: disable=unused-argument
 def connected(client):
     # Connected function will be called when the client is connected to Adafruit IO.
     print("Connected to Adafruit IO! ")
 
 
-# pylint: disable=unused-argument
 def subscribe(client, userdata, topic, granted_qos):
     # This method is called when the client subscribes to a new feed.
-    print("Subscribed to {0} with QOS level {1}".format(topic, granted_qos))
+    print(f"Subscribed to {topic} with QOS level {granted_qos}")
 
 
-# pylint: disable=unused-argument
 def publish(client, userdata, topic, pid):
     # This method is called when the client publishes data to a feed.
-    print("Published to {0} with PID {1}".format(topic, pid))
+    print(f"Published to {topic} with PID {pid}")
     if userdata is not None:
         print("Published User data: ", end="")
         print(userdata)
 
 
-# pylint: disable=unused-argument
 def disconnected(client):
     # Disconnected function will be called when the client disconnects.
     print("Disconnected from Adafruit IO!")
 
 
-# pylint: disable=unused-argument
 def on_led_msg(client, topic, message):
     # Method called whenever user/feeds/led has a new value
-    print("New message on topic {0}: {1} ".format(topic, message))
+    print(f"New message on topic {topic}: {message} ")
     if message == "ON":
         led_pin.value = True
     elif message == "OFF":

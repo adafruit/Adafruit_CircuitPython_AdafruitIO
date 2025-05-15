@@ -2,11 +2,13 @@
 # SPDX-License-Identifier: MIT
 
 # retrieve user rate info via adafruit_circuitpython_adafruitio with native wifi networking
+import time
 from os import getenv
-import time  # pylint: disable=unused-import
+
+import adafruit_connection_manager
 import adafruit_requests
 import wifi
-import adafruit_connection_manager
+
 from adafruit_io.adafruit_io import IO_HTTP
 
 # Get WiFi details and Adafruit IO keys, ensure these are setup in settings.toml

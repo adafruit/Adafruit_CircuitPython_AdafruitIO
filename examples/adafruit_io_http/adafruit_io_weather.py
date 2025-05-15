@@ -4,12 +4,14 @@
 # Example of using the Adafruit IO+ Weather Service
 # adafruit_circuitpython_adafruitio with an esp32spi_socket
 from os import getenv
+
+import adafruit_connection_manager
+import adafruit_requests
 import board
 import busio
-from digitalio import DigitalInOut
-import adafruit_connection_manager
 from adafruit_esp32spi import adafruit_esp32spi
-import adafruit_requests
+from digitalio import DigitalInOut
+
 from adafruit_io.adafruit_io import IO_HTTP
 
 # Get WiFi details and Adafruit IO keys, ensure these are setup in settings.toml
@@ -62,11 +64,7 @@ forecast = io.receive_weather(location_id)
 
 # Get today's forecast
 current_forecast = forecast["current"]
-print(
-    "It is {0} and {1}*F.".format(
-        current_forecast["summary"], current_forecast["temperature"]
-    )
-)
+print("It is {0} and {1}*F.".format(current_forecast["summary"], current_forecast["temperature"]))
 print("with a humidity of {0}%".format(current_forecast["humidity"] * 100))
 
 # Get tomorrow's forecast

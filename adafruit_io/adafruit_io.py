@@ -18,26 +18,28 @@ Implementation Notes
 * Adafruit CircuitPython firmware for the supported boards:
     https://github.com/adafruit/circuitpython/releases
 """
-import time
+
 import json
 import re
+import time
 
 try:
-    from typing import List, Any, Callable, Optional
+    from typing import Any, Callable, List, Optional
 except ImportError:
     pass
 
 from adafruit_minimqtt.adafruit_minimqtt import MMQTTException
+
 from adafruit_io.adafruit_io_errors import (
+    AdafruitIO_MQTTError,
     AdafruitIO_RequestError,
     AdafruitIO_ThrottleError,
-    AdafruitIO_MQTTError,
 )
 
 __version__ = "0.0.0+auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_AdafruitIO.git"
 
-CLIENT_HEADERS = {"User-Agent": "AIO-CircuitPython/{0}".format(__version__)}
+CLIENT_HEADERS = {"User-Agent": f"AIO-CircuitPython/{__version__}"}
 
 
 def validate_feed_key(feed_key: str):
@@ -75,23 +77,18 @@ class IO_MQTT:
     :param MiniMQTT mqtt_client: MiniMQTT Client object.
     """
 
-    # pylint: disable=protected-access
     def __init__(self, mqtt_client):
         # Check for MiniMQTT client
         mqtt_client_type = str(type(mqtt_client))
         if "MQTT" in mqtt_client_type:
             self._client = mqtt_client
         else:
-            raise TypeError(
-                "This class requires a MiniMQTT client object, please create one."
-            )
+            raise TypeError("This class requires a MiniMQTT client object, please create one.")
         # Adafruit IO MQTT API MUST require a username
         try:
             self._user = self._client._username
         except Exception as err:
-            raise TypeError(
-                "Adafruit IO requires a username, please set one in MiniMQTT"
-            ) from err
+            raise TypeError("Adafruit IO requires a username, please set one in MiniMQTT") from err
         # User-defined MQTT callback methods must be init'd to None
         self.on_connect = None
         self.on_disconnect = None
@@ -143,7 +140,6 @@ class IO_MQTT:
         except MMQTTException:
             return False
 
-    # pylint: disable=not-callable, unused-argument
     def _on_connect_mqtt(self, client, userdata, flags, return_code):
         """Runs when the client calls on_connect."""
         if return_code == 0:
@@ -154,7 +150,6 @@ class IO_MQTT:
         if self.on_connect is not None:
             self.on_connect(self)
 
-    # pylint: disable=not-callable, unused-argument
     def _on_disconnect_mqtt(self, client, userdata, return_code):
         """Runs when the client calls on_disconnect."""
         self._connected = False
@@ -162,7 +157,6 @@ class IO_MQTT:
         if self.on_disconnect is not None:
             self.on_disconnect(self)
 
-    # pylint: disable=not-callable
     def _on_message_mqtt(self, client, topic: str, payload: str):
         """Runs when the client calls on_message. Parses and returns
         incoming data from Adafruit IO feeds.
@@ -198,24 +192,19 @@ class IO_MQTT:
                 topic_name = topic_name[2]
                 message = payload
         else:
-            raise ValueError(
-                "You must define an on_message method before calling this callback."
-            )
+            raise ValueError("You must define an on_message method before calling this callback.")
         self.on_message(self, topic_name, message)
 
-    # pylint: disable=not-callable, unused-argument
     def _on_publish_mqtt(self, client, user_data, topic, pid):
         """Runs when the client calls on_publish."""
         if self.on_publish is not None:
             self.on_publish(self, user_data, topic, pid)
 
-    # pylint: disable=not-callable
     def _on_subscribe_mqtt(self, client, user_data, topic, qos):
         """Runs when the client calls on_subscribe."""
         if self.on_subscribe is not None:
             self.on_subscribe(self, user_data, topic, qos)
 
-    # pylint: disable=not-callable
     def _on_unsubscribe_mqtt(self, client, user_data, topic, pid):
         """Runs when the client calls on_unsubscribe."""
         if self.on_unsubscribe is not None:
@@ -233,9 +222,7 @@ class IO_MQTT:
         :param str callback_method: Name of callback method.
         """
         validate_feed_key(feed_key)
-        self._client.add_topic_callback(
-            "{0}/f/{1}".format(self._user, feed_key), callback_method
-        )
+        self._client.add_topic_callback(f"{self._user}/f/{feed_key}", callback_method)
 
     def remove_feed_callback(self, feed_key: str):
         """Removes a previously registered callback method
@@ -247,7 +234,7 @@ class IO_MQTT:
         :param str feed_key: Adafruit IO feed key.
         """
         validate_feed_key(feed_key)
-        self._client.remove_topic_callback("{0}/f/{1}".format(self._user, feed_key))
+        self._client.remove_topic_callback(f"{self._user}/f/{feed_key}")
 
     def loop(self, timeout=1):
         """Manually process messages from Adafruit IO.
@@ -286,13 +273,13 @@ class IO_MQTT:
         """
         if shared_user is not None and feed_key is not None:
             validate_feed_key(feed_key)
-            self._client.subscribe("{0}/f/{1}".format(shared_user, feed_key))
+            self._client.subscribe(f"{shared_user}/f/{feed_key}")
         elif group_key is not None:
             validate_feed_key(group_key)
-            self._client.subscribe("{0}/g/{1}".format(self._user, group_key))
+            self._client.subscribe(f"{self._user}/g/{group_key}")
         elif feed_key is not None:
             validate_feed_key(feed_key)
-            self._client.subscribe("{0}/f/{1}".format(self._user, feed_key))
+            self._client.subscribe(f"{self._user}/f/{feed_key}")
         else:
             raise AdafruitIO_MQTTError("Must provide a feed_key or group_key.")
 
@@ -313,9 +300,7 @@ class IO_MQTT:
 
         :param int randomizer_id: Random word record you want data for.
         """
-        self._client.subscribe(
-            "{0}/integration/words/{1}".format(self._user, randomizer_id)
-        )
+        self._client.subscribe(f"{self._user}/integration/words/{randomizer_id}")
 
     def subscribe_to_weather(self, weather_record: int, forecast: str):
         """Subscribes to a weather forecast using the Adafruit IO PLUS weather
@@ -324,11 +309,7 @@ class IO_MQTT:
         :param int weather_record: Weather record you want data for.
         :param str forecast: Forecast data you'd like to recieve.
         """
-        self._client.subscribe(
-            "{0}/integration/weather/{1}/{2}".format(
-                self._user, weather_record, forecast
-            )
-        )
+        self._client.subscribe(f"{self._user}/integration/weather/{weather_record}/{forecast}")
 
     def subscribe_to_time(self, time_type: str):
         """Adafruit IO provides some built-in MQTT topics for getting the current server time.
@@ -370,20 +351,18 @@ class IO_MQTT:
         """
         if shared_user is not None and feed_key is not None:
             validate_feed_key(feed_key)
-            self._client.unsubscribe("{0}/f/{1}".format(shared_user, feed_key))
+            self._client.unsubscribe(f"{shared_user}/f/{feed_key}")
         elif group_key is not None:
             validate_feed_key(group_key)
-            self._client.unsubscribe("{0}/g/{1}".format(self._user, group_key))
+            self._client.unsubscribe(f"{self._user}/g/{group_key}")
         elif feed_key is not None:
             validate_feed_key(feed_key)
-            self._client.unsubscribe("{0}/f/{1}".format(self._user, feed_key))
+            self._client.unsubscribe(f"{self._user}/f/{feed_key}")
         else:
             raise AdafruitIO_MQTTError("Must provide a feed_key or group_key.")
 
     # Publishing
-    def publish_multiple(
-        self, feeds_and_data: List, timeout: int = 3, is_group: bool = False
-    ):
+    def publish_multiple(self, feeds_and_data: List, timeout: int = 3, is_group: bool = False):
         """Publishes multiple data points to multiple feeds or groups with a variable
         timeout.
 
@@ -410,7 +389,6 @@ class IO_MQTT:
                 self.publish(topic, data)
             time.sleep(timeout)
 
-    # pylint: disable=too-many-arguments
     def publish(
         self,
         feed_key: str,
@@ -471,18 +449,16 @@ class IO_MQTT:
         """
         validate_feed_key(feed_key)
         if is_group:
-            self._client.publish("{0}/g/{1}".format(self._user, feed_key), data)
+            self._client.publish(f"{self._user}/g/{feed_key}", data)
         if shared_user is not None:
-            self._client.publish("{0}/f/{1}".format(shared_user, feed_key), data)
+            self._client.publish(f"{shared_user}/f/{feed_key}", data)
         if metadata is not None:
             if isinstance(data, int or float):
                 data = str(data)
             csv_string = data + "," + metadata
-            self._client.publish(
-                "{0}/f/{1}/csv".format(self._user, feed_key), csv_string
-            )
+            self._client.publish(f"{self._user}/f/{feed_key}/csv", csv_string)
         else:
-            self._client.publish("{0}/f/{1}".format(self._user, feed_key), data)
+            self._client.publish(f"{self._user}/f/{feed_key}", data)
 
     def get(self, feed_key: str):
         """Calling this method will make Adafruit IO publish the most recent
@@ -498,7 +474,7 @@ class IO_MQTT:
             io.get('temperature')
         """
         validate_feed_key(feed_key)
-        self._client.publish("{0}/f/{1}/get".format(self._user, feed_key), "\0")
+        self._client.publish(f"{self._user}/f/{feed_key}/get", "\0")
 
 
 class IO_HTTP:
@@ -558,7 +534,7 @@ class IO_HTTP:
 
         :param str path: Adafruit IO API URL path.
         """
-        return "https://io.adafruit.com/api/v2/{0}/{1}".format(self.username, path)
+        return f"https://io.adafruit.com/api/v2/{self.username}/{path}"
 
     # HTTP Requests
     def _post(self, path: str, payload: Any):
@@ -582,9 +558,7 @@ class IO_HTTP:
 
         :param str path: Formatted Adafruit IO URL from _compose_path
         """
-        with self._http.get(
-            path, headers=self._create_headers(self._aio_headers[1])
-        ) as response:
+        with self._http.get(path, headers=self._create_headers(self._aio_headers[1])) as response:
             self._handle_error(response)
             json_data = response.json()
         return json_data
@@ -620,14 +594,12 @@ class IO_HTTP:
         :param int precision: Optional amount of precision points to send with floating point data
         """
         validate_feed_key(feed_key)
-        path = self._compose_path("feeds/{0}/data".format(feed_key))
+        path = self._compose_path(f"feeds/{feed_key}/data")
         if precision:
             try:
                 data = round(data, precision)
             except NotImplementedError as err:  # received a non-float value
-                raise NotImplementedError(
-                    "Precision requires a floating point value"
-                ) from err
+                raise NotImplementedError("Precision requires a floating point value") from err
         payload = self._create_data(data, metadata)
         self._post(path, payload)
 
@@ -642,10 +614,10 @@ class IO_HTTP:
         if not isinstance(data_list, list) or data_list == []:
             raise ValueError("Data must be a list of dicts or namedtuples")
         if not isinstance(data_list[0], dict):  # assume namedtuple
-            data_list = type(data_list)((data._asdict() for data in data_list))
+            data_list = type(data_list)(data._asdict() for data in data_list)
         if not all("value" in data for data in data_list):
             raise ValueError("Data list items must at least contain a 'value' key")
-        path = self._compose_path("feeds/{0}/data/batch".format(feed_key))
+        path = self._compose_path(f"feeds/{feed_key}/data/batch")
         self._post(path, {"data": data_list})
 
     def send_group_data(
@@ -659,11 +631,9 @@ class IO_HTTP:
         :param dict metadata: Optional metadata for the data e.g. created_at, lat, lon, ele
         """
         validate_feed_key(group_key)
-        path = self._compose_path("groups/{0}/data".format(group_key))
+        path = self._compose_path(f"groups/{group_key}/data")
         if not isinstance(feeds_and_data, list):
-            raise ValueError(
-                'This method accepts a list of dicts with "key" and "value".'
-            )
+            raise ValueError('This method accepts a list of dicts with "key" and "value".')
         if metadata is not None:
             if not isinstance(metadata, dict):
                 raise ValueError("Metadata must be a dictionary.")
@@ -680,7 +650,7 @@ class IO_HTTP:
         :param str feed_key: Adafruit IO feed key
         """
         validate_feed_key(feed_key)
-        path = self._compose_path("feeds/{0}/data".format(feed_key))
+        path = self._compose_path(f"feeds/{feed_key}/data")
         return self._get(path)
 
     def receive_n_data(self, feed_key: str, n_values: int):
@@ -693,7 +663,7 @@ class IO_HTTP:
         """
         validate_n_values(n_values)
         validate_feed_key(feed_key)
-        path = self._compose_path("feeds/{0}/data?limit={1}".format(feed_key, n_values))
+        path = self._compose_path(f"feeds/{feed_key}/data?limit={n_values}")
         return self._get(path)
 
     def receive_data(self, feed_key: str):
@@ -703,7 +673,7 @@ class IO_HTTP:
         :param string feed_key: Adafruit IO feed key
         """
         validate_feed_key(feed_key)
-        path = self._compose_path("feeds/{0}/data/last".format(feed_key))
+        path = self._compose_path(f"feeds/{feed_key}/data/last")
         return self._get(path)
 
     def delete_data(self, feed_key: str, data_id: str):
@@ -714,7 +684,7 @@ class IO_HTTP:
         :param string data_id: Data point to delete from the feed
         """
         validate_feed_key(feed_key)
-        path = self._compose_path("feeds/{0}/data/{1}".format(feed_key, data_id))
+        path = self._compose_path(f"feeds/{feed_key}/data/{data_id}")
         return self._delete(path)
 
     # Groups
@@ -735,7 +705,7 @@ class IO_HTTP:
 
         :param str group_key: Adafruit IO Group Key
         """
-        path = self._compose_path("groups/{0}".format(group_key))
+        path = self._compose_path(f"groups/{group_key}")
         return self._delete(path)
 
     def get_group(self, group_key: str):
@@ -744,7 +714,7 @@ class IO_HTTP:
 
         :param str group_key: Adafruit IO Group Key
         """
-        path = self._compose_path("groups/{0}".format(group_key))
+        path = self._compose_path(f"groups/{group_key}")
         return self._get(path)
 
     def create_feed_in_group(self, group_key: str, feed_name: str):
@@ -753,7 +723,7 @@ class IO_HTTP:
         :param str group_key: Group name.
         :param str feed_name: Name of new feed.
         """
-        path = self._compose_path("groups/{0}/feeds".format(group_key))
+        path = self._compose_path(f"groups/{group_key}/feeds")
         payload = {"feed": {"name": feed_name}}
         return self._post(path, payload)
 
@@ -765,7 +735,7 @@ class IO_HTTP:
         :param str feed_key: Feed to add to the group
         """
         validate_feed_key(feed_key)
-        path = self._compose_path("groups/{0}/add".format(group_key))
+        path = self._compose_path(f"groups/{group_key}/add")
         payload = {"feed_key": feed_key}
         return self._post(path, payload)
 
@@ -779,9 +749,9 @@ class IO_HTTP:
         """
         validate_feed_key(feed_key)
         if detailed:
-            path = self._compose_path("feeds/{0}/details".format(feed_key))
+            path = self._compose_path(f"feeds/{feed_key}/details")
         else:
-            path = self._compose_path("feeds/{0}".format(feed_key))
+            path = self._compose_path(f"feeds/{feed_key}")
         return self._get(path)
 
     def create_new_feed(
@@ -820,9 +790,7 @@ class IO_HTTP:
         try:
             return self.get_feed(feed_key, detailed=detailed)
         except AdafruitIO_RequestError:
-            self.create_new_feed(
-                feed_key, feed_desc=feed_desc, feed_license=feed_license
-            )
+            self.create_new_feed(feed_key, feed_desc=feed_desc, feed_license=feed_license)
             return self.get_feed(feed_key, detailed=detailed)
 
     def delete_feed(self, feed_key: str):
@@ -832,7 +800,7 @@ class IO_HTTP:
         :param str feed_key: Valid feed key
         """
         validate_feed_key(feed_key)
-        path = self._compose_path("feeds/{0}".format(feed_key))
+        path = self._compose_path(f"feeds/{feed_key}")
         return self._delete(path)
 
     # Adafruit IO Connected Services
@@ -843,7 +811,7 @@ class IO_HTTP:
 
         :param int weather_id: ID for retrieving a specified weather record.
         """
-        path = self._compose_path("integrations/weather/{0}".format(weather_id))
+        path = self._compose_path(f"integrations/weather/{weather_id}")
         return self._get(path)
 
     def receive_random_data(self, generator_id: int):
@@ -852,7 +820,7 @@ class IO_HTTP:
 
         :param int generator_id: Specified randomizer record
         """
-        path = self._compose_path("integrations/words/{0}".format(generator_id))
+        path = self._compose_path(f"integrations/words/{generator_id}")
         return self._get(path)
 
     def get_user_info(self):
@@ -895,9 +863,7 @@ class IO_HTTP:
         """
         user_rates = self.get_user_rate_info()
         if user_rates is None:
-            raise ValueError(
-                "Could not get user info, get_user_rate_info returned None."
-            )
+            raise ValueError("Could not get user info, get_user_rate_info returned None.")
         return user_rates["data_rate_limit"] - user_rates["active_data_rate"]
 
     def get_throttle_limit(self):
@@ -908,9 +874,7 @@ class IO_HTTP:
         """
         user_rates = self.get_user_rate_info()
         if user_rates is None:
-            raise ValueError(
-                "Could not get user info, get_user_rate_info returned None."
-            )
+            raise ValueError("Could not get user info, get_user_rate_info returned None.")
         return user_rates["data_rate_limit"]
 
     def get_current_usage(self):
@@ -921,9 +885,7 @@ class IO_HTTP:
         """
         user_rates = self.get_user_rate_info()
         if user_rates is None:
-            raise ValueError(
-                "Could not get user info, get_user_rate_info returned None."
-            )
+            raise ValueError("Could not get user info, get_user_rate_info returned None.")
         return user_rates["active_data_rate"]
 
     def receive_time(self, timezone: str = None):
@@ -937,10 +899,9 @@ class IO_HTTP:
         """
         path = self._compose_path("integrations/time/struct.json")
         if timezone is not None:
-            path += "?tz={0}".format(timezone)
+            path += f"?tz={timezone}"
         time_struct = self._get(path)
         return time.struct_time(
-            # pylint: disable=line-too-long
             (
                 time_struct["year"],
                 time_struct["mon"],

@@ -4,11 +4,14 @@
 Example using create_and_get_feed. Creates a new feed if it does not exist and sends to it, or
 sends to an existing feed once it has been created.
 """
+
 from os import getenv
-import adafruit_requests
-import wifi
-import microcontroller
+
 import adafruit_connection_manager
+import adafruit_requests
+import microcontroller
+import wifi
+
 from adafruit_io.adafruit_io import IO_HTTP
 
 # Get WiFi details and Adafruit IO keys, ensure these are setup in settings.toml
@@ -20,7 +23,7 @@ aio_key = getenv("ADAFRUIT_AIO_KEY")
 
 # Connect to Wi-Fi using credentials from settings.toml
 wifi.radio.connect(ssid, password)
-print("Connected to {}!".format(ssid))
+print(f"Connected to {ssid}!")
 print("IP:", wifi.radio.ipv4_address)
 
 pool = adafruit_connection_manager.get_radio_socketpool(wifi.radio)
@@ -32,7 +35,7 @@ io = IO_HTTP(aio_username, aio_key, requests)
 
 # Create temperature variable using the CPU temperature and print the current value.
 temperature = microcontroller.cpu.temperature
-print("Current CPU temperature: {0} C".format(temperature))
+print(f"Current CPU temperature: {temperature} C")
 
 # Create and get feed.
 io.send_data(io.create_and_get_feed("cpu-temperature-feed")["key"], temperature)

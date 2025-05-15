@@ -20,13 +20,11 @@ class AdafruitIO_RequestError(Exception):
     def __init__(self, response):
         response_content = response.json()
         error = response_content["error"]
-        super().__init__(
-            "Adafruit IO Error {0}: {1}".format(response.status_code, error)
-        )
+        super().__init__(f"Adafruit IO Error {response.status_code}: {error}")
 
 
 class AdafruitIO_MQTTError(Exception):
     """Adafruit IO MQTT error class"""
 
     def __init__(self, response):
-        super().__init__("MQTT Error: {0}".format(response))
+        super().__init__(f"MQTT Error: {response}")

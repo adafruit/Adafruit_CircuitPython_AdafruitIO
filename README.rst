@@ -13,9 +13,9 @@ Adafruit_CircuitPython_AdafruitIO
     :target: https://github.com/adafruit/Adafruit_CircuitPython_AdafruitIO/actions/
     :alt: Build Status
 
-.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
-    :target: https://github.com/psf/black
-    :alt: Code Style: Black
+.. image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json
+    :target: https://github.com/astral-sh/ruff
+    :alt: Code Style: Ruff
 
 CircuitPython wrapper library for communicating with `Adafruit IO <http://io.adafruit.com>`_.
 

@@ -9,16 +9,15 @@ import time
 from os import getenv
 from random import randint
 
+import adafruit_connection_manager
+import adafruit_fona.adafruit_fona_socket as pool
+import adafruit_minimqtt.adafruit_minimqtt as MQTT
 import board
 import busio
 import digitalio
-
-import adafruit_connection_manager
 from adafruit_fona.adafruit_fona import FONA
 from adafruit_fona.adafruit_fona_gsm import GSM
-import adafruit_fona.adafruit_fona_socket as pool
 
-import adafruit_minimqtt.adafruit_minimqtt as MQTT
 from adafruit_io.adafruit_io import IO_MQTT
 
 # Get Fona details and Adafruit IO keys, ensure these are setup in settings.toml
@@ -50,7 +49,6 @@ while not gsm.is_connected:
 
 
 # Define callback functions which will be called when certain events happen.
-# pylint: disable=unused-argument
 def connected(client):
     # Connected function will be called when the client is connected to Adafruit IO.
     # This is a good place to subscribe to feed changes.  The client parameter
@@ -61,39 +59,34 @@ def connected(client):
     client.subscribe("DemoFeed")
 
 
-# pylint: disable=unused-argument
 def subscribe(client, userdata, topic, granted_qos):
     # This method is called when the client subscribes to a new feed.
-    print("Subscribed to {0} with QOS level {1}".format(topic, granted_qos))
+    print(f"Subscribed to {topic} with QOS level {granted_qos}")
 
 
-# pylint: disable=unused-argument
 def unsubscribe(client, userdata, topic, pid):
     # This method is called when the client unsubscribes from a feed.
-    print("Unsubscribed from {0} with PID {1}".format(topic, pid))
+    print(f"Unsubscribed from {topic} with PID {pid}")
 
 
-# pylint: disable=unused-argument
 def disconnected(client):
     # Disconnected function will be called when the client disconnects.
     print("Disconnected from Adafruit IO!")
 
 
-# pylint: disable=unused-argument
 def publish(client, userdata, topic, pid):
     # This method is called when the client publishes data to a feed.
-    print("Published to {0} with PID {1}".format(topic, pid))
+    print(f"Published to {topic} with PID {pid}")
     if userdata is not None:
         print("Published User data: ", end="")
         print(userdata)
 
 
-# pylint: disable=unused-argument
 def message(client, feed_id, payload):
     # Message function will be called when a subscribed feed has a new value.
     # The feed_id parameter identifies the feed, and the payload parameter has
     # the new value.
-    print("Feed {0} received new value: {1}".format(feed_id, payload))
+    print(f"Feed {feed_id} received new value: {payload}")
 
 
 ssl_context = adafruit_connection_manager.create_fake_ssl_context(pool, fona)
@@ -132,6 +125,6 @@ while True:
     # Send a new message every 10 seconds.
     if (time.monotonic() - last) >= 5:
         value = randint(0, 100)
-        print("Publishing {0} to DemoFeed.".format(value))
+        print(f"Publishing {value} to DemoFeed.")
         io.publish("DemoFeed", value)
         last = time.monotonic()
