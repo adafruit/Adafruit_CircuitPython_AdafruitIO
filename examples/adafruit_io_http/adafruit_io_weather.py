@@ -41,7 +41,7 @@ while not esp.is_connected:
     except RuntimeError as e:
         print("could not connect to AP, retrying: ", e)
         continue
-print("Connected to", str(esp.ssid, "utf-8"), "\tRSSI:", esp.rssi)
+print("Connected to", str(esp.ap_info.ssid, "utf-8"), "\tRSSI:", esp.ap_info.rssi)
 
 # Initialize a requests session
 pool = adafruit_connection_manager.get_radio_socketpool(esp)
