@@ -132,12 +132,47 @@ io.connect()
 # Start a blocking message loop...
 # NOTE: NO code below this loop will execute
 # NOTE: Network reconnection is handled within this loop
-while True:
+TIME_TOPICS = ("seconds", "millis", "iso", "hours")
+
+try:
+    while True:
+        try:
+            io.loop()
+        except (ValueError, RuntimeError) as e:
+            print("Failed to get data, retrying\n", e)
+            io.reconnect()
+            continue
+        print("Use Ctrl-C to unsubscribe and disconnect...")
+        time.sleep(1)
+    # Normal loop ends here. Use Ctrl-C to Unsubscribe and disconnect/exit.
+    
+except KeyboardInterrupt:
     try:
+        print("\nKeyboardInterrupt: processing pending messages before disconnecting...")
         io.loop()
-    except (ValueError, RuntimeError) as e:
-        print("Failed to get data, retrying\n", e)
-        wifi.reset()
-        io.reconnect()
-        continue
-    time.sleep(1)
+    except (Exception) as e:
+        pass
+    print("\nUnsubscribing from time topics and disconnecting...")
+    for time_topic in TIME_TOPICS:
+        try:
+            print(f"Unsubscribing from time topic '{time_topic}'...")
+            io.unsubscribe_from_time(time_topic)
+            print(f"Successfully unsubscribed from time topic '{time_topic}'.")
+        except Exception as e:
+            print(f"Failed to unsubscribe from time topic '{time_topic}':", e)
+        try:
+            print("Processing messages... (io.loop())")
+            io.loop()
+            print("Processing complete.")
+        except (Exception) as e:
+            pass
+    # loop for another 6s collecting io loop messages
+    print("Processing final messages for 6 seconds...")
+    for _ in range(6):
+        try:
+            io.loop()
+        except (Exception) as e:
+            print("Failed to get data, retrying\n", e)
+            continue
+        time.sleep(1)
+    io.disconnect()

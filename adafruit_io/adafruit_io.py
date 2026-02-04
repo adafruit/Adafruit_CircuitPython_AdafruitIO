@@ -304,10 +304,22 @@ class IO_MQTT:
 
     def subscribe_to_weather(self, weather_record: int, forecast: str):
         """Subscribes to a weather forecast using the Adafruit IO PLUS weather
-        service. This feature is only avaliable to Adafruit IO PLUS subscribers.
+        service. This feature is only available to Adafruit IO PLUS subscribers.
 
         :param int weather_record: Weather record you want data for.
-        :param str forecast: Forecast data you'd like to recieve.
+        :param str forecast: Forecast type you'd like to receive. 
+        *Warning* The properties vary depending on the forecast type.
+        Valid forecast types (different fields for days/mins/hours/current):
+        "current"
+        "forecast_minutes_5"
+        "forecast_minutes_30"
+        "forecast_hours_1"
+        "forecast_hours_2"
+        "forecast_hours_6"
+        "forecast_hours_24"
+        "forecast_days_1"
+        "forecast_days_2"
+        "forecast_days_5"
         """
         self._client.subscribe(f"{self._user}/integration/weather/{weather_record}/{forecast}")
 
@@ -316,7 +328,7 @@ class IO_MQTT:
         service. This feature is only available to Adafruit IO PLUS subscribers.
 
         :param int air_quality_record: Air quality record you want data for.
-        :param str forecast: Forecast data you'd like to receive.
+        :param str forecast: Can be "current", "forecast-today", or "forecast-tomorrow".
         """
         self._client.subscribe(f"{self._user}/integration/air_quality/{air_quality_record}/{forecast}")
 
