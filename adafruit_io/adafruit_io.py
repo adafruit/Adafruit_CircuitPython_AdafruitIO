@@ -370,6 +370,41 @@ class IO_MQTT:
         else:
             raise AdafruitIO_MQTTError("Must provide a feed_key or group_key.")
 
+    def unsubscribe_from_randomizer(self, randomizer_id: int):
+        """Unsubscribe from a random data stream created by the Adafruit IO Words service.
+
+        :param int randomizer_id: Random word record you want to stop receiving data for.
+        """
+        self._client.unsubscribe(f"{self._user}/integration/words/{randomizer_id}")
+
+    def unsubscribe_from_time(self, time_type: str):
+        """Unsubscribe from Adafruit IO MQTT time topics.
+
+        :param str time_type: Time type to unsubscribe from. Can be 'seconds', 'millis', or 'iso'.
+        """
+        if time_type == "iso":
+            self._client.unsubscribe("time/ISO-8601")
+        else:
+            self._client.unsubscribe("time/" + time_type)
+
+    def unsubscribe_from_weather(self, weather_record: int, forecast: str):
+        """Unsubscribe from weather forecast updates using the Adafruit IO PLUS weather
+        service. This feature is only available to Adafruit IO PLUS subscribers.
+
+        :param int weather_record: Weather record you want to stop receiving data for.
+        :param str forecast: Forecast data you'd like to stop receiving.
+        """
+        self._client.unsubscribe(f"{self._user}/integration/weather/{weather_record}/{forecast}")
+
+    def unsubscribe_from_air_quality(self, air_quality_record: int, forecast: str):
+        """Unsubscribe from air quality updates using the Adafruit IO PLUS air quality
+        service. This feature is only available to Adafruit IO PLUS subscribers.
+
+        :param int air_quality_record: Air quality record you want to stop receiving data for.
+        :param str forecast: Forecast data you'd like to stop receiving.
+        """
+        self._client.unsubscribe(f"{self._user}/integration/air_quality/{air_quality_record}/{forecast}")
+
     # Publishing
     def publish_multiple(self, feeds_and_data: List, timeout: int = 3, is_group: bool = False):
         """Publishes multiple data points to multiple feeds or groups with a variable
