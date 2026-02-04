@@ -311,6 +311,15 @@ class IO_MQTT:
         """
         self._client.subscribe(f"{self._user}/integration/weather/{weather_record}/{forecast}")
 
+    def subscribe_to_air_quality(self, air_quality_record: int, forecast: str):
+        """Subscribes to air quality updates using the Adafruit IO PLUS air quality
+        service. This feature is only avaliable to Adafruit IO PLUS subscribers.
+
+        :param int air_quality_record: Air quality record you want data for.
+        :param str forecast: Forecast data you'd like to recieve.
+        """
+        self._client.subscribe(f"{self._user}/integration/air_quality/{air_quality_record}/{forecast}")
+
     def subscribe_to_time(self, time_type: str):
         """Adafruit IO provides some built-in MQTT topics for getting the current server time.
 
@@ -813,6 +822,57 @@ class IO_HTTP:
         """
         path = self._compose_path(f"integrations/weather/{weather_id}")
         return self._get(path)
+
+    def get_air_quality(self):
+        """
+        Get all air quality integration records without their current forecast values.
+        NOTE: This service is avaliable to Adafruit IO Plus subscribers only.
+        """
+        path = self._compose_path("integrations/air_quality")
+        return self._get(path)
+
+    def create_air_quality(
+        self,
+        location: str,
+        name: Optional[str] = None,
+        provider: str = "open_meteo",
+    ):
+        """
+        Create a new air quality integration record.
+        NOTE: This service is avaliable to Adafruit IO Plus subscribers only.
+
+        :param str location: Location in latitude,longitude format (e.g., "40.7128,-74.0060")
+        :param str name: Optional friendly name for the location
+        :param str provider: Data provider, either "open_meteo" (default, global coverage)
+                           or "airnow" (US only, official EPA data)
+        """
+        path = self._compose_path("integrations/air_quality")
+        payload = {"air_quality": {"location": location, "provider": provider}}
+        if name is not None:
+            payload["air_quality"]["name"] = name
+        return self._post(path, payload)
+
+    def receive_air_quality(self, air_quality_id: int):
+        """
+        Get the specified air quality record with current air quality conditions
+        and hourly forecast data including PM2.5, PM10, ozone, nitrogen dioxide,
+        and other pollutants.
+        NOTE: This service is avaliable to Adafruit IO Plus subscribers only.
+
+        :param int air_quality_id: ID for retrieving a specified air quality record.
+        """
+        path = self._compose_path(f"integrations/air_quality/{air_quality_id}")
+        return self._get(path)
+
+    def delete_air_quality(self, air_quality_id: int):
+        """
+        Permanently delete the specified air quality integration.
+        NOTE: This service is avaliable to Adafruit IO Plus subscribers only.
+
+        :param int air_quality_id: ID of the air quality integration to delete.
+        """
+        path = self._compose_path(f"integrations/air_quality/{air_quality_id}")
+        return self._delete(path)
 
     def receive_random_data(self, generator_id: int):
         """
