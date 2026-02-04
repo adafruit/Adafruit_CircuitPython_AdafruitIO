@@ -130,8 +130,8 @@ io.connect()
 
 
 # Start a blocking message loop...
-# NOTE: NO code below this loop will execute
-# NOTE: Network reconnection is handled within this loop
+# NOTE: This loop runs indefinitely until interrupted with Ctrl-C (KeyboardInterrupt).
+# NOTE: Network reconnection is handled within this loop; cleanup runs afterward.
 TIME_TOPICS = ("seconds", "millis", "iso", "hours")
 
 try:
@@ -145,12 +145,12 @@ try:
         print("Use Ctrl-C to unsubscribe and disconnect...")
         time.sleep(1)
     # Normal loop ends here. Use Ctrl-C to Unsubscribe and disconnect/exit.
-    
+
 except KeyboardInterrupt:
     try:
         print("\nKeyboardInterrupt: processing pending messages before disconnecting...")
         io.loop()
-    except (Exception) as e:
+    except Exception:
         pass
     print("\nUnsubscribing from time topics and disconnecting...")
     for time_topic in TIME_TOPICS:
@@ -164,14 +164,14 @@ except KeyboardInterrupt:
             print("Processing messages... (io.loop())")
             io.loop()
             print("Processing complete.")
-        except (Exception) as e:
+        except Exception:
             pass
     # loop for another 6s collecting io loop messages
     print("Processing final messages for 6 seconds...")
     for _ in range(6):
         try:
             io.loop()
-        except (Exception) as e:
+        except Exception as e:
             print("Failed to get data, retrying\n", e)
             continue
         time.sleep(1)

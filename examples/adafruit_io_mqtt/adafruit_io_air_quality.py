@@ -61,8 +61,8 @@ wifi = adafruit_esp32spi_wifimanager.WiFiManager(esp, ssid, password, status_pix
 AIR_QUALITY_RECORD_ID = 0
 
 # Available forecast types depend on the service.
-# Typical values are "current" and "hourly".
-FORECAST_TYPES = ("current", "hourly")
+# Typical values are "current", "forecast_today", and "forecast_tomorrow".
+FORECAST_TYPES = ("current", "forecast_today", "forecast_tomorrow")
 
 
 # Define callback functions which will be called when certain events happen.

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 Adafruit Industries
+# SPDX-FileCopyrightText: 2026 Adafruit Industries
 # SPDX-License-Identifier: MIT
 
 # Example of using the Adafruit IO+ Air Quality Service
@@ -14,8 +14,8 @@ from digitalio import DigitalInOut
 
 from adafruit_io.adafruit_io import IO_HTTP
 
-# Get WiFi details and Adafruit IO keys, ensure these are setup in settings.toml
-# (visit io.adafruit.com if you need to create an account, or if you need your Adafruit IO key.)
+# # Get WiFi details and Adafruit IO keys, ensure these are setup in settings.toml
+# # (visit io.adafruit.com if you need to create an account, or if you need your Adafruit IO key.)
 ssid = getenv("CIRCUITPY_WIFI_SSID")
 password = getenv("CIRCUITPY_WIFI_PASSWORD")
 aio_username = getenv("ADAFRUIT_AIO_USERNAME")
@@ -48,6 +48,7 @@ pool = adafruit_connection_manager.get_radio_socketpool(esp)
 ssl_context = adafruit_connection_manager.get_radio_ssl_context(esp)
 requests = adafruit_requests.Session(pool, ssl_context)
 
+
 # Initialize an Adafruit IO HTTP API object
 io = IO_HTTP(aio_username, aio_key, requests)
 
@@ -64,7 +65,7 @@ io = IO_HTTP(aio_username, aio_key, requests)
 # print(f"Created new air quality location with ID: {location_id}")
 
 # Or use an existing location ID
-location_id = 2127
+location_id = 2
 
 print("Getting air quality data from IO...")
 # Fetch the specified record with current air quality
