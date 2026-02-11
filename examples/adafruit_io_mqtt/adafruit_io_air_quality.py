@@ -1,9 +1,14 @@
-# SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
+# SPDX-FileCopyrightText: 2026 Adafruit Industries
 # SPDX-License-Identifier: MIT
 
-# Adafruit IO provides some built-in MQTT topics
-# for obtaining the current server time, if you don't have
-# access to a RTC module.
+"""Example of subscribing to the Adafruit IO+ Air Quality Service over MQTT.
+
+This feature is only available to Adafruit IO+ subscribers.
+
+To obtain an Air Quality record ID, visit:
+https://io.adafruit.com/services/air_quality
+"""
+
 import time
 from os import getenv
 
@@ -51,31 +56,29 @@ status_pixel = neopixel.NeoPixel(board.NEOPIXEL, 1, brightness=0.2)  # Uncomment
 # status_pixel = adafruit_rgbled.RGBLED(RED_LED, BLUE_LED, GREEN_LED)
 wifi = adafruit_esp32spi_wifimanager.WiFiManager(esp, ssid, password, status_pixel=status_pixel)
 
+# Air Quality record ID
+# (create or view records at https://io.adafruit.com/services/air_quality)
+AIR_QUALITY_RECORD_ID = 0
+
+# Available forecast types depend on the service.
+# Typical values are "current", "forecast_today", and "forecast_tomorrow".
+FORECAST_TYPES = ("current", "forecast_today", "forecast_tomorrow")
+
 
 # Define callback functions which will be called when certain events happen.
 def connected(client):
     # Connected function will be called when the client is connected to Adafruit IO.
-    # This is a good place to subscribe to feed changes.  The client parameter
-    # passed to this function is the Adafruit IO MQTT client so you can make
-    # calls against it easily.
+    # This is a good place to subscribe to topics.
     print("Connected to Adafruit IO!")
 
-    # Subscribe to time/seconds topic
-    # https://io.adafruit.com/api/docs/mqtt.html#time-seconds
-    io.subscribe_to_time("seconds")
-
-    # Subscribe to time/millis topic
-    # https://io.adafruit.com/api/docs/mqtt.html#time-millis
-    io.subscribe_to_time("millis")
-
-    # Subscribe to time/ISO-8601 topic
-    # https://io.adafruit.com/api/docs/mqtt.html#time-iso-8601
-    io.subscribe_to_time("iso")
-
-    # Subscribe to time/hours topic
-    # NOTE: This topic only publishes once every hour.
-    # https://io.adafruit.com/api/docs/mqtt.html#adafruit-io-monitor
-    io.subscribe_to_time("hours")
+    for forecast_type in FORECAST_TYPES:
+        print(
+            "Subscribing to air quality updates for record",
+            AIR_QUALITY_RECORD_ID,
+            "forecast:",
+            forecast_type,
+        )
+        io.subscribe_to_air_quality(AIR_QUALITY_RECORD_ID, forecast_type)
 
 
 def disconnected(client):
@@ -83,19 +86,20 @@ def disconnected(client):
     print("Disconnected from Adafruit IO!")
 
 
-def publish(client, userdata, topic, pid):
-    # This method is called when the client publishes data to a feed.
-    print(f"Published to {topic} with PID {pid}")
-    if userdata is not None:
-        print("Published User data: ", end="")
-        print(userdata)
+def subscribe(client, userdata, topic, granted_qos):
+    # This method is called when the client subscribes to a new topic.
+    print(f"Subscribed to {topic} with QOS level {granted_qos}")
+
+
+def unsubscribe(client, userdata, topic, pid):
+    # This method is called when the client unsubscribes from a topic.
+    print(f"Unsubscribed from {topic} with PID {pid}")
 
 
 def message(client, feed_id, payload):
-    # Message function will be called when a subscribed feed has a new value.
-    # The feed_id parameter identifies the feed, and the payload parameter has
-    # the new value.
-    print(f"Feed {feed_id} received new value: {payload}")
+    # Message function will be called when a subscribed topic has a new value.
+    # For integration topics, feed_id may be a short identifier like "air_quality".
+    print(f"{feed_id} received new value: {payload}")
 
 
 # Connect to WiFi
@@ -122,57 +126,31 @@ io = IO_MQTT(mqtt_client)
 # Connect the callback methods defined above to Adafruit IO
 io.on_connect = connected
 io.on_disconnect = disconnected
+io.on_subscribe = subscribe
+io.on_unsubscribe = unsubscribe
 io.on_message = message
-io.on_publish = publish
 
 # Connect to Adafruit IO
 io.connect()
 
 
 # Start a blocking message loop...
-# NOTE: This loop runs indefinitely until interrupted with Ctrl-C (KeyboardInterrupt).
-# NOTE: Network reconnection is handled within this loop; cleanup runs afterward.
-TIME_TOPICS = ("seconds", "millis", "iso", "hours")
-
+# NOTE: Network reconnection is handled within this loop
 try:
     while True:
         try:
             io.loop()
         except (ValueError, RuntimeError) as e:
             print("Failed to get data, retrying\n", e)
+            wifi.reset()
             io.reconnect()
             continue
-        print("Use Ctrl-C to unsubscribe and disconnect...")
         time.sleep(1)
-    # Normal loop ends here. Use Ctrl-C to Unsubscribe and disconnect/exit.
-
 except KeyboardInterrupt:
-    try:
-        print("\nKeyboardInterrupt: processing pending messages before disconnecting...")
-        io.loop()
-    except Exception:
-        pass
-    print("\nUnsubscribing from time topics and disconnecting...")
-    for time_topic in TIME_TOPICS:
+    print("\nKeyboardInterrupt: unsubscribing from air quality topics and disconnecting...")
+    for forecast_type in FORECAST_TYPES:
         try:
-            print(f"Unsubscribing from time topic '{time_topic}'...")
-            io.unsubscribe_from_time(time_topic)
-            print(f"Successfully unsubscribed from time topic '{time_topic}'.")
+            io.unsubscribe_from_air_quality(AIR_QUALITY_RECORD_ID, forecast_type)
         except Exception as e:
-            print(f"Failed to unsubscribe from time topic '{time_topic}':", e)
-        try:
-            print("Processing messages... (io.loop())")
-            io.loop()
-            print("Processing complete.")
-        except Exception:
-            pass
-    # loop for another 6s collecting io loop messages
-    print("Processing final messages for 6 seconds...")
-    for _ in range(6):
-        try:
-            io.loop()
-        except Exception as e:
-            print("Failed to get data, retrying\n", e)
-            continue
-        time.sleep(1)
+            print(f"Failed to unsubscribe from forecast '{forecast_type}':", e)
     io.disconnect()

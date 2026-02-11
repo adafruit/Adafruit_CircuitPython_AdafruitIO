@@ -304,12 +304,37 @@ class IO_MQTT:
 
     def subscribe_to_weather(self, weather_record: int, forecast: str):
         """Subscribes to a weather forecast using the Adafruit IO PLUS weather
-        service. This feature is only avaliable to Adafruit IO PLUS subscribers.
+        service. This feature is only available to Adafruit IO PLUS subscribers.
 
         :param int weather_record: Weather record you want data for.
-        :param str forecast: Forecast data you'd like to recieve.
+        :param str forecast: Forecast type you'd like to receive.
+
+            Warning: The properties vary depending on the forecast type.
+            Valid forecast types (different fields for days/mins/hours/current):
+
+            - ``current``
+            - ``forecast_minutes_5``
+            - ``forecast_minutes_30``
+            - ``forecast_hours_1``
+            - ``forecast_hours_2``
+            - ``forecast_hours_6``
+            - ``forecast_hours_24``
+            - ``forecast_days_1``
+            - ``forecast_days_2``
+            - ``forecast_days_5``
         """
         self._client.subscribe(f"{self._user}/integration/weather/{weather_record}/{forecast}")
+
+    def subscribe_to_air_quality(self, air_quality_record: int, forecast: str):
+        """Subscribes to air quality updates using the Adafruit IO PLUS air quality
+        service. This feature is only available to Adafruit IO PLUS subscribers.
+
+        :param int air_quality_record: Air quality record you want data for.
+        :param str forecast: Can be "current", "forecast_today", or "forecast_tomorrow".
+        """
+        self._client.subscribe(
+            f"{self._user}/integration/air_quality/{air_quality_record}/{forecast}"
+        )
 
     def subscribe_to_time(self, time_type: str):
         """Adafruit IO provides some built-in MQTT topics for getting the current server time.
@@ -360,6 +385,44 @@ class IO_MQTT:
             self._client.unsubscribe(f"{self._user}/f/{feed_key}")
         else:
             raise AdafruitIO_MQTTError("Must provide a feed_key or group_key.")
+
+    def unsubscribe_from_randomizer(self, randomizer_id: int):
+        """Unsubscribe from a random data stream created by the Adafruit IO Words service.
+
+        :param int randomizer_id: Random word record you want to stop receiving data for.
+        """
+        self._client.unsubscribe(f"{self._user}/integration/words/{randomizer_id}")
+
+    def unsubscribe_from_time(self, time_type: str):
+        """Unsubscribe from Adafruit IO MQTT time topics.
+
+        :param str time_type: Time type to unsubscribe from, such as 'seconds', 'millis',
+          'hours', or 'iso'.
+        """
+        if time_type == "iso":
+            self._client.unsubscribe("time/ISO-8601")
+        else:
+            self._client.unsubscribe("time/" + time_type)
+
+    def unsubscribe_from_weather(self, weather_record: int, forecast: str):
+        """Unsubscribe from weather forecast updates using the Adafruit IO PLUS weather
+        service. This feature is only available to Adafruit IO PLUS subscribers.
+
+        :param int weather_record: Weather record you want to stop receiving data for.
+        :param str forecast: Forecast data you'd like to stop receiving.
+        """
+        self._client.unsubscribe(f"{self._user}/integration/weather/{weather_record}/{forecast}")
+
+    def unsubscribe_from_air_quality(self, air_quality_record: int, forecast: str):
+        """Unsubscribe from air quality updates using the Adafruit IO PLUS air quality
+        service. This feature is only available to Adafruit IO PLUS subscribers.
+
+        :param int air_quality_record: Air quality record you want to stop receiving data for.
+        :param str forecast: Forecast data you'd like to stop receiving.
+        """
+        self._client.unsubscribe(
+            f"{self._user}/integration/air_quality/{air_quality_record}/{forecast}"
+        )
 
     # Publishing
     def publish_multiple(self, feeds_and_data: List, timeout: int = 3, is_group: bool = False):
@@ -670,7 +733,7 @@ class IO_HTTP:
         """
         Return the most recent value for the specified feed.
 
-        :param string feed_key: Adafruit IO feed key
+        :param str feed_key: Adafruit IO feed key
         """
         validate_feed_key(feed_key)
         path = self._compose_path(f"feeds/{feed_key}/data/last")
@@ -680,8 +743,8 @@ class IO_HTTP:
         """
         Deletes an existing Data point from a feed.
 
-        :param string feed: Adafruit IO feed key
-        :param string data_id: Data point to delete from the feed
+        :param str feed_key: Adafruit IO feed key
+        :param str data_id: Data point to delete from the feed
         """
         validate_feed_key(feed_key)
         path = self._compose_path(f"feeds/{feed_key}/data/{data_id}")
@@ -804,6 +867,34 @@ class IO_HTTP:
         return self._delete(path)
 
     # Adafruit IO Connected Services
+    def get_weather(self):
+        """
+        Get all weather integration records without their current forecast values.
+        NOTE: This service is available to Adafruit IO Plus subscribers only.
+        """
+        path = self._compose_path("integrations/weather")
+        return self._get(path)
+
+    def create_weather(
+        self,
+        location: str,
+        name: Optional[str] = None,
+        provider: str = "open_meteo",
+    ):
+        """
+        Create a new weather integration record.
+        NOTE: This service is available to Adafruit IO Plus subscribers only.
+
+        :param str location: Location in latitude,longitude format (e.g., "40.7128,-74.0060")
+        :param str name: Optional friendly name for the location
+        :param str provider: Data provider, default "open_meteo"
+        """
+        path = self._compose_path("integrations/weather")
+        payload = {"weather": {"location": location, "provider": provider}}
+        if name is not None:
+            payload["weather"]["name"] = name
+        return self._post(path, payload)
+
     def receive_weather(self, weather_id: int):
         """
         Get data from the Adafruit IO Weather Forecast Service
@@ -813,6 +904,67 @@ class IO_HTTP:
         """
         path = self._compose_path(f"integrations/weather/{weather_id}")
         return self._get(path)
+
+    def delete_weather(self, weather_id: int):
+        """
+        Permanently delete the specified weather integration.
+        NOTE: This service is available to Adafruit IO Plus subscribers only.
+
+        :param int weather_id: ID of the weather integration to delete.
+        """
+        path = self._compose_path(f"integrations/weather/{weather_id}")
+        return self._delete(path)
+
+    def get_air_quality(self):
+        """
+        Get all air quality integration records without their current forecast values.
+        NOTE: This service is available to Adafruit IO Plus subscribers only.
+        """
+        path = self._compose_path("integrations/air_quality")
+        return self._get(path)
+
+    def create_air_quality(
+        self,
+        location: str,
+        name: Optional[str] = None,
+        provider: str = "open_meteo",
+    ):
+        """
+        Create a new air quality integration record.
+        NOTE: This service is available to Adafruit IO Plus subscribers only.
+
+        :param str location: Location in latitude,longitude format (e.g., "40.7128,-74.0060")
+        :param str name: Optional friendly name for the location
+        :param str provider: Data provider, either "open_meteo" (default, global coverage)
+                           or "airnow" (US only, official EPA data)
+        """
+        path = self._compose_path("integrations/air_quality")
+        payload = {"air_quality": {"location": location, "provider": provider}}
+        if name is not None:
+            payload["air_quality"]["name"] = name
+        return self._post(path, payload)
+
+    def receive_air_quality(self, air_quality_id: int):
+        """
+        Get the specified air quality record with current air quality conditions
+        and hourly forecast data including PM2.5, PM10, ozone, nitrogen dioxide,
+        and other pollutants.
+        NOTE: This service is available to Adafruit IO Plus subscribers only.
+
+        :param int air_quality_id: ID for retrieving a specified air quality record.
+        """
+        path = self._compose_path(f"integrations/air_quality/{air_quality_id}")
+        return self._get(path)
+
+    def delete_air_quality(self, air_quality_id: int):
+        """
+        Permanently delete the specified air quality integration.
+        NOTE: This service is available to Adafruit IO Plus subscribers only.
+
+        :param int air_quality_id: ID of the air quality integration to delete.
+        """
+        path = self._compose_path(f"integrations/air_quality/{air_quality_id}")
+        return self._delete(path)
 
     def receive_random_data(self, generator_id: int):
         """
