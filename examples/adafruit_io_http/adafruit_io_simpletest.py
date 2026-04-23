@@ -18,9 +18,9 @@ password = getenv("CIRCUITPY_WIFI_PASSWORD")
 aio_username = getenv("ADAFRUIT_AIO_USERNAME")
 aio_key = getenv("ADAFRUIT_AIO_KEY")
 
-print("Connecting to %s" % ssid)
+print(f"Connecting to {ssid}")
 wifi.radio.connect(ssid, password)
-print("Connected to %s!" % ssid)
+print(f"Connected to {ssid}!")
 
 pool = adafruit_connection_manager.get_radio_socketpool(wifi.radio)
 ssl_context = adafruit_connection_manager.get_radio_ssl_context(wifi.radio)

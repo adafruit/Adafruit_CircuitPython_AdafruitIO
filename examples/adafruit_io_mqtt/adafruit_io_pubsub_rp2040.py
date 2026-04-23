@@ -127,9 +127,9 @@ while True:
         cpu_temp = cpu.temperature
         # truncate to two decimal points
         cpu_temp = str(cpu_temp)[:5]
-        print("CPU temperature is %s degrees C" % cpu_temp)
+        print(f"CPU temperature is {cpu_temp} degrees C")
         # publish it to io
-        print("Publishing %s to temperature feed..." % cpu_temp)
+        print(f"Publishing {cpu_temp} to temperature feed...")
         io.publish("temperature", cpu_temp)
         print("Published!")
         prv_refresh_time = time.monotonic()

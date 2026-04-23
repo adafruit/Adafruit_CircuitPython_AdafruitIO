@@ -20,9 +20,9 @@ aio_key = getenv("ADAFRUIT_AIO_KEY")
 ### WiFi ###
 
 if not wifi.radio.connected:
-    print("Connecting to %s" % ssid)
+    print(f"Connecting to {ssid}")
     wifi.radio.connect(ssid, password)
-    print("Connected to %s!" % ssid)
+    print(f"Connected to {ssid}!")
 
 
 # Define callback functions which will be called when certain events happen.

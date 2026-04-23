@@ -287,13 +287,13 @@ class IO_MQTT:
         """Subscribes to your personal Adafruit IO /throttle topic.
         https://io.adafruit.com/api/docs/mqtt.html#mqtt-api-rate-limiting
         """
-        self._client.subscribe("%s/throttle" % self._user)
+        self._client.subscribe(f"{self._user}/throttle")
 
     def subscribe_to_errors(self):
         """Subscribes to your personal Adafruit IO /errors topic.
         Notifies you of errors relating to publish/subscribe calls.
         """
-        self._client.subscribe("%s/errors" % self._user)
+        self._client.subscribe(f"{self._user}/errors")
 
     def subscribe_to_randomizer(self, randomizer_id: int):
         """Subscribes to a random data stream created by the Adafruit IO Words service.
