@@ -75,9 +75,14 @@ class IO_MQTT:
     https://io.adafruit.com/api/docs/mqtt.html#adafruit-io-mqtt-api
 
     :param MiniMQTT mqtt_client: MiniMQTT Client object.
+    :param boolean feed_history_enabled: Whether the feed history is enabled or not.
+      If feed history is enabled the message size limit is 1kb, if disabled the
+      message size limit is 100kb. The setting itself is controlled on the
+      AIO web dashboard feed page. This argument just configures the limit
+      locally.
     """
 
-    def __init__(self, mqtt_client):
+    def __init__(self, mqtt_client, feed_history_enabled: bool = True):
         # Check for MiniMQTT client
         mqtt_client_type = str(type(mqtt_client))
         if "MQTT" in mqtt_client_type:
@@ -104,6 +109,8 @@ class IO_MQTT:
         self._client.on_unsubscribe = self._on_unsubscribe_mqtt
         self._client.on_publish = self._on_publish_mqtt
         self._connected = False
+
+        self._client.mqtt_msg = 1024 if feed_history_enabled else 1024 * 100
 
     def __enter__(self):
         return self
